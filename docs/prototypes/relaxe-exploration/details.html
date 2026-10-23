@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Relaxe — post details review</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="details.css"></head>
+<body>
+<header class="workbench">
+ <div class="masthead"><span class="wordmark">relaxe<span class="mark">/</span></span><span class="eyebrow">FOR REDDIT · POST DETAILS STUDY 04</span><span class="status">Direction accepted for now · local fixtures</span></div>
+ <div class="intro"><h1>The post.<br>The conversation.</h1><p>Your selected starting point: the full post, then its comments. This review covers reading, thread structure, actions and reply states. Shared styling remains provisional.</p></div>
+ <p class="scope-note"><strong>Accepted direction:</strong> post header/content, comment hierarchy, collapse and action behavior, sorting and replying. The <a href="index.html">approved feed/media study</a> is retained. No Reddit requests or real replies are sent.</p>
+ <form class="controls" aria-label="Post detail study settings" onsubmit="return false">
+  <label>Post<select id="detail-post"><option value="p1">Mountain photo</option><option value="p5">Repair discussion</option><option value="p2">Two-image gallery</option><option value="p3">Flower video</option><option value="p4">Earth GIF</option></select></label>
+  <label>Presentation<select id="detail-presentation"><option value="full">Full post → comments</option><option value="summary">Compact summary → comments</option></select></label>
+  <label>Comment actions<select id="detail-actions"><option value="hold">Long press to reveal</option><option value="always">Always visible</option></select></label>
+  <label>Theme<select id="detail-theme"><option value="light">Light</option><option value="dark">Dark</option></select></label>
+  <label>Text<select id="detail-text"><option value="1">100%</option><option value="1.3">130%</option><option value="2">200%</option></select></label>
+  <label>Viewport<select id="detail-width"><option value="390">390 × 844</option><option value="360">360 × 800</option><option value="600">600 × 960</option></select></label>
+  <label>Thread state<select id="detail-state"><option value="ready">Ready</option><option value="initial-loading">Loading comments</option><option value="initial-error">Comments failed</option><option value="more-error">More replies failed</option><option value="empty">No comments</option><option value="refreshing">Refreshing with content</option><option value="locked">Post locked</option><option value="archived">Post archived</option><option value="guest">Guest account</option><option value="recovery">Partial recovery</option></select></label>
+  <label class="failure-switch"><input type="checkbox" id="detail-failure">Fail next action</label>
+  <button type="button" id="detail-reset">Reset discussion</button>
+ </form>
+ <p class="instructions">The full post leads by default. Use “↓ Comments” to jump to the discussion. Collapse a branch with its − button; links and spoilers keep their own actions. In long-press mode, hold a comment to reveal actions (desktop: right click or Shift+F10). Use the main post’s Reply button for a top-level comment. Reply drafts stay locally when the editor closes; Send only updates this fixture.</p>
+</header>
+<main class="details-workspace">
+ <section class="study"><div class="study-head"><span class="num">POST DETAILS / ACCEPTED MOCKUP</span><h2>Read, then discuss.</h2><p id="details-caption">Full post first, a clear comment boundary, and replies that keep their context.</p></div><div id="detail-phone" class="phone detail-phone"></div><p class="measurement" id="detail-measurement"></p></section>
+ <aside class="review-notes detail-notes"><span class="eyebrow">DECISIONS IN THIS REVIEW</span><h2>A readable thread.<br>A clear place to act.</h2><p><strong>Chosen for now:</strong> full post followed by comments, top-right −/+ branch collapse and the current comment-action flow. The summary option remains a comparison.</p><p><strong>Reply:</strong> use Reply on the main post to add a top-level comment, or Reply on a comment to answer that person. Drafts keep their parent context. Native refinements and shared styling remain future work.</p><h3>Try these flows</h3><ol><li>Read the post, then jump to comments.</li><li>Collapse a branch and expand it again.</li><li>Reveal a comment’s vote/reply/save toolbar.</li><li>Reply, close the editor, and reopen the draft.</li><li>Use “Fail next action” before save, vote, reply or loading more.</li></ol><h3>Behavior that must survive</h3><p>Current account, sorting, read/vote/save effects, Markdown links/spoilers, child loading, locks, archive rules, recovery feedback and restoration. Native preference mappings need care: upstream already supports swapping tap/hold actions.</p><p class="small-note">Synthetic discussion and local drafts only. The HTML thread does not establish native Android text selection, TalkBack, keyboard insets, provider behavior or process restoration.</p><p><a href="../../DESIGN.md">Design decisions and review tracker</a></p></aside>
+</main>
+<dialog id="detail-dialog" aria-labelledby="detail-dialog-title"><div class="sheet-header"><h2 id="detail-dialog-title">Post options</h2><button type="button" id="detail-dialog-close" aria-label="Close dialog">✕</button></div><div id="detail-dialog-content"></div></dialog>
+<footer class="rationale"><p>All post/comment text, authors and counts are synthetic. Shared photography, video and GIF credits are retained in <a href="index.html">the feed/media study</a>. Production code, account settings and identity are unchanged.</p></footer>
+<script src="details.js"></script>
+</body></html>

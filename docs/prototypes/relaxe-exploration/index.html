@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Relaxe — compact feed refinement</title><link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="workbench">
+<div class="masthead"><span class="wordmark">relaxe<span class="mark">/</span></span><span class="eyebrow">FOR REDDIT · MEDIA REFINEMENT 03</span><span class="status">Interactive prototype · local fixtures</span></div>
+<div class="intro"><h1>Compact cards.<br>Actions on demand.</h1><p>Refining your preferred Option A: title, community + author + flair, then bold points + comments + time. Hold a card to reveal its toolbar.</p></div>
+<p class="scope-note"><strong>Feed direction accepted:</strong> compact cards and row actions. <strong>Media refinement:</strong> autoplay with controls and metadata hidden until a tap; video/GIF controls hide again after about four seconds while playing. Post details and whole-app styling remain separate reviews.</p>
+<form class="controls" aria-label="Comparison settings" onsubmit="return false">
+<label>Review<select id="review"><option value="refine">Refined A</option><option value="compare">Original A / B / C</option></select></label>
+<label>Surface<select id="surface"><option value="feed">Compact feed</option><option value="media">Vertical media</option></select></label>
+<label>Theme<select id="theme"><option value="light">Light</option><option value="dark">Dark</option></select></label>
+<label>Text<select id="text"><option value="1">100%</option><option value="1.3">130%</option><option value="2">200%</option></select></label>
+<label>Viewport<select id="width"><option value="390">390 × 844</option><option value="360">360 × 800</option><option value="600">600 × 960</option></select></label>
+<label>State<select id="state"><option value="ready">Ready</option><option value="loading">Loading</option><option value="error">Unavailable / retry</option><option value="empty">Empty feed</option><option value="gated">Content gate</option></select></label>
+<button type="button" id="reset">Reset fixtures</button>
+<button type="button" data-action="configure-toolbar">Customize toolbar</button>
+<a class="next-study" href="details.html">Post-details review →</a>
+</form>
+<p class="instructions">Long press a compact card for actions; desktop: right click or focus a title and press Shift+F10. In Refined A media, tap to show/hide controls without pausing. Video/GIF autoplay starts muted; overlays hide after four seconds while playing, and stay while paused, seeking or navigating by keyboard. Swipe ↑↓ between posts and ←→ within galleries. Comments opens the default post-details destination.</p>
+</header>
+<main class="studies" id="studies" aria-label="Compact feed and media prototype"></main>
+<section class="rationale"><span class="eyebrow">REVIEW BOUNDARY</span><h2>Feed agreed. Native refinement ahead.</h2><p>The feed direction is accepted. Media now uses tap-revealed overlays and the agreed four-second playing timeout. Exact colors, corner radii and icon shapes remain provisional. Comments demonstrates the existing post-details destination; that page can be reviewed next.</p><p>Use “Original A / B / C” to revisit the earlier comparison. Counts measure fully visible fixture rows, including card gaps. CSS pixels stand in for dp; the font controls are browser stress tests, not Android’s nonlinear scaling. Expanded toolbars intentionally take more space.</p><p>All media and account actions are local samples. External-open, report, mute, share and copy are represented by destination previews. See <a href="../../DESIGN.md">the design specification and UI review tracker</a> for decisions, control-visibility research and asset sources. Android gestures, lifecycle, accessibility and dimensions will need validation during implementation.</p></section>
+<footer class="rationale"><p>Photos: Unsplash. Flower video: MDN CC0 sample. <a href="https://commons.wikimedia.org/wiki/File:Rotating_earth_(large).gif">Rotating Earth by Marvel</a>, <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a>; static poster extracted from the first frame, under the same license.</p></footer>
+<dialog id="sheet" aria-labelledby="sheet-title"><div class="sheet-header"><h2 id="sheet-title">Post actions</h2><button id="close-sheet" aria-label="Close dialog">✕</button></div><div id="sheet-content"></div></dialog>
+<script src="app.js"></script>
+</body></html>

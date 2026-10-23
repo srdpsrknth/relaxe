@@ -19,7 +19,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.LayoutRes
 import androidx.annotation.StyleRes
-import com.github.takahirom.roborazzi.RoborazziOptions
 import com.github.takahirom.roborazzi.captureRoboImage
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.loadingindicator.LoadingIndicator
@@ -148,10 +147,6 @@ class SwipeActionSnapshotTest(private val case: Case) {
         private val LIGHT = "light" to CustomThemeSharedPreferencesUtils.LIGHT
         private val DARK = "dark" to CustomThemeSharedPreferencesUtils.DARK
 
-        private val SCREENSHOT_OPTIONS = RoborazziOptions(
-            captureType = RoborazziOptions.CaptureType.Screenshot(),
-        )
-
         @JvmStatic
         @ParameterizedRobolectricTestRunner.Parameters(name = "{0}")
         fun cases(): List<Array<Any>> = buildList {
@@ -252,7 +247,7 @@ class SwipeActionSnapshotTest(private val case: Case) {
 
         bitmap.captureRoboImage(
             filePath = "src/test/screenshots/${case.goldenName}.png",
-            roborazziOptions = SCREENSHOT_OPTIONS,
+            roborazziOptions = BASELINE_SCREENSHOT_OPTIONS,
         )
         bitmap.recycle()
     }

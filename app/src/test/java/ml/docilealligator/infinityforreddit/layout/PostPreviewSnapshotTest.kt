@@ -18,7 +18,6 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.annotation.StyleRes
-import com.github.takahirom.roborazzi.RoborazziOptions
 import com.github.takahirom.roborazzi.captureRoboImage
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
@@ -126,10 +125,6 @@ class PostPreviewSnapshotTest(private val case: Case) {
         private const val LIGHT = "light"
         private const val DARK = "dark"
 
-        private val SCREENSHOT_OPTIONS = RoborazziOptions(
-            captureType = RoborazziOptions.CaptureType.Screenshot(),
-        )
-
         /** Longest edge of the generated sample image, in pixels. */
         private const val SAMPLE_IMAGE_LONG_EDGE = 480
 
@@ -217,7 +212,7 @@ class PostPreviewSnapshotTest(private val case: Case) {
         view.draw(Canvas(bitmap))
         bitmap.captureRoboImage(
             filePath = "src/test/screenshots/${case.goldenName}.png",
-            roborazziOptions = SCREENSHOT_OPTIONS,
+            roborazziOptions = BASELINE_SCREENSHOT_OPTIONS,
         )
         bitmap.recycle()
     }

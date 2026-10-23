@@ -25,7 +25,6 @@ import androidx.annotation.StyleRes
 import androidx.recyclerview.widget.RecyclerView
 import com.github.piasy.biv.BigImageViewer
 import com.github.piasy.biv.loader.ImageLoader
-import com.github.takahirom.roborazzi.RoborazziOptions
 import com.github.takahirom.roborazzi.captureRoboImage
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
@@ -623,7 +622,7 @@ class RoborazziLayoutTest(private val case: Case) {
         view.draw(Canvas(bitmap))
         bitmap.captureRoboImage(
             filePath = "src/test/screenshots/${case.goldenName}.png",
-            roborazziOptions = SCREENSHOT_OPTIONS,
+            roborazziOptions = BASELINE_SCREENSHOT_OPTIONS,
         )
         // captureRoboImage writes the file synchronously, so the backing pixels are dead weight from
         // here on. Releasing them keeps peak heap flat across a ~1000-case run instead of leaving a
@@ -825,7 +824,3 @@ class RoborazziLayoutTest(private val case: Case) {
         return lp.width == box && lp.height == box
     }
 }
-
-private val SCREENSHOT_OPTIONS = RoborazziOptions(
-    captureType = RoborazziOptions.CaptureType.Screenshot(),
-)

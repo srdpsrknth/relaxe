@@ -183,12 +183,14 @@ android {
     }
 
     lint {
-        baseline = file("lint-baseline.xml")
+        // Keep existing warnings visible without depending on an ignored, machine-local
+        // baseline. A fresh checkout must not fail just because that file does not exist.
+        abortOnError = true
+        warningsAsErrors = false
         disable 'MissingTranslation'
         // Timber is not a dependency of this project and nothing imports it; the check arrives
         // transitively from another library's bundled lint rules. Every android.util.Log call is
-        // therefore correct here, and the check only produced noise -- 183 entries of it already
-        // sit in the baseline.
+        // therefore correct here, and the check only produces noise.
         disable 'LogNotTimber'
     }
 
@@ -717,15 +719,16 @@ def subredditListsCheckout = new File(rootDir.parentFile, 'subreddit-lists')
 
 tasks.register('verifyShippedSubredditLists') {
     group = 'verification'
-    description = 'Fails if the subreddit-name lists shipped in the APK are missing or dangling.'
-    // Two stat calls, so re-running is cheaper than reasoning about when a symlink whose target
-    // vanished counts as a changed input. Declaring the lists as inputs would be worse than
-    // useless here: an absent input reads as "nothing to do", which is the exact state to catch.
+    description = 'Fails if the shipped subreddit lists are absent, dangling, or invalid text.'
+    // Stream the names too: core.symlinks=false on Windows leaves a nonempty file containing
+    // only the link target, which passes existence checks but is not a usable subreddit list.
+    // Always check so removing or changing the external symlink target cannot go unnoticed.
     outputs.upToDateWhen { false }
 
     def lists = shippedSubredditLists
     def checkout = subredditListsCheckout
     doLast {
+        def validName = ~/(?:[A-Za-z0-9_]{2,21}|reddit\.com)/
         def problems = lists.findResults { listFile ->
             def path = listFile.toPath()
             if (!java.nio.file.Files.exists(path, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
@@ -739,14 +742,27 @@ tasks.register('verifyShippedSubredditLists') {
             if (listFile.length() == 0L) {
                 return "$listFile -- empty"
             }
-            return null
+            return listFile.withReader('UTF-8') { reader ->
+                int lineNumber = 0
+                String line
+                while ((line = reader.readLine()) != null) {
+                    lineNumber++
+                    if (!validName.matcher(line).matches()) {
+                        return "$listFile -- invalid subreddit name at line $lineNumber; " +
+                                "check for a symlink placeholder or a malformed download"
+                    }
+                }
+                return null
+            }
         }
 
         if (problems) {
             throw new GradleException("The subreddit-name lists that ship in the APK are not readable:\n"
                     + problems.collect { "  $it" }.join('\n')
                     + "\n\nThey are symlinks into a sibling checkout. Clone it and build again:\n"
-                    + "  git clone https://github.com/cygnusx-1-org/subreddit-lists.git $checkout\n")
+                    + "  git clone https://github.com/cygnusx-1-org/subreddit-lists.git $checkout\n"
+                    + "If that checkout already exists, do not clone over it. On Windows, also "
+                    + "enable symlink support and restore the tracked symlinks.\n")
         }
     }
 }

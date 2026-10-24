@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Relaxe · selected foundations 07</title><link rel="stylesheet" href="foundations.css?rev=07"></head>
+<body>
+<header class="bench">
+ <div class="topline"><a href="../../DESIGN.md">Relaxe for Reddit</a><span>DESIGN REVIEW / 07</span><span class="badge">Selected foundation · theme study</span></div>
+ <div class="intro"><div><p class="eyebrow">A TYPE + B ROUNDING + C ICONS</p><h1>One foundation.<br>Your colors.</h1></div><p>Your selected mix: familiar sans-serif typography, moderate rounding and solid icons. <strong>The same components in three theme examples.</strong> Wallpaper colors follow the existing Material You option; custom themes remain supported.</p></div>
+ <ol class="stages" aria-label="Proposed review order"><li aria-current="step">01 Foundations</li><li>02 Shell & navigation</li><li>03 Browse & personal</li><li>04 Create & act</li><li>05 Settings & consistency</li></ol>
+ <form class="controls" aria-label="Foundation comparison" onsubmit="return false">
+  <label>Foundation<select id="foundation"><option value="selected">Selected mix</option><option value="original">Earlier A / B / C</option></select></label>
+  <label>Surface<select id="surface"><option value="feed">Compact feed</option><option value="post">Full post</option><option value="comments">Comments</option><option value="media">Vertical photo</option><option value="preferences">Preference rows</option><option value="components">Controls & feedback</option></select></label>
+  <label>Appearance<select id="appearance"><option value="light">Light</option><option value="dark">Dark</option><option value="amoled">AMOLED</option></select></label>
+  <label>Color source<select id="palette"><option value="direction">Fallbacks + wallpaper</option><option value="blue">Wallpaper · blue fixture</option><option value="rose">Wallpaper · rose fixture</option><option value="amber">Custom · amber fixture</option></select></label>
+  <label>Text<select id="text"><option value="1">100%</option><option value="1.3">130%</option><option value="2">200%</option></select></label>
+  <label>Width<select id="width"><option value="390">390 px</option><option value="360">360 px</option><option value="600">600 px</option></select></label>
+  <label>Compare<select id="compare"><option value="all">All three</option><option value="stone">A · Stone</option><option value="hearth">B · Hearth</option><option value="grove">C · Grove</option></select></label>
+ </form>
+ <p id="palette-note" class="palette-note" hidden>All three previews now use the same color fixture. The selected typography, rounding and icons stay consistent while theme colors change.</p>
+ <p class="hint" id="surface-hint">Hold a card for its accepted toolbar; desktop: right click or Shift+F10. The shell is retained as context and will be reviewed next.</p>
+ <p class="small">These are illustrative theme fixtures, not colors extracted from your device. Continuum's existing light/dark/AMOLED theme selection, Material You Enable/Apply and custom-theme options are preserved. Browser scaling is a stress test; native fonts, accessibility and insets require later device review.</p>
+</header>
+<main id="comparisons" class="comparisons" aria-label="Three styling directions"></main>
+<section class="review bench">
+ <p class="eyebrow">SELECTED DESIGN DIRECTION</p><h2>Consistent styling, adaptable color.</h2>
+ <div class="review-grid"><div><h3>Keep the theme choices</h3><p>Use the existing light, dark and AMOLED themes. When Material You is enabled, resolved system/wallpaper colors feed the same components. A's neutral and B's warm palettes remain fallback examples, with no fixed shipping default chosen.</p></div><div><h3>Map each role</h3><p>Canvas, post cards, read titles, comment text, toolbar, navigation, links and vote feedback keep their own theme roles. A custom icon or read-post color should survive a new component. Media retains a readable dark control layer.</p></div><div><h3>Keep the selected form</h3><p>A's system typography, B's moderate corners and C's solid icon treatment apply across every example. The studies use 12px card/control corners and 24px sheets as reference values, with at least 48px action targets. Native geometry remains to be refined.</p></div></div>
+ <div class="review-footer"><p><strong>Next:</strong> <a href="navigation.html?rev=09">review the shell and search sheet</a>. This foundation preview retains the earlier illustrative shell for context.</p><p>Accepted originals: <a href="index.html">feed & media</a> · <a href="details.html">post & comments</a>. Existing fixture credits remain in those studies. No account access, Reddit requests or real settings changes.</p></div>
+</section>
+<script src="foundations-theme.js?rev=07"></script><script src="foundations.js?rev=07"></script>
+</body></html>

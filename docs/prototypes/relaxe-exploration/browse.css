@@ -1,0 +1,42 @@
+/* Study 11: subscription lists using the selected shared foundation. */
+.browse-controls{display:grid;grid-template-columns:minmax(0,1fr) 48px;gap:8px;margin-bottom:12px}
+.browse-controls label{min-width:0;font-size:calc(11px * var(--scale));color:var(--secondary)}
+.browse-controls select{display:block;width:100%;min-height:48px;margin-top:4px;border:1px solid var(--outline);border-radius:12px;background:var(--card);padding:8px;font-size:calc(14px * var(--scale))}
+.destination .browse-add{align-self:end;padding:8px;font-size:28px;min-height:48px;border-color:var(--outline);background:var(--container);color:var(--accent)}
+.browse-filter{display:flex;gap:4px;align-items:center;border:1px solid var(--outline);border-radius:12px;background:var(--card);padding:0 4px 0 12px}
+.browse-filter input{min-width:0;flex:1;width:100%;min-height:48px;border:0;background:transparent;padding:8px 0;font-size:calc(15px * var(--scale))}
+.browse-filter input::placeholder{color:var(--secondary);opacity:1}
+.browse-filter input::-webkit-search-cancel-button{display:none}
+.destination .browse-filter button{border:0;flex-shrink:0;padding:8px}
+.browse-options{margin-top:4px;font-size:calc(12px * var(--scale));color:var(--secondary)}
+.browse-options summary{display:flex;align-items:center;min-height:48px;cursor:pointer;text-decoration:underline;text-underline-offset:4px}
+.browse-options label{display:flex;align-items:center;gap:10px;min-height:48px;color:var(--fg)}
+.browse-options input{width:24px;height:24px;accent-color:var(--accent);flex-shrink:0}
+.browse-options button{margin-block:4px}
+.browse-caption{font-size:calc(12px * var(--scale));color:var(--secondary);margin:12px 0 6px;overflow-wrap:anywhere}
+.browse-group h3{font-size:calc(12px * var(--scale));font-weight:650;color:var(--secondary);margin:12px 0 4px;padding:0 4px}
+.browse-row{display:flex;align-items:center;border-bottom:1px solid var(--outline);gap:4px;min-width:0}
+.destination .browse-open{display:flex;align-items:center;gap:8px;flex:1;min-width:0;text-align:start;border:0;padding:4px;min-height:48px;border-radius:8px}
+.browse-avatar{display:grid;place-items:center;flex-shrink:0;width:28px;height:28px;border-radius:8px;background:var(--container);color:var(--accent);font-size:16px;font-weight:650}
+.browse-copy{flex:1;min-width:0;overflow-wrap:anywhere}
+.browse-copy strong{font-size:calc(15px * var(--scale));line-height:1.4;font-weight:650;display:block}
+.browse-copy small{display:block;font-size:calc(11px * var(--scale));line-height:1.5;color:var(--secondary);margin-top:2px}
+.destination .browse-star{border:0;flex:0 0 48px;min-height:48px;padding:10px;border-radius:12px;color:var(--accent);background:transparent;box-shadow:none}
+.browse-star svg{width:24px;height:24px;display:block;fill:currentColor}
+.browse-star[aria-pressed=false] svg{fill:none;stroke:currentColor;stroke-width:1.8}
+.browse-feedback:empty{display:none}
+.browse-feedback{font-size:calc(12px * var(--scale));line-height:1.5;color:var(--accent);background:var(--container);padding:10px;border-radius:8px}
+.browse-empty{padding:20px 4px;font-size:calc(14px * var(--scale));line-height:1.6}
+.browse-empty strong{display:block;font-size:calc(18px * var(--scale))}
+.browse-placeholder{height:48px;border-bottom:1px solid var(--outline);background:var(--card);opacity:.65;margin:4px 0}
+.browse-back{margin-bottom:16px}
+.browse-dialog{position:fixed;inset:0;margin:auto;width:calc(100% - 32px);max-width:370px;max-height:calc(100% - 32px);overflow:auto;background:var(--card);color:var(--fg);border:1px solid var(--outline);border-radius:24px;padding:20px;font:inherit;font-size:calc(14px * var(--scale))}
+.browse-dialog::backdrop{background:#111c1760}
+.browse-dialog h2{font-size:calc(20px * var(--scale));line-height:1.3;overflow-wrap:anywhere;margin-top:0}
+.browse-dialog button{border:1px solid var(--outline)}
+.browse-dialog p{line-height:1.6;overflow-wrap:anywhere}
+.browse-fixture-controls{display:flex;gap:12px;flex-wrap:wrap}
+.browse-fixture-controls[hidden]{display:none}
+.nav-phone[data-browse-list=true][data-large-text=true] .shell-bar{flex-wrap:wrap}
+.nav-phone[data-browse-list=true][data-large-text=true] .shell-heading{order:2;flex-basis:100%;padding-inline:8px}
+.nav-phone[data-browse-list=true][data-large-text=true] #screen-back{margin-inline-start:auto}

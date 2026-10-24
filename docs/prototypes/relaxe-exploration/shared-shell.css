@@ -1,0 +1,30 @@
+/* One bottom bar for the HTML studies. Overlay geometry keeps scroll anchors stable. */
+.shared-shell-owner{position:relative;--shared-bar-height:var(--shared-root-inset,82px)}
+.shared-shell-owner>.bottom-nav{display:none!important}
+.shared-shell-nav{position:absolute!important;inset-inline:0;bottom:0;z-index:20;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr));padding:4px 2px max(10px,env(safe-area-inset-bottom));border:0;border-top:1px solid var(--outline,var(--divider));background:var(--bottom-bg,var(--bg));color:var(--bottom-icon,var(--accent));opacity:1;transform:translateY(0);transition:opacity .18s ease,transform .18s ease,visibility .18s;visibility:visible;box-sizing:border-box;pointer-events:auto}
+.shared-shell-nav[hidden]{display:none!important}
+.shared-shell-nav[data-scroll-hidden=true]{opacity:0;transform:translateY(8px);visibility:hidden;pointer-events:none}
+.shared-shell-nav button{font-family:inherit!important;display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:56px!important;min-width:0!important;max-width:100%;padding:5px 2px!important;border:0;background:transparent;color:inherit;border-radius:12px;font-size:calc(11px * var(--scale,1));line-height:1.2;cursor:pointer}
+.shared-shell-nav .nav-symbol{display:flex;align-items:center;justify-content:center;min-height:30px}
+.shared-shell-nav svg{width:24px;height:24px;flex-shrink:0;fill:currentColor}
+.shared-shell-nav .nav-label{font-size:calc(11px * var(--scale,1));line-height:1.2;max-width:100%;overflow-wrap:anywhere}
+.shared-shell-nav .center-search .nav-symbol{background:var(--accent);color:var(--on-accent,var(--bg));border-radius:12px;padding:6px 12px}
+.shared-shell-nav button:focus-visible{outline:3px solid var(--focus,var(--accent));outline-offset:-3px}
+.shared-shell-nav [aria-current=page]{background:var(--card,var(--tint));color:var(--accent)}
+.shared-shell-owner .scroll,.shared-shell-owner .detail-scroll,.shared-shell-owner .destination{padding-bottom:calc(var(--shared-bar-height) + 12px)!important;scroll-padding-bottom:calc(var(--shared-bar-height) + 12px)}
+.shared-shell-owner .detail-bottom{transform:translateY(calc(-1 * var(--shared-bar-height)));transition:transform .18s ease;position:relative;z-index:5}
+.shared-shell-owner[data-shell-hidden=true] .detail-bottom{transform:translateY(0)}
+.shared-shell-owner .media-chrome .media-dock{bottom:calc(var(--shared-bar-height) + 12px)}
+.shared-shell-owner .sub-status:not(:empty){position:absolute;bottom:var(--shared-bar-height);inset-inline:0;z-index:4}
+.shared-search-frame{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;border:0!important;z-index:30;background:transparent}
+.shared-search-frame[data-results=true]{z-index:10;background:var(--canvas,var(--bg))}
+html[data-embedded-search],html[data-embedded-search] body{background:transparent!important;margin:0!important;height:100%;overflow:hidden}
+html[data-embedded-search] .bench,html[data-embedded-search] .nav-notes{display:none!important}
+html[data-embedded-search] .nav-workspace{display:block;padding:0;margin:0}
+html[data-embedded-search] .nav-phone{width:100vw!important;height:100vh!important;border:0;border-radius:0;box-shadow:none;background:transparent}
+html[data-embedded-search] .nav-base{visibility:hidden}
+html[data-embedded-search][data-search-results=true] .nav-base{visibility:visible;background:var(--canvas)}
+html[data-embedded-search] #shell-nav{display:none!important}
+html[data-embedded-search] #shell-feed{display:none!important}
+html[data-embedded-search] .destination{padding-bottom:calc(var(--shared-bar-height,82px) + 16px)}
+@media(prefers-reduced-motion:reduce){.shared-shell-nav,.shared-shell-owner .detail-bottom{transition:none}}

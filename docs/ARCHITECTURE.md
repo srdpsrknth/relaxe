@@ -36,6 +36,7 @@ unless otherwise stated.
 | --- | --- | --- |
 | App setup and dependency injection | `Infinity.java`, `AppComponent.java`, `AppModule.java`, `NetworkModule.java` | Dagger supplies networking, database, preferences, and other app dependencies; this is not a separately packaged core. |
 | Navigation and shell | `activities/MainActivity.java`, `activities/BaseActivity.java`, `fragments/PostFragment.java` | Activities, intents, FragmentManager, ViewPager2, callbacks, and EventBus participate; preserve back and restoration behavior. |
+| User profiles | `activities/ViewUserDetailActivity.java`, `fragments/CommentsListingFragment.java`, `user/UserSaving.kt`, `user/UserFollowing.java` | Posts reuse `PostFragment` with user/submitted scope; Comments use a separate listing. Preserve explicit opening tab/sort precedence over resume, per-tab anchors, Follow versus local Save user, own/other-user visibility and Guest behavior. |
 | Feed | `post/PostViewModel.java`, `post/PostPagingSource.java`, `post/ParsePost.java`, `post/Post.java` | Paging 3/LiveData, filtering, local read state, network loading, and mutable Parcelable models. |
 | Networking and authentication | `NetworkModule.java`, `apis/RedditAPI.java`, `apis/RedditAPIKt.kt`, `network/`, `viewmodels/AppAuthLoginViewModel.kt` | Retrofit/OkHttp and authenticators remain the integration path; retain existing client-ID/access behavior. |
 | Persistence | `RedditDataRoomDatabase.java`, entity/DAO packages | Room schema version 43 with explicit migrations, `exportSchema=false`; no schema changes are justified by a visual redesign alone. |
@@ -75,6 +76,34 @@ Replace presentation feature by feature, creating small boundaries only when a c
 screen needs them. Retain the feed, APIs, persistence, providers, and established behavior.
 Start the first feed proof of concept with existing Views/RecyclerView/Paging infrastructure.
 Evaluate Compose individually where it reduces real screen complexity.
+
+Shared-styling decision (2026-10-23): use Continuum's resolved `CustomTheme` roles and
+existing wrapper/attrs in Views, and `LocalAppTheme` in Compose, for replacement components.
+Keep wallpaper/system generation, custom-theme persistence, light/dark/AMOLED selection,
+font preferences and account ownership in their current mechanisms. Adapt presentation
+roles progressively; do not add a parallel theme engine. `AppTheme.kt` currently supplies
+custom roles explicitly, rather than populating a Material 3 color scheme automatically.
+DESIGN.md owns the selected type/shape/icon direction and component-role mapping.
+
+Shell/search prototypes likewise target existing Android presentation primitives: drawer
+helpers/`DrawerLayout`, Material sheets and existing result fragments. The current shared
+`LandscapeExpandedRoundedBottomSheetDialogFragment` forces expanded state and skips collapsed
+state; a future balanced-entry search sheet needs local configuration, not a global change
+to existing sheets. DESIGN.md records the selected behavior and native validation boundaries.
+No native shell/search extraction or migration has been implemented by the HTML study.
+
+The shared-shell HTML revision reuses one bottom-bar fixture and embeds the accepted search
+study over feed/subreddit/details without replacing the originating document. The same-origin
+browser bridge and account-partitioned synthetic session state are prototype scaffolding only;
+they do not establish a new native router, persistence boundary or account namespace. Map the
+selected presentation back onto existing native navigation/search and restoration mechanisms.
+
+Profile study 12 extends the scoped HTML feed fixture hook with a render-completion callback,
+so profile headers reuse compact rows/actions/media and remount after redraw. The shell feed
+also uses that callback for decoration. These browser hooks and fixture readiness controls
+are scaffolding, not a native state layer. Profile Search carries a user target through the
+existing shared sheet/history fixture; native implementation must preserve the existing
+user-scoped search and account boundaries rather than adopt this browser state store.
 
 This trades some short-term extraction effort for testable behavior and fewer repeated edits
 inside upstream UI classes. It does not eliminate merge conflicts or make upstream a stable

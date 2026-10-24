@@ -18,6 +18,8 @@
   restoration, and accessibility when replacing a UI component.
 - Reuse existing upstream abstractions before adding parallel implementations. Avoid broad
   package renames, Java-to-Kotlin conversions, formatting sweeps, or a wholesale Compose rewrite.
+- Use Reddit terminology in UI and design work: subreddits, users, subscriptions and
+  multireddits. See the terminology rules in `docs/DESIGN.md`; preserve upstream identifiers.
 - Use short-lived `codex/...` branches from the reviewed fork baseline. Worktrees are useful
   for concurrent edits or integration experiments, not required for every task.
 - Inspect working-tree changes before editing and preserve unrelated user work.

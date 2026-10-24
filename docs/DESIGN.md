@@ -15,12 +15,494 @@ been implemented in the fresh fork.
 - Preserve readability, one-handed use, light/dark themes, dynamic colors, accessibility,
   reduced motion, responsiveness, and efficient media use.
 
+## Reddit terminology
+
+**User-approved vocabulary:** use **subreddit/subreddits** and **user/users** in Relaxe's
+labels, questions and design documentation. Search types are **Posts · Subreddits · Users**.
+Use **Subscriptions**, **Subscribe / Subscribed / Unsubscribe**, and **multireddit/multireddits**
+for their existing Reddit concepts. An **account** is the active signed-in identity (or Guest);
+a **profile** is a user's page; **author** identifies the user who wrote a post or comment.
+Keep **post**, **comment**, **flair**, **karma**, **upvote/downvote**, **Saved** and **Inbox** distinct.
+
+Evidence: Reddit's [API reference](https://www.reddit.com/dev/api/) uses subreddits, users,
+subscription and multi routes; Continuum's `strings.xml` labels its search and selection
+screens Subreddits, Users and MultiReddit. Modern Reddit help uses other display labels in
+places; Relaxe follows the requested classic/API vocabulary. This is a presentation rule,
+not a native resource or API migration. Preserve opaque fixture keys and upstream identifiers,
+including JSON fields. Natural-language fixture content such as a garden or a group of people
+does not name a navigation destination and should retain its meaning. The accepted prefix-free
+subreddit/author labels in feed cards remain; page headings may use `r/hiking` and user routes
+may use `u/username` where appropriate.
+
 ## Shared design-system process
 
 Inventory existing elements and states, research references, compare a small number of
 alternatives, then approve components before broad implementation. Cover foundations,
 components, loading/error/empty/selected states, and screen patterns. Do not choose an entire
 design system from a single card mockup or expand speculative settings prematurely.
+
+## Whole-app styling review 07 (2026-10-23)
+
+**Foundation direction selected:** A's typography + B's moderate rounding + C's solid icons.
+A and B's colors are liked, but the user wants wallpaper-dependent Material colors through
+Continuum's existing theme mechanisms, mapped to the replacement components. This supersedes
+the serif-heading exploration preference. No fixed shipping palette is selected. Preserve
+existing font overrides; exact native geometry and final icon assets remain refinement work.
+
+**Review feedback:** the user could not distinguish the three revision-05 options. Its
+closely related palettes, nearly identical feed type and small-toolbar-only serif treatment
+were an ineffective comparison, despite passing technical checks. Revision 06 supersedes
+that comparison with stronger palette/type/icon/shape differences and an always-visible,
+identical-content type/control specimen above each live preview. The earlier alternatives
+remain selectable; revision 07 defaults to the selected mix across neutral A, warm B and a
+simulated wallpaper-blue palette. These are theme examples of one foundation.
+
+Open [the shared-foundations comparison](prototypes/relaxe-exploration/foundations.html)
+through a local HTTP preview. It wraps the existing feed/media and details studies with
+temporary styling; the underlying behavior scripts are reused. Preference rows and shared
+controls are separate synthetic samples, not proposed settings organization. All three
+directions use identical content on each surface. The workbench typography and study names
+are review aids, not application identity.
+
+### Proposed staged review order
+
+Use the UI review tracker below as the area inventory. Ask focused preference questions
+when each group becomes active; do not treat the following order as approval of its designs.
+
+1. **Foundations (direction selected):** A typography + B rounding + C solid icons, using
+   existing theme roles. Native geometry, assets and full-role parity remain later work.
+2. **Shell/navigation (HTML direction accepted):** toolbar, destinations/tabs/drawer,
+   account/subreddit switching and search entry. Native keyboard policy, Back, insets,
+   restoration and large-screen adaptation remain implementation review items.
+3. **Browse/personal surfaces (active):** subreddits, subscriptions/multireddits, search/filter lists,
+   profiles, inbox, saved/history and other retained feed layouts, in small review groups.
+4. **Create/act:** post/reply editors, formatting/attachments, action customization,
+   moderation/reporting, sheets/dialogs, feedback and media/share/download utilities.
+5. **Settings/accounts/onboarding and consistency:** preference organization, login/API/access,
+   theme editor and account scope, then a cross-surface consistency pass.
+
+Each group includes light/dark/AMOLED, dynamic/custom themes, pending/selected/disabled/
+error/empty/loading states, large text, keyboard/accessibility alternatives, RTL, reduced
+motion, landscape/tablet and safe-area requirements. Native validation remains separate.
+
+### Selected mix and earlier alternatives
+
+The selected preview uses A's system sans-serif/weights and 15px/1.28 compact titles, B's
+12px card/control, 24px sheet and 6px thumbnail corners, and C's solid icon treatment. These
+are HTML reference values, not frozen Android dimensions or a font preference migration.
+Preserve existing global/title/content font choices, custom uploaded fonts and size settings.
+The following table records the earlier alternatives for reference only.
+
+| Direction | Color and type | Shape, icons and spacing | Trade-off |
+| --- | --- | --- | --- |
+| A · Stone | Warm white/charcoal; restrained sans-serif titles and headings | 4px cards/controls, 12px sheets, 2px thumbnails; fine square-ended outline icons; 12px sample section padding | Quiet and precise; less warmth or heading character |
+| B · Hearth | Oat canvas/cream cards/terracotta accent; serif post titles and app/section headings, sans-serif body/comments | 12px cards/controls, 24px sheets, 6px thumbnails; rounded outline icons; 16px sample section padding | Stronger editorial warmth; serif post titles are a new proposal requiring review |
+| C · Grove | Sage canvas, filled accent toolbar/bottom bar; bold sans-serif titles/headings | 24px cards/pill controls, 32px sheets, 12px thumbnails; solid icons; 20px sample section padding | Most expressive; color and rounding may compete with dense reading |
+
+The earlier comparisons use browser pixels, not approved Android dp/sp. All retain the accepted compact
+64px thumbnail, 8px inner padding, 6px card gap, title → wrapped metadata → statistics
+hierarchy and hidden toolbar. Body/comments remain 15px system text, with 12px metadata/
+statistics and 20–22px app/post headings before scaling. Compact titles are 15px/1.28 in
+Stone/Grove, and 16px/1.2 serif in Hearth, preserving the same title line-box height. Hearth's
+post titles now participate in the serif experiment; comment and body text remain sans-serif.
+The local browser uses Segoe UI/Roboto and Georgia fallbacks; no font is downloaded or
+selected for native shipping. Controls retain ≥48px targets and flexible heights.
+
+The workbench exposes light/dark/AMOLED, fallback examples, two **simulated** dynamic
+palettes (blue/rose), one custom amber fixture, 100/130/200% text and 360/390/600px widths.
+Dynamic/custom fixtures share semantic canvas/card/text/secondary/outline/accent/container/
+error roles. A prominent notice explains that selecting a shared color fixture makes all
+three use the same palette. The selected mix keeps typography, rounding and icons identical
+across themes; the earlier comparison retains its alternative treatments.
+They demonstrate adaptation; they do not perform Android palette extraction,
+edit a real custom theme, choose native defaults or persist account preferences. Media
+retains a dark fitted canvas and opaque, high-contrast revealed control layer in all themes.
+
+### Theme reuse and component-role mapping
+
+**Approved reuse principle:** resolve colors through the existing Continuum theme mechanisms
+and map them progressively into new components. Preserve Material You opt-in/Enable/Apply,
+light/dark/AMOLED selection, custom themes, preference scope and existing font ownership.
+Do not introduce a competing wallpaper extractor, theme repository or account namespace.
+
+Source inspection, not device verification: `MaterialYouUtils.java` uses Android 12+ system
+color resources, or Android 8.1–11 wallpaper colors where available. It writes generated
+light/dark/AMOLED themes to existing Room/preference paths and requests activity recreation.
+Unsupported/no-color paths return without generating a theme. `ThemePreferenceFragment.java`
+applies on enabling and on the explicit Apply action; no new refresh policy is proposed.
+
+`AppTheme.kt` supplies the selected persisted `CustomTheme` through `LocalAppTheme` and
+resolves typography separately. Its `MaterialTheme {}` does not populate a custom Material 3
+color scheme. Existing Compose controls read `LocalAppTheme` fields explicitly; Views use
+their existing wrapper/attrs. Keep these two paths consistent as components are replaced.
+
+Source-backed mapping to carry into the replacement UI (HTML demonstrates named-role
+fixtures; native integration and any derived contrast/container roles require later work):
+
+| Component role | Existing theme source |
+| --- | --- |
+| Canvas; normal/read cards | `backgroundColor`; `cardViewBackgroundColor` / `readPostCardViewBackgroundColor`, plus filled-card variants where applicable |
+| Post title/content/read text | `postTitleColor`, `postContentColor`, `readPostTitleColor`, `readPostContentColor` |
+| Post/comment metadata/icons | `postIconAndInfoColor`, `commentIconAndInfoColor`, with dedicated primary/media icon fields retained |
+| Comments | `commentBackgroundColor`, `commentColor`; preserve thread/collapse and author/moderator overrides |
+| Toolbar | `colorPrimary`, `toolbarPrimaryTextAndIconColor`, `toolbarSecondaryTextColor` |
+| Bottom navigation | `bottomAppBarBackgroundColor`, `bottomAppBarIconColor`; destination composition reviewed separately |
+| Filled controls/selection/progress | Existing `colorPrimaryLightTheme` / `buttonTextColor` control pair; `colorAccent` and progress roles; derive new containers without replacing stored overrides |
+| Links/flair/votes/gates | Separate `linkColor`, flair fields, `upvoted` / `downvoted`, spoiler/NSFW and availability roles |
+| Dividers, media badges, system bars | `dividerColor`, media-indicator roles, `navBarColor`, status/navigation icon-lightness flags; native contrast/insets need validation |
+
+Fixtures do not reproduce platform extraction or select native defaults. Focused checks show
+independent post/read-title, comment-background/text and link overrides reaching their own
+components. Full native theme parity, including every badge/author/thread/system-bar variant,
+remains unverified. Media retains the accepted high-contrast dark control layer and policy.
+
+### Preservation and next review
+
+The native source has more theme roles than this comparison's compact palette. Preserve
+`customtheme/CustomTheme.java`'s separate normal/read text/card, vote, post/comment/media
+icon, flair/gate, author/moderator, thread, message and system-bar roles. Do not collapse
+user-authored role overrides into a single accent. `AppTheme.kt`, `styles.xml` and existing
+font preferences/custom typefaces need consistent progressive mapping in Views and Compose.
+`MaterialYouUtils.java` already derives themes through platform/wallpaper paths and chooses
+foreground/system-bar contrast. `theme_preferences.xml` keeps theme choice, AMOLED, custom
+editing and Material You Apply separate; `AccountScopedKeys.kt` establishes existing scope.
+None of these native contracts is changed by this study.
+
+Shell/navigation direction is accepted at HTML level in study 09b below: Home, Saved,
+center Search sheet, Inbox, Profile and a drawer for subreddits/accounts. Next review is
+browse/personal surfaces. Motion remains restrained with reduced-motion support; native
+keyboard, navigation and gesture validation remain separate implementation work.
+
+Verification and remaining limitations are recorded in ROADMAP.md. Browser checks support
+this comparison only; native TalkBack/Switch Access, nonlinear text scaling, theme-role parity,
+RTL reading order, system bars, insets, landscape/tablet layouts and restoration still need
+their separately authorized implementation/device work.
+
+## Shell and search review 09 (2026-10-23)
+
+**User-selected starting structure:** a few bottom destinations with a drawer for subreddits
+and accounts; Home, Saved, **Search**, Inbox, Profile in that starting order. Search is the
+center action and opens a bottom sheet. The user wants Continuum's existing search content
+refined, considers its current UI clunky/unresponsive, and requested a Sync reference.
+The drawer should follow Continuum's existing design. Search starts balanced, then expands.
+This is design direction, not native migration or measured performance evidence.
+
+Open [the shell/search study](prototypes/relaxe-exploration/navigation.html). It reuses the
+accepted compact feed and shared selected-foundation theme/icon helpers. It demonstrates
+the five actions, subreddit/account drawer, query sheet and existing full-screen results
+destination as a fixture. Saved/Inbox/Profile/subreddit content is a route preview, not
+approval of those later area designs.
+
+### Existing search and navigation evidence
+
+Paths below are relative to `app/src/main/java/ml/docilealligator/infinityforreddit/`.
+
+| Source | Preservation requirement |
+| --- | --- |
+| `activities/SearchActivity.java`, `res/layout/activity_search.xml` | Current search entry is a standalone Activity, with query, scope, history and autocomplete lists. Its toolbar contains clear/link/keyboard-privacy/random actions. A simpler sheet can change presentation without dropping these capabilities. |
+| `SearchActivity.java` autocomplete/text watcher | 500ms debounce, cancellation, OAuth/no-OAuth API paths and account-scoped NSFW eligibility. User-only search skips subreddit autocomplete. Failure/parse callbacks currently provide no visible error feedback. This is source inspection, not latency measurement. |
+| `RecentSearchQueryViewModel`, recent-query DAO/adapters | History is account-partitioned; records retain type and subreddit/user/custom-feed scope. Row submission versus fill, individual/all-history deletion and Undo need preservation, as does history visibility preference. |
+| `activities/SearchResultActivity.java` | Existing Posts/Subreddits/Users results use `PostFragment` and listing fragments, with current query/scope/selection-return contracts, sort/filter/layout/read behavior. The entry sheet does not imply moving paged results into a small sheet. |
+| `SearchActivity.java` submission and account events | Retain IME submit, special preference-controlled support route, link resolver, selection-only/multi-selection callers, keyboard-incognito semantics, guest behavior and finish-on-account-switch boundaries. These are not permission to replace their native behavior. |
+| `activities/MainActivity.java`, drawer adapter | Current bottom bar is a configurable 2/4-command bar with arbitrary actions, plus FAB/rail options. A five-destination shell is a structural presentation change; preserve existing preferences or explicitly review migration/optional layout behavior later. Reuse account/subreddit routing and drawer helpers. |
+| `adapters/navigationdrawer/NavigationDrawerRecyclerViewMergedAdapter.java`, `res/layout/nav_header_main.xml`, `res/xml/navigation_drawer_preferences.xml` | Keep the account header/switcher and Account, Reddit, Posts, Preferences, favorites and subscriptions groups. The account list replaces the groups while keeping the header. Preserve section visibility/collapse, avatar side, karma visibility, auth availability and quick-toggle preferences during native refinement. |
+
+### Search references and limits
+
+Sync's v20 announcement and beta-25 developer posts were fetched directly during revision
+09b research, as were Relay's v10 developer notes. Boost's developer changelog was retrieved;
+its historical Gfycat search demo was not available. These are historical references, not
+current app measurements. None of the reference apps was installed or exercised on a device.
+
+| Reference | Supported finding and application |
+| --- | --- |
+| [Sync v20 announcement](https://www.reddit.com/r/redditsync/comments/gx15pb/) | Documents bottom navigation, a redesigned search bottom sheet and a simpler sidebar. Supports the entry-sheet/drawer pattern, not an exact geometry or present-day support claim. |
+| [v20 beta 25](https://www.reddit.com/r/redditsync/comments/k207mk/) | Documents a search-sheet menu with clear history and focus-on-open control. Keep secondary tools available without crowding the query row; Relaxe's keyboard policy is deferred to native review. |
+| [v20 beta 11/12 notes](https://www.reddit.com/r/redditsync/comments/htl5mc/) | Documents search opening in a new window and constrained landscape sheet width. Supports separating search entry from results and reviewing large-screen behavior; the phone HTML is not landscape/device validation. |
+| [Boost 1.6.0 developer changelog](https://boostforreddit.com/blog/2017/11/24/boost-for-reddit-1-6-0/) | Describes searching posts/subreddits and direct profile/subreddit navigation in one search screen. Supports a unified entry; the unavailable demo does not establish exact geometry or controls. |
+| [Relay v10 developer announcement](https://www.reddit.com/r/RelayForReddit/comments/dj7n6b/) | Documents moving controls to the bottom for one-handed access and rewriting search. Does not establish the search sheet's exact contents; do not infer them from general bottom-bar behavior. |
+
+Continuum's `activity_search.xml` places the query/toolbar before a scope row and recent or
+autocomplete lists. `SearchActivity.onWindowFocusChanged()` requests query focus and shows
+the keyboard. These are inspected source behaviors, not approval of that keyboard policy
+for Relaxe. The proposed disclosure arrangement below is our synthesis of the references.
+
+### Study 09: selected structure and remaining proposals
+
+- Search is an action, not a permanently selected page. Dismissal restores the current
+  destination/focus; Home, Saved, Inbox and Profile remain labelled. Drawer owns subreddits,
+  accounts and secondary entries. Account switches clear this search session and use distinct
+  history fixtures; guest Saved is local, while Inbox/Profile explain sign-in.
+- Query and clear/submit are prominent. Search type and scope are explicit, with account
+  context visible. Post scope is retained when switching type; subreddit/users result queries
+  are global, and Users does not invent live user autocomplete. Recent rows submit; the
+  arrow fills query/scope/type. Records carry the concrete subreddit target.
+- The search header's tools button holds history management/clear+Undo, link opening,
+  random subreddit and keyboard privacy. These are synthetic destination/state previews,
+  not new permission or persistence.
+- Typing updates the field immediately. Suggestion loading is local to its section; empty
+  matches and failure/Retry are visible without preventing submission. The mock uses the
+  existing 500ms debounce, plus a slow fixture, and discards cancelled/stale responses.
+  This demonstrates presentation responsiveness, not an Android performance fix.
+- Submit closes the entry sheet and previews full-screen results with query/type/scope/account.
+  **The user accepted the current results presentation for now.** No results redesign is
+  requested by the entry simplification.
+  Existing result fragments/ranking/sorts/filters and selection-return callers remain reuse
+  requirements. Result fixtures do not implement Reddit ranking or a complete results redesign.
+- **Selected:** balanced entry, then expanded. The browser opens with the heading focused so
+  the first state is visible, expands on query focus/edit, and starts balanced on reopening
+  while retaining query context. Fixed balanced/expanded modes remain comparison controls.
+  Heading focus demonstrates the transition; keyboard-on-open policy is deferred to native
+  review and is not selected by the HTML fixture's focus behavior.
+- **Selected reference:** Continuum's drawer structure. The fixture shows its account
+  header/switcher, grouped navigation, favorite subreddits and subscriptions, including
+  switching between navigation and account rows. Exact native layout/assets remain refinement.
+
+### Revision 09b: simplify entry
+
+**User feedback:** the previous search sheet was too cluttered. The user requested reference
+research and selected **one compact type-and-scope selector**, rather than three persistent
+type tabs. **The user accepted the refined entry design and current results presentation.**
+The shell/search HTML review is closed for now; native implementation remains outside this task.
+
+The working HTML revision starts with the query, a `Posts · Everywhere` disclosure, and up to
+three recent searches. Opening the disclosure reveals the existing type and scope controls;
+the effective scope remains visible while collapsed. Account context sits beneath the heading.
+Clear appears only for a nonempty query, and the submit arrow/keyboard submit remain available.
+Typed input replaces recents with subreddit matches; it no longer duplicates the submit action
+as a separate row. Users keeps its global result search without inventing live autocomplete.
+
+Manage reveals full history and individual deletion/Undo. The header tools panel retains clear
+history/Undo, link, random-subreddit and keyboard-privacy actions. Tool/disclosure Escape returns
+to entry before dismissing the sheet. Reopening resets disclosure/tool state and balanced height
+while retaining query/type/scope. Results submission receives heading focus; editing results
+retains the original destination for Back. These are browser refinements, not native restoration.
+
+The compact selector, history/tool arrangement and overall entry composition are accepted at
+HTML design level. The user noted that keyboard behavior cannot be judged adequately in this
+prototype. Defer keyboard-on-open/focus policy to a separately authorized native review with
+real IME/insets, expansion, Back/dismissal, reopening, large text and accessibility behavior.
+No automatic-keyboard default or focus-on-open setting is selected by this acceptance. Keep
+history visibility preferences, selection-only callers, account boundaries and the existing
+access/content/media contracts during any later native work. ROADMAP.md owns verification and
+the remaining browser reload diagnostic.
+
+### Android presentation boundary
+
+This task changes HTML prototypes and documentation only. The future implementation should
+use existing Views/Activity/Fragment/Paging boundaries, `DrawerLayout` and Material
+`BottomSheetDialogFragment`/`BottomSheetBehavior`, with native IME/insets, Back dispatch,
+lifecycle/restoration and accessibility support. These provide native gestures and state
+handling; browser dialogs, focus and fixed pixel heights are demonstrations, not native code.
+
+Source inspection found that `LandscapeExpandedRoundedBottomSheetDialogFragment.onStart()`
+always sets `STATE_EXPANDED` and `skipCollapsed=true`. Balanced search therefore needs a
+search-specific configuration or override, rather than changing all existing shared sheets.
+The balanced state must be sized for content, window size and IME using supported library
+APIs; the mockup's 180px/24px offsets are not Android dimensions or a chosen state API.
+Respect the project's SDK/library versions, dp/sp and nonlinear font scaling, system bars,
+landscape/tablet/RTL, TalkBack/Switch Access, keyboard dismissal and process/account restoration.
+Browser checks cannot establish these native behaviors. Retain existing resolved theme/font
+roles and account ownership as recorded above.
+
+Next review: browse/personal surfaces, starting with the subreddit header study below,
+then subscriptions and multireddits. Retain the accepted shell/search direction, selected foundations and
+Continuum drawer structure. Keyboard behavior returns during native review. Production
+implementation and any actual search latency/network policy change require their own
+separately authorized task and native measurements.
+
+## Subreddit header study 10 (2026-10-23)
+
+### Shared shell consistency revision (2026-10-24)
+
+**HTML review accepted on 2026-10-24:** the user approved the revision-12 subreddit preview
+and continued to the next group. This closes the current header proportions/spacing, Sort
+placement, scrolling Posts/About controls, page-swipe and shared bottom-bar review for now.
+Native geometry, accessibility and gesture/preference mapping still require implementation
+review; this acceptance does not authorize Android changes.
+
+**User-directed:** the subreddit and other pages share the Home / Saved / center Search /
+Inbox / Profile bottom bar. It fades away on downward reading scroll and returns on upward
+scroll. **Explicitly confirmed:** remove the subreddit toolbar's Search button and use the
+bottom Search action. This replaces the cross-study shortcut that navigated away before
+opening the search sheet. The accepted search type/scope/history/tools and results composition
+remain the starting point; this decision does not replace them with another search design.
+
+The HTML studies now reuse `shared-shell.js` / `shared-shell.css` on feed, subreddit, details
+and shell destinations. Search reuses study 09b over the originating page; closing or backing
+out of its results restores that page without replacing its DOM, scroll position or reply
+draft. Results keep the shared bar, and their scrolling follows the same visibility policy.
+Synthetic search history/query/type/scope/privacy context is partitioned by fixture account
+in browser session storage across these examples. This is browser scaffolding, not a new
+Android account store, route system or history policy.
+
+The bar overlays reserved end padding so hiding it does not resize the reading viewport or
+shift its anchor. Details' reply controls sit above it and return to the bottom when it hides.
+Short directional thresholds suppress jitter in the fixture; exact native timing and physics
+remain reviewable. Keyboard Tab reveals navigation; a focused bar is kept available, and hidden
+navigation is inert. Reduced-motion removes transitions. Immersive media retains its accepted
+entry/reveal policy: the shared bar appears with the revealed controls and hides with them;
+opening Search pauses active media. Do not infer Android accessibility/service detection,
+keyboard insets, gesture arbitration or performance from this browser behavior.
+
+Retain the existing navigation customization, account ownership, search/access mechanisms,
+media policy and native restoration contracts. The selected five-item structure is a design
+default, not authorization to discard existing command-bar, rail/FAB or hide-on-scroll settings.
+No Android UI or application identity was changed.
+
+### Subreddit composition
+
+**Selected by the user:** a large banner and description on first load/at the top of a
+subreddit page. As the user scrolls, it becomes a compact header with posts immediately below.
+Returning to the top restores the expanded header. This supersedes the proposed choice between
+two fixed header sizes. The user requested Sync for Reddit as inspiration.
+
+[Study 10](prototypes/relaxe-exploration/subreddit.html) demonstrates that direction with
+synthetic `r/hiking` content and the selected foundation. The banner, name, subscriber count,
+description and subscription action scroll in the same surface as the posts. The compact title
+appears when the expanded title leaves view. Posts/About scroll away with the expanded header,
+leaving the posts immediately below the compact bar. Bottom Search reuses study 09b with
+subreddit/account context as described above. Banner proportions and spacing remain reviewable,
+not frozen Android dimensions.
+
+**Accepted: Subscribe placement A, beside the subreddit name.** A separate full row was rejected;
+the banner-corner alternative is no longer in the active study. Keep a labelled subscription
+state and the existing menu alternative. Large text may wrap the name-row action to preserve
+readable text and touch targets.
+
+The user also required complete sort/time controls. Continuum's
+`SortTypeBottomSheetFragment` applies Hot, New and Rising directly; Top and Controversial
+open `SortTimeBottomSheetFragment`, with Hour, Day, Week, Month, Year and All Time. Study 10
+demonstrates that sequence; **the user accepted the sort/time presentation**. Closing the time
+dialog keeps the applied pair; selection survives header collapse, theme/post redraw and
+Posts/About switching. This uses the existing sort contract without changing defaults, scoped
+preferences or ranking.
+
+**Accepted at HTML design level, following the user's request:** move Sort beside More in the top bar,
+with a solid sort icon. Its accessible name/tooltip and dialog identify the current pair, such
+as **Top · Week**. Sort is available on Posts and hidden on About. Posts/About buttons remain
+at the top of the scrolling content, with horizontal swipes switching pages: left from Posts
+to About, right to return, reversed in RTL. Each page retains its offset. A page destination in
+More and Left/Right keys on the focused content region provide alternatives while scrolled;
+About also identifies itself below the compact subreddit title. The placement/gesture
+revision is accepted for the prototype; it is not a verified native interaction specification.
+
+Continuum's `ViewSubredditDetailActivity` already uses `ViewPager2` for these pages and respects
+`DISABLE_SWIPING_BETWEEN_TABS`; retain that preference. The workbench includes enabled/disabled
+fixtures. Gesture recognition is limited to post/About content, respects vertical movement,
+does not own the media viewer or action toolbar, and suppresses a swipe's trailing click.
+The HTML switches after release rather than reproducing native drag physics. Native edge-Back,
+selection, nested media gestures, multi-touch and TalkBack arbitration remain implementation
+checks, alongside the preserved upstream tab double-tap/navigation preferences.
+
+The study reuses `app.js`'s compact-post renderer, long-press actions and media behavior through
+a hook enabled only for the subreddit-study URL. Header fixtures cover long/hidden description,
+missing banner, metadata failure/Retry, Guest and subscription failure. Sort selection is kept
+as local presentation state; it does not implement Reddit ranking. Subscription actions and
+counts are synthetic. Posts/About retain local scroll offsets; native process/account/feed
+restoration remains a preservation requirement, not a browser verification result. A restored
+position below the header must stay there rather than reset to the first-load banner.
+
+Reference evidence: Sync's developer [v22 FAQ](https://www.reddit.com/r/redditsync/comments/tk02dp/)
+documents an optional Material 3 large app bar, and the [v22.3.6 release notes](https://www.reddit.com/r/redditsync/comments/t8acw7/)
+mention preserving expanded-toolbar position between posts/messages. Neither establishes the
+exact banner/description transition here. No Sync installation or native geometry measurement
+was performed; the requested transition comes from the user's direction.
+
+Continuum already uses `AppBarLayout` / `CollapsingToolbarLayout` in
+`activity_view_subreddit_detail.xml`, with a banner, subreddit information and subscription
+control. `ViewSubredditDetailActivity` supplies Posts/About tabs, collapsed-app-bar restoration,
+account/subscription readiness and `HIDE_SUBREDDIT_DESCRIPTION`. Reuse those boundaries and
+preferences; do not replace them with a separate feed or subscription implementation. Retain
+sort/filter/layout, eligibility, API/access and media/restoration contracts. A native large
+header must still handle IME/insets, nonlinear font scaling, TalkBack, RTL and landscape.
+
+ROADMAP.md records current browser verification and the next review step. No Android source,
+identity, installation or Git publication is authorized by this study.
+
+## Subscriptions and Multireddits study 11 (2026-10-24)
+
+**HTML direction selected; native density deferred:** [open study 11](prototypes/relaxe-exploration/navigation.html?study=11&destination=subscriptions&rev=14).
+It extends the existing shell with list destinations rather than introducing another bottom
+bar or search sheet. **User-selected:** keep visible favorite stars on each list row and the
+single list selector. The user requested tighter rows, explicitly noting that final spacing
+must be judged in the Android app. Revision 14 reduces vertical padding, decorative avatar
+size and section gaps, retaining the text, wrapping and separate ≥48px browser action targets.
+Ordinary 390px/100% fixture rows measure 49px including the divider, previously 65px. This is
+a browser reference, not a shipping dp/sp value or a measured native density improvement.
+Validate actual Android fonts/font padding, nonlinear scaling, insets and ≥48dp targets
+before choosing final row geometry. Larger text and long names must grow the row naturally.
+Favorites grouping and list-filter presentation remain reviewable details. Favorites appear
+once in a leading section, with the other rows below; both
+groups are alphabetical in this fixture. The favorite state is labelled and conveyed by
+filled/outlined stars, independently of color.
+
+One selector exposes **Subreddits**, **Users**, **Your multireddits** and **Users’ multireddits**.
+The latter retains the owner's username; your own multireddits show visibility and subreddit
+count. The inline **Filter this list** field is distinct from bottom Search, which retains
+the accepted Reddit search flow. **List options** discloses prefix-only matching and refresh.
+Controls scroll with the list, and the shared bottom bar follows the accepted directional
+fade. At 200% text the toolbar heading uses a full-width row rather than splitting its word.
+
+Source evidence: `SubscribedThingListingActivity.SectionsPagerAdapter` already separates
+these four browsing categories, with different tab sets in selection mode. Its add routes
+are Go to subreddit, Add user, Create multireddit and Add user's multireddits. The subscription
+and multireddit DAOs filter and sort by account, while the existing adapters expose favorites.
+`SubscribedSubredditDao` distinguishes signed-in synchronized subscriptions from Guest's
+local-only subscriptions. `MultiRedditListingFragment` separates owned/followed lists and
+disables Guest refresh. Preserve those data/selection/add-route boundaries, current long-press
+options, default-tab and navigation preferences; a visual selector does not merge their data.
+
+The fixture demonstrates account-isolated lists/filter/favorites, Guest local lists, list
+filtering/prefix matching, row-return scroll/filter retention, loading/empty/no-match states,
+refresh failure with retained rows and Retry, and favorite failure with unchanged state.
+Add actions open a labelled route preview; editors/options and full destination contents
+remain later review work. No Reddit API call or native persistence/refresh behavior is
+implemented. The existing native account/access/theme/font and restoration contracts remain.
+
+## Profiles study 12 (2026-10-24)
+
+**User-selected HTML direction:** expand the profile header at the top and collapse it while
+reading, like the accepted subreddit page. Keep Follow beside the username with a separate
+Save user bookmark. In the Comments list, keep the parent post context before the comment.
+[Open the profile study](prototypes/relaxe-exploration/profile.html?rev=16), or
+[enter Comments directly](prototypes/relaxe-exploration/profile.html?rev=16&tab=comments).
+Exact header/row dimensions and remaining detail refinements are browser references; judge
+final density and nonlinear font scaling on Android, as required for study 11 too.
+
+The large header contains a banner/avatar, `u/username`, karma, cake day and bio. Other users
+offer Follow and the distinct local Save user action; your own profile offers Edit profile.
+At 200% text, the username takes a full row and actions wrap beneath it to preserve readable
+names and touch targets. The compact toolbar retains the username/current tab, Sort and More.
+Posts/Comments controls scroll away with the header. Horizontal paging follows the existing
+disable-swiping preference, with top controls, More and keyboard alternatives. Each tab keeps
+its scroll position and sort/time selection in the fixture. The shared bar fades with reading
+direction and Search opens over the same profile, scoped to posts by that user; results Back
+returns to the original document/offset. Query/history scope includes the target username.
+
+Source evidence: `ViewUserDetailActivity` has exactly Posts and Comments, backed by user/
+submitted `PostFragment` and `CommentsListingFragment`. It uses `ViewPager2`, respects
+`DISABLE_SWIPING_BETWEEN_TABS`, prioritizes explicit initial tab/sort over resume and restores
+the appropriate tab's feed record. `UserThingSortTypeBottomSheetFragment` exposes New, Hot,
+Top and Controversial; the latter two use the retained Hour/Day/Week/Month/Year/All Time flow.
+The prototype's New fixture default does not change any native sort preference.
+
+Follow, Save user and user-list favorites remain separate: native Guest following and saving
+use local lists, Save user is also local when signed in, and it is hidden on your own profile.
+Do not discard the existing Room-backed user marks/favorites or remote follow eligibility.
+Own-profile menu visibility differs from other-user menus. Retain sign-in/access checks for
+messages/report/block, existing avatar-animation/media/content policies, Markdown bio behavior,
+account scope, custom fonts/themes and restoration. The Guest own-profile destination offers
+account access rather than inventing a Reddit profile for Guest.
+
+Posts reuse the accepted compact renderer and its actions/media. Comment specimens show
+subreddit/time, parent post title, full comment text and points/thread access; they are list
+composition examples, not replacement native comment actions or paging. Edit, message, tag,
+block, report, multireddit, filter, share and layout controls are labelled route previews.
+No API request, real follow/save, message, report or native persistence is implemented.
+Loading, missing banner, long bio, details failure with retained posts, empty contributions,
+follow unavailability/failure and Guest states are review fixtures. ROADMAP.md records actual
+verification, repairs and the remaining browser diagnostic. Continue with Inbox next.
 
 ## Feed and media review decisions (2026-10-23)
 
@@ -37,12 +519,12 @@ current mockup review; native Android refinement and verification remain impleme
   `r/` nor `u/` in these feed labels. Wrap this metadata onto another line when needed;
   do not discard the author/flair to keep a fixed height. This wrapping choice was confirmed.
 - The following statistics line is **bold points** · comments · time. Move the time here
-  from the community line. Internal names/identifiers and navigation semantics stay unchanged.
+  from the subreddit line. Internal names/identifiers and navigation semantics stay unchanged.
 - No permanent three-dot button on the collapsed feed card. Long press reveals a toolbar
   that drops down within that card: upvote, downvote, post-details/comments destination,
   open in external browser, then More. “Post & comments” is interpreted as one combined
   destination button; its page design is recorded in the separate post-details review below.
-- More contains community navigation, author information, mark unread, hide, report, mute,
+- More contains subreddit navigation, author information, mark unread, hide, report, mute,
   share/copy and related upstream actions. Keep save/unsave reachable there unless selected
   as a direct toolbar button. Exact menu grouping and final icon assets remain open.
 - Provide customization in options for long-press buttons and related behavior. The prototype
@@ -143,14 +625,14 @@ Paths are relative to `app/src/main/java/ml/docilealligator/infinityforreddit/` 
 | --- | --- |
 | `viewmodels/ViewPostDetailFragmentViewModelNew.kt:98–155` | UiState separates initial load/failure, refresh, child loading and error reasons; DataState holds post/comments/child IDs. Recovery has completed versus interrupted partial-result semantics. Reuse these states rather than a separate comments repository. |
 | `fragments/ViewPostDetailFragmentNew.java:1298–1388` | Existing scroll anchors, collapsed-thread records, above-comments anchors and gallery page restoration; gallery state is captured independently of whether a thread anchor exists. Do not reduce restoration to a list index alone. |
-| `adapters/CommentsRecyclerViewAdapterNew.java:1373–1430` | Existing reply launches `CommentActivity` with parent fullname/depth/body and community context. Guest/archive block reply and vote; post/comment locks block replies. Keep current action/helpers and availability checks. |
+| `adapters/CommentsRecyclerViewAdapterNew.java:1373–1430` | Existing reply launches `CommentActivity` with parent fullname/depth/body and subreddit context. Guest/archive block reply and vote; post/comment locks block replies. Keep current action/helpers and availability checks. |
 | `adapters/CommentsRecyclerViewAdapterNew.java:1664–1742` | Toolbar visibility, branch expansion and Markdown interaction are coupled to the tap/hold-swap preference. Spoiler/link/text-selection paths must not accidentally collapse branches. Proposed hold actions cannot silently reverse existing user preferences. |
 | `customviews/CommentToolbar.kt`, `CollapsedCommentHeader.kt` | Existing width-aware toolbar/header compaction and reuse behavior. Preserve reply access; evaluate target sizes when reusing compaction rather than copying its smallest icon stages into the redesign. |
 | `res/xml/comment_preferences.xml`, `post_details_preferences.xml` | Existing toolbar/collapse/avatar/prefix/embedded-media settings, top-level-first mode, gallery-grid and landscape split/swap preferences. Preserve scoped settings and layout variants; the phone mockup does not replace them. |
 
 ### Study 04 accepted composition and interaction direction
 
-- Present the full title, prefix-free community/author/flair metadata and bold-points/comments/
+- Present the full title, prefix-free subreddit/author/flair metadata and bold-points/comments/
   time, then full post content/media and post actions. The photo is fitted without a forced
   crop; gallery pages have labelled controls. A jump-to-comments control avoids forcing a
   long scroll. Compact summary is an explicit alternative/toggle for comparison only.
@@ -220,13 +702,13 @@ account scope, accessibility and restoration requirements from ARCHITECTURE.md t
 | Post details and comments | Study 04 accepted for now: full post → comments, top-right −/+ branch collapse, explicit main-post Reply for top-level comments | Native preference mappings, composer integration and Android refinement; exact styling separately |
 | Vertical photo/gallery/video/GIF | A selected; autoplay; tap-revealed overlays; confirmed ~4s playing timeout; Comments goes to default details | Native gesture/timeout/accessibility/policy/restoration validation; exact styling separately |
 | Long-press/action options | Customizable actions required | Final placement, order/toggle controls, defaults, scope/persistence and accessible alternatives |
-| Shared visual foundations | Separate whole-app styling chat | Color/dynamic/custom themes, type, icons, spacing, shapes, motion, contrast and state roles |
-| Shell/navigation | Prototype shell illustrative | Toolbar, tabs/bottom navigation, drawers, account/community switching, search entry and insets |
-| Communities/search/list surfaces | Not styled or approved | Community lists, subscriptions/multireddits, search results, filters and empty/error states |
-| Profiles/inbox/saved/history | Not styled or approved | User information, messages/notifications, saved/read/history lists and scope indicators |
+| Shared visual foundations | A typography + B moderate rounding + C solid icons selected; reuse existing wallpaper/custom theme mechanisms through component-role mapping | Native geometry/assets, full role parity and accessibility validation remain later work |
+| Shell/navigation | Study 09b accepted at HTML design level: shell/drawer, balanced → expanded search, compact type/scope selector, history/tools and current results presentation | Keyboard-on-open deferred to native review; layout/preference mappings, insets, Back and restoration remain implementation work |
+| Subreddits/search/list surfaces | Search 09b and subreddit/shared-shell revision 12 accepted at HTML level; study 11 single list selector and visible stars selected, tighter rows requested and demonstrated | Judge final row density on Android; retain list details for consistency review and continue to Profiles |
+| Profiles/inbox/saved/history | Profile study 12 expanding header, adjacent Follow/separate Save user and parent-post context first selected; Inbox/Saved/History still route previews | Inbox messages/notifications next, then Saved/History; native profile geometry/actions/accessibility remain implementation work |
 | Creation/editing/moderation | Not styled or approved | Post/reply editors, formatting/attachments, validation, moderation/report flows |
-| Settings/accounts/onboarding | Not styled or approved | Preference organization, login/API-key/access setup, account options and theme editor |
-| Sheets/dialogs/feedback | Exact appearance open | Action/confirmation menus, loading/retry, destructive feedback and keyboard focus |
+| Settings/accounts/onboarding | Review 07 has preference-row specimens; existing theme mechanism inspected, area design not reviewed | Preference organization, login/API-key/access setup, account options and theme editor in proposed group 5 |
+| Sheets/dialogs/feedback | Search entry accepted in study 09b; keyboard policy deferred to native review; other shared dialog details open | Action/confirmation menus, destructive feedback and focus in create/act group |
 | Media utilities/downloads | Existing behavior retained | Provider/external-open/share/save/download surfaces and status feedback |
 | Accessibility/responsiveness | Cross-cutting requirement, not a separate cosmetic pass | Large text, TalkBack/Switch Access, RTL, keyboard, landscape/tablet, motion and safe areas in every slice |
 
@@ -302,9 +784,9 @@ unless prefixed with `res/`. The broader source map remains in [ARCHITECTURE.md]
 
 | Family | Shared elements and states to carry forward | Existing owner / incremental reuse |
 | --- | --- | --- |
-| Shell/navigation | Account/community identity, toolbar, sort/filter context, tabs, sheets, Back, selected tab, insets, restored position | `activities/MainActivity.java:160,1760`; `fragments/PostFragment.java:1637`; retain intents/FragmentManager and `resume/FeedResumeState.kt` |
+| Shell/navigation | Account/subreddit identity, toolbar, sort/filter context, tabs, sheets, Back, selected tab, insets, restored position | `activities/MainActivity.java:160,1760`; `fragments/PostFragment.java:1637`; retain intents/FragmentManager and `resume/FeedResumeState.kt` |
 | Feed containers | Initial load, loaded, refresh with content, append/retry, filtered-empty/end, selected layout, read state | `post/PostViewModel.java:358,405,420`, `post/PostPagingSource.java`; use the existing cached filtered Paging stream; media-only must reach paging/invalidation |
-| Post rows | Title, community/author/time, flair/type/gates, thumbnail/placeholder/gallery count, points/comments, read/saved/vote/pending/error | `adapters/PostRecyclerViewAdapter.java:181,740,828`; holders mix presentation with action/cache/read effects; replace one holder and extract only the boundary it needs |
+| Post rows | Title, subreddit/author/time, flair/type/gates, thumbnail/placeholder/gallery count, points/comments, read/saved/vote/pending/error | `adapters/PostRecyclerViewAdapter.java:181,740,828`; holders mix presentation with action/cache/read effects; replace one holder and extract only the boundary it needs |
 | Dense composition | Thumbnail width, title wrapping, metadata, action/footer blocks, row padding | `res/values/dimens.xml:16` has 112dp default; `res/layout/item_post_compact.xml:104,163,181,195,285,308` plus Compact 2/right-thumbnail variants; runtime size preference alone cannot remove structural height |
 | Actions/feedback | Save/unsave; neutral/up/down vote; pending, confirmed, failure/rollback; action sheet; cross-screen feedback | Existing `thing/SaveThing.*`, `thing/VoteThing.java` and adapter callbacks; preserve optimistic results, cache updates and account scope; do not duplicate network calls |
 | Comments/detail | Post header, Markdown/link spans, depth/collapse, sort, reply/actions, initial failure, refresh, more children, partial recovery, gated/error states | `viewmodels/ViewPostDetailFragmentViewModelNew.kt:102` exposes UiState/DataState; `adapters/CommentsRecyclerViewAdapterNew.java`; keep existing recovery/sort/rendering contracts |
@@ -327,7 +809,7 @@ support guarantees. There are no screenshot-derived behavioral claims in this st
 | --- | --- | --- |
 | Sync compact/list | Developer [v20 beta notes](https://www.reddit.com/r/redditsync/comments/l7hes5) document optional single-line titles; [v11.2.1 notes](https://www.reddit.com/r/redditsync/comments/4k84g1) document reduced compact padding and long-press post options | Density combines wrapping, padding and thumbnail choices. Exact action layout and touch dimensions remain unverified. Long-press should be supplementary. |
 | Sync navigation/actions | Developer [v23 notes](https://www.reddit.com/r/redditsync/comments/10s1bui) describe bottom navigation, customizable quick actions, swipe actions and position restoration | Keep density and navigation/action preference separable; copying gesture behavior is not required. |
-| Boost feed/media | [Developer feature page](https://boostforreddit.com/) describes compact list, cards, slideshow, gallery modes, per-community presentation, left-handed configuration and media previews | A dense feed can coexist with dedicated media browsing. Slideshow direction, gallery gestures and exact density are not established. |
+| Boost feed/media | [Developer feature page](https://boostforreddit.com/) describes compact list, cards, slideshow, gallery modes, per-subreddit presentation, left-handed configuration and media previews | A dense feed can coexist with dedicated media browsing. Slideshow direction, gallery gestures and exact density are not established. |
 | Boost playback | [Developer changelog](https://boostforreddit.com/blog/) records compact dimension reductions, mute preferences, GIF autoplay always/Wi-Fi/never and lower-data album loading | Preserve policy explicitly when changing presentation. These are historical descriptions, not tested current network behavior. |
 | SnapReel image/paging | Pinned [viewer](https://github.com/shahriar-ahmed-seam/SnapReel/blob/57df94471fd81f9049cc1149dacffd4d69a57063/app/src/main/java/com/snapreel/app/ui/viewer/ReelsViewerScreen.kt) and [ImagePage](https://github.com/shahriar-ahmed-seam/SnapReel/blob/57df94471fd81f9049cc1149dacffd4d69a57063/app/src/main/java/com/snapreel/app/ui/viewer/ImagePage.kt): vertical pager, URI/index restoration, 1–5× zoom, Fit/Fill, optional timed advance | Source inspection only. Image pan is processed with multiple pointers; familiar one-finger panning is not established. A local folder sequence does not define horizontal Reddit galleries. |
 | SnapReel video/lifecycle | Pinned [VideoPage](https://github.com/shahriar-ahmed-seam/SnapReel/blob/57df94471fd81f9049cc1149dacffd4d69a57063/app/src/main/java/com/snapreel/app/ui/viewer/VideoPage.kt) and [ViewModel](https://github.com/shahriar-ahmed-seam/SnapReel/blob/57df94471fd81f9049cc1149dacffd4d69a57063/app/src/main/java/com/snapreel/app/ui/viewer/ReelsViewerViewModel.kt): seek/mute/retry, first-frame poster, control visibility cycle, lifecycle pause/trim/release | Useful explicit states; the three-step tap cycle is not usability evidence. [Current README](https://github.com/shahriar-ahmed-seam/SnapReel/blob/57df94471fd81f9049cc1149dacffd4d69a57063/README.md) describes up to three players and decoder-pressure fallback. That is not an appropriate default streaming budget without measurement. |
@@ -349,8 +831,8 @@ These are realistic fixtures, not fetched Reddit content or user data.
 | Direction | Compact feed | Vertical media | Main trade-off |
 | --- | --- | --- | --- |
 | A · Index (recommended) | 64px left thumbnail; title first, two lines at normal size; consolidated metadata/stats; text opens comments; visible overflow for save/vote | Fit whole media; reserved dark control/metadata bands; explicit gallery and page buttons | Most title space without a separate action bar; save/vote require opening the sheet |
-| B · Dock | 56px left thumbnail; title/community above a 48px action strip with upvote/comments/save/overflow | Fit whole media above a themed persistent bottom dock | Best direct action discoverability; the tallest feed rows |
-| C · Context | Community above title; points/menu rail on left; 64px thumbnail on right | Fill with prominent metadata and controls over an opaque lower scrim | Strong community scanning; narrower text and cropping/overlay costs |
+| B · Dock | 56px left thumbnail; title/subreddit above a 48px action strip with upvote/comments/save/overflow | Fit whole media above a themed persistent bottom dock | Best direct action discoverability; the tallest feed rows |
+| C · Context | Subreddit above title; points/menu rail on left; 64px thumbnail on right | Fill with prominent metadata and controls over an opaque lower scrim | Strong subreddit scanning; narrower text and cropping/overlay costs |
 
 Original-comparison measurements in headless Chrome, local fixture, at scroll top, with
 Segoe UI fallback (these do not describe revision 02's refined cards):
@@ -427,7 +909,7 @@ while shared roles are adopted.
   large text and functional icons ≥3:1. Audit every dynamic/custom palette, scrim and gate state.
   Do not place metadata directly over arbitrary imagery without a contrast surface.
 - Verify 100/130/200% text, 360dp width, landscape/tablet and safe areas. Reflow before shrinking
-  text or hiding controls; support RTL and long community names/titles. Do not make density
+  text or hiding controls; support RTL and long subreddit names/titles. Do not make density
   counts an accessibility pass condition at large text.
 
 These requirements follow [Android accessible Views guidance](https://developer.android.com/guide/topics/ui/accessibility/views/apps-views),
@@ -464,7 +946,7 @@ is a later slice. No API, auth, database, account namespace, identity or wholesa
    effects. Back/recreation/layout switch restores the anchor/offset; no extra fetch policy or
    settings defaults change solely for the new row.
 5. Verify read/saved/vote/flair/gated/missing-thumbnail and loading/append-retry states; preserve
-   the title → prefix-free community/author/flair → bold-points/comments/time hierarchy with
+   the title → prefix-free subreddit/author/flair → bold-points/comments/time hierarchy with
    metadata wrapping. Long press reveals an in-card toolbar with no idle overflow; verify
    touch cancellation, TalkBack/keyboard alternatives, configurable button order/visibility,
    pending-action state and focus return. Reuse existing preference scope/visibility settings

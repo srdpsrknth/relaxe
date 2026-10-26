@@ -20,7 +20,7 @@
 | Project foundations | Complete | Valid asset packaging and a recorded desktop verification baseline; shared guidance/skill and upstream procedure validated. Device coverage remains separate. |
 | UI/UX exploration | Feed/media direction agreed at HTML design level | Research/inventory, comparison and accepted refined A behavior recorded; Android refinement/verification remains implementation work. |
 | Post-details/comments review | Study 04 accepted for now; main-post Reply added | Full post first, top-right −/+ branch collapse and top-level Reply recorded; native preferences, composer integration and device refinement remain implementation work. |
-| Whole-app styling | In progress: subreddit/shared-shell and list directions selected; profile study 12 expanding header, adjacent Follow/separate Save user and parent-post context first selected | Inbox next, then Saved/History and remaining review groups. Final density, keyboard policy and native behavior remain implementation review items. |
+| Whole-app styling | In progress: browse/personal and layout directions selected; unified composer, visible options, top-bar Preview, Title-first Link, Image-before-Body order and always-visible Video editing controls selected; all six composer types have browser-checked proposals | Next: inline attachments for Text/Poll, then reply/edit/action flows and settings/accounts/onboarding. Poll initial fields, Gallery caption placement/attachment details, tablet adaptation, final density, keyboard policy and native verification remain separate. |
 | Architecture proof of concept | Planned | One focused presentation slice reuses feed/actions with failure, state, restoration, and accessibility checks. |
 | Progressive redesign | Planned | Replace selected feed, comments, media, shell, and settings surfaces through small reviewed changes. |
 | Integration automation and refinement | Planned | Repeatable manual sync, useful detection/preparation automation, performance/device checks, eventual release decisions. |
@@ -36,6 +36,33 @@ on this branch, then continuing the design review. This does not authorize nativ
 merging or release. Subsequent review work can remain uncommitted until its next checkpoint.
 Build/test repairs are in `cc7d8c9aa`; the accompanying documentation commit records this
 handoff. Continue from this branch/its checkpoint, since `master` still contains upstream only.
+
+### Current review checkpoint (2026-10-26)
+
+- **Selected directions:** compact feed/media/details; shared typography/rounding/icons;
+  shell/drawer/search; subreddit and profile headers; subscriptions, Inbox, Saved, History
+  and Recently visited; four customizable feed families and Gallery viewer navigation.
+- **Current step:** create/act study 18 has browser proposals for Text, Link, Image, Gallery,
+  Video and Poll. Selected details include the unified type selector, visible post options,
+  Preview beside Post, Title-first Link, Image before optional Body and visible Video editing
+  controls. Other form details remain proposals; continuing is not blanket design approval.
+- **Precise next task:** inspect Text/Poll inline-image insertion, uploaded-image management,
+  camera/error states and Markdown/rich-text conversion, then draft one small HTML proposal.
+  Keep Poll's two-field/Add option choice, Gallery caption placement and attachment-action
+  details provisional for consistency review.
+- **Remaining design groups:** finish create/act (inline attachments, reply/edit/private
+  messages, action customization, reporting/moderation, dialogs/feedback and media utilities),
+  then settings/accounts/onboarding, tablet adaptation and cross-surface consistency.
+- **Later milestones:** separately authorize a focused native architecture proof, incremental
+  Android replacement and native accessibility/state/performance/device verification, then
+  upstream integration/refinement and any release. No native implementation is authorized here.
+- **Checkpoint scope:** the user authorized updating, committing and pushing documentation
+  on this date. Include the HTML/CSS/JS design studies linked by the documents so the checkpoint
+  is usable from a fresh checkout. User attachments and ignored diagnostics are not part of it.
+  Existing browser results below are historical checks, not reruns for this documentation update.
+
+Continue this chat for the current review; the documents provide the handoff if the user
+prefers a new one. No new chat is required at this boundary.
 
 ## Verification and repairs (2026-10-23)
 
@@ -403,6 +430,466 @@ rendered with the shared bar, Search opened, and Profile routed to the signed-in
 Evidence: `.gradle/design-profile12-layouts.json`, `design-profile12-interactions.json`,
 `design-profile16-render-smoke.json` and `design-profile12-*.png`.
 
+The user authorized the styling checkpoint commit/push on 2026-10-24. Commits `a60c1aa53`
+(HTML studies) and `f2cfa30bd` (decisions/handoff) were pushed to
+`fork/codex/whole-app-styling`; the remote tip matched `f2cfa30bd` afterward. Inbox study 13
+is subsequent local work, not part of that pushed checkpoint.
+
+Inbox study 13 (revision 18): the user requested Boost-inspired All/Unread/Messages/Sent/
+Mentions access after sharing a screenshot; tabs are optional. This supersedes the two-tab
+selection. The user subsequently accepted the compact seven-view selector (also Comment
+replies/Post replies) and two-line reply/message previews. Direct Mark all read/More placement
+and exact native geometry remain later review work.
+**126 layout views passed**: seven views × 360/390/600px × 100/200% text × light/dark/AMOLED.
+**25 interaction checks passed**: each view's fixture contents, separate Sent recipients and
+unread semantics, read success/removal from Unread while retained in All, read failure,
+account-wide Mark all success/failure, Guest isolation and selected-view return, Search/results
+return, compose route preview, paging retry, loading/error/empty/retry and shared-bar down/up
+scroll. Five palette/RTL bounds checks and four actual 360×800 / 844×390 Guest/signed-in 200%
+overflow checks passed. Normal and narrow dark 200% views were visually inspected. Revision 18
+blue-fixture row and selector text contrast passed across light/dark/AMOLED (minimum 4.91:1).
+JavaScript syntax and whitespace checks passed; no native source files changed.
+Evidence: `.gradle/design-inbox18-verification.json`, `design-inbox13-before.png` and
+`design-inbox18-*.png`. Revision 17's tab layout and interaction evidence is superseded.
+No native changes, Gradle/device run, install, merge or release. The earlier
+`MutationObserver.observe` diagnostic appeared again in Inbox browser logs and remains unresolved;
+the passing fixture checks do not establish error-free console output or native correctness.
+
+Saved study 14 (revision 19): the user selected Posts/Comments tabs plus a separate source
+selector. Find in Saved inside More versus an always-visible field is still the review question.
+The scoped post frame reuses compact rows, hidden actions and media; comments retain parent-post
+context. The old Saved placeholder was shown before the draft. Guest uses device-local saved
+posts, with source/Comments controls disabled rather than reusing signed-in recovered saves.
+**108 final layout views passed** after repairs: two sources × two tabs × 360/390/600px ×
+100/130/200% text × light/dark/AMOLED. **33 interaction checks passed**, covering text-only and
+zero-result filtering, query/source/tab retention, exact subreddit and AND terms, comment route
+previews, Saved-only versus global Search, Guest isolation, loading/empty/failure/retry,
+save success/rollback/source retention, pending failure across account teardown, media hidden
+entry/reveal/theme/return, Home/Inbox regression paths, cache-bypass scope, keyboard tab access
+and shared-bar down/up reading. **30 extra checks passed**: 18 Guest layout views, five palette/
+RTL bounds, three comment/source contrast checks (at least 4.5:1) and four actual 360×800 /
+844×390 Guest/signed-in 200% overflow checks. Normal and narrow dark 200% views were visually
+reviewed. Fixture controls now stay hidden outside their destination.
+
+Testing found and repaired a renderer assumption that every filtered list contains media,
+and stale optimistic save feedback when the iframe was destroyed during a pending demo action.
+The fixture now safely handles text-only/empty lists and settles demo actions before teardown;
+this is not a native request-lifecycle change. Final layout checks and focused interaction
+retests passed afterward. Syntax/whitespace checks passed. The final Saved log sample was
+empty, but the earlier reload diagnostic remains open rather than being claimed fixed.
+Evidence: `.gradle/design-saved14-verification.json`, `design-saved14-before.png`,
+`design-saved14-posts.png`, `design-saved14-comments.png` and `design-saved14-large.png`.
+No Android, identity, Gradle/device, installation or new Git publication action was performed.
+
+History study 15 revision 21 follows the agreed read-state model and selected Today / Yesterday /
+Earlier headings. Added labels replace premature last-read/visit wording. A route notice now
+hides during media viewing along with the surrounding list controls. **54 layout views passed**
+(three appearances × three widths × three text sizes × both grouping comparisons), plus
+**17 interaction checks** and **27 extra checks**: 18 Guest layouts, five RTL palette bounds,
+three timestamp contrast checks (at least 4.5:1) and an actual 360×800 viewport at 200% text.
+Interactions cover independent account grouping, loading/empty/failure/retry, settings route,
+direct media entry/reveal/return, details and shared Search. The earlier Guest grouping failure
+was a reset expectation: explicit state setup and account round trips confirm independent
+retention. Search's accessible dialog name is Search; its test expectation was corrected.
+The media Back locator reported a node-location error during pointer automation; a visible
+coordinate click and keyboard return both passed. This does not establish native correctness.
+The known MutationObserver reload diagnostic appeared again and remains unresolved.
+Evidence: `.gradle/design-history15-rev21-verification.json`, `design-history15-before21.png`,
+`design-history15-selected21.png` and `design-history15-large21.png`. Tailnet preview returned
+HTTP 200. Native code remains unchanged; no Gradle/device run, installation or new publication.
+
+Recently visited study 16 revision 23 uses the user's selected two visible tabs, replacing the
+initial compact selector proposal. It reuses the shared shell and foundation roles, with a
+local name filter, independent Follow/Save user actions and synthetic account-partitioned state.
+**54 layout views passed** across three appearances, widths and text sizes and both tabs;
+**26 interactions passed**, covering tab keyboard/focus, shared filtering, route return, action
+failure, off/loading/empty/load-error/retry specimens, Guest boundaries, settings preview,
+drawer/Search and bar down/up reading. **58 extra checks passed**: 36 Guest layouts, five RTL
+palette bounds, three contrast groups (row time/action/selected tab, all at least 4.5:1) and
+actual 360×800 and 844×390 viewports at 200% text, plus 12 focused narrow/200% views after
+giving the longer Subreddits tab more width to avoid a mid-word break. Normal Subreddits/Users and large-text views
+were captured. The known MutationObserver reload diagnostic appeared again and remains open.
+Evidence: `.gradle/design-visited16-rev23-verification.json`, `design-visited16-before.png`,
+`design-visited16-subreddits23.png`, `design-visited16-users23.png` and
+`design-visited16-large23.png`. Browser action results and offsets do not establish native API,
+recording, gestures, process restoration or performance. Android code and identity remain
+unchanged; no Gradle/device, installation or publication action was taken.
+
+Retained feed layouts study 17 revision 28 adds a source-derived comparison board for Card,
+Card 2, Card 3, Compact 2 and Gallery using the same fixtures, plus temporary customization
+controls. The user requested comparison before selecting layouts/settings and deferred the
+isolated Card title-order decision. DESIGN.md owns the source inventory, historical primary
+Sync/Boost references and open decisions. This historical comparison is superseded by the
+revision 30 four-family selection below; no native preferences have been changed.
+
+Browser checks during revisions 25–28: **135 final theme/width/text views passed**, checking
+row count, horizontal bounds, vertical overlap/content containment, 48px target bounds (1px
+rounding tolerance) and embedded-document overflow. **45 two-column views passed** after the
+grid sizing repair. Earlier in this same study, **39 interaction checks** covered shared
+customization, Gallery media-only filtering, media entry/reveal/return, content gates and
+Guest save isolation; **49 extra checks** covered narrow/two-column/RTL bounds, contrast and
+actual narrow/desktop viewports. These counts are not native or exhaustive action coverage.
+Initial horizontal-only checks missed vertical overlap; the final matrix explicitly tests it.
+Repairs addressed implicit grid rows shrinking below content, Compact 2 narrow wrapping,
+refresh before fixture readiness, missed load events for already-loaded iframes and embedded
+workbench overflow. Three subsequent warm reloads initialized all five feeds with ten rows.
+Jump buttons work with pointer and keyboard. Normal Card/Gallery and 200% narrow views were
+captured for visual review. The existing MutationObserver reload diagnostic recurred and
+remains unresolved; do not claim a clean console. Media tap reveal and keyboard Back passed;
+keyboard reveal was inconclusive in nested-frame automation. Album paging, feed autoplay,
+native gestures, IME, TalkBack, restoration and performance remain unverified.
+
+Evidence: `.gradle/design-layouts17-rev28-verification.json`, `design-layouts17-cards28.png`,
+`design-layouts17-gallery27.png` and `design-layouts17-narrow27.png`. Local and tailnet HTTP
+previews returned 200. Syntax/diff checks passed. No native source/identity, Gradle/device,
+installation, new commit/push, merge or release action was taken for this study.
+
+Revision 30 follows the user’s selected four-family model. Card 1/2 are retained Large card
+compositions; Compact uses the accepted renderer, and Vertical swipe reuses the accepted
+viewer. Compact 2 is rejected and Card 3 is not a separate proposed option. Per-family
+settings are independent in-memory browser controls; the exact controls/defaults remain
+proposals. No native layout IDs or saved preferences were changed.
+
+Revision 30 checks: **108 family/theme/width/text views passed**, including row overlap,
+horizontal bounds, visible targets (48px with 1px rounding tolerance), hidden media entry
+controls and compact body width. **27 compact thumbnail positions at 200% text passed** after
+repairing a conflict with the existing large-text grid placement; **nine Card 2 large-text
+views passed**. **11 focused interactions passed** for independent family choices, element
+visibility, Card 2 order, compact keyboard toolbar/customization, Gallery media-only filtering,
+media tap reveal, shared Search and synthetic save. Twelve surface-bound checks also passed;
+actual 360×800/200% and 1280×1000 parent bounds passed. Desktop families and narrow compact
+captures were reviewed. This does not establish final native density or native behavior.
+The existing reload diagnostic remains unresolved; no clean-console claim or Gradle/device
+run. Evidence: `.gradle/design-layouts17-rev30-verification.json`,
+`design-layouts17-families30.png`, `design-layouts17-narrow30.png` and
+`design-layouts17-settings30.png`. Local/tailnet preview and syntax/diff checks passed.
+No new commit/push, native source/identity, installation, merge or release action was taken.
+
+On 2026-10-26 the user selected Card 1 (text above preview) as the Large card default;
+Card 2 remains selectable/customizable. Revision 31 marks that existing preview default in
+labels and records the decision. Syntax/diff checks and tailnet HTTP 200/default-label checks
+passed. This was a documentation/copy update; the revision 30 browser matrix was not rerun.
+
+Revision 32 adds a focused Filled/Outlined/Flat rows comparison, with a Large/Compact family
+selector. It reuses the existing validated iframe bridge, renderer, theme roles and actions;
+no surface default or native behavior changed. **108 layout views passed** across both families,
+three appearances, three widths, 100/200% text and all three surfaces. **Five interactions
+passed** (compact keyboard toolbar, shared Search and three narrow-screen keyboard jumps),
+plus **15 extra checks** covering actual narrow/desktop parent bounds, tailnet rendering,
+RTL and title contrast (all nine tested title/surface/theme pairs at least 4.5:1). Large-card
+comparison and narrow 200% Compact captures were visually reviewed. The initial border test
+assumed exactly 1px; the browser computed 0.666667px, so the assertion now checks a positive
+border. No renderer repair was needed. Syntax/diff checks passed. Shell HTTP probes were
+unavailable under current socket restrictions; the tailnet page and all frames were verified
+in the browser. Earlier reload diagnostics remain unresolved; no Gradle/device run or new Git
+publication. Evidence: `.gradle/design-surfaces17-rev32-verification.json`,
+`design-surfaces17-large32.png` and `design-surfaces17-narrow32.png`.
+
+Revision 33 records Filled as the selected Large card default, with Outlined/Flat retained,
+and the user’s Save as layout requirement for named custom configurations (including size,
+icons/positions, feed gaps and title/preview/toolbar arrangement). The first working HTML flow
+saves and reapplies current presentation controls plus padding/gaps/preview limits/thumbnail
+size. It rejects blank/duplicate names, preserves saved snapshots while editing drafts, and
+keeps named copies through family Reset. Names are rendered as text. The prototype library
+clears on reload; native persistence, account/context mapping, picker organization and the
+complete icon/toolbar editor are not implemented.
+
+Current checks: **108 family/theme/width/text views passed**, plus **27 extreme size/spacing
+views** at 200% text. **23 interaction checks passed** for defaults, validation, cancel/Escape,
+name creation, immutable snapshots, applying controls to the renderer, global-theme exclusion,
+family filtering, reset/reapply, draft selection and forward/reverse modal focus wrapping.
+An initial modal focus test failed; explicit Tab boundary handling repaired it and the
+focused retests passed. Two actual narrow-screen bounds checks passed for dialog/workbench.
+Save-dialog and applied-layout captures were reviewed. Syntax/diff checks passed; the tailnet
+page and frames loaded in the browser. No shell HTTP success is claimed under current socket
+restrictions. No native changes, Gradle/device run, installation or Git publication.
+
+On 2026-10-26 the user selected **always save a new copy** for edits to custom layouts.
+Existing saved configurations remain unchanged; no in-place Save changes action is planned.
+The revision 33 prototype already behaves this way. This decision/copy update passed syntax
+and diff checks; the earlier interaction matrix was not rerun.
+
+Evidence: `.gradle/design-layouts17-presets33-verification.json`,
+`design-layouts17-save-dialog33.png` and `design-layouts17-named33.png`. Earlier reload
+platform/browser diagnostics remain unresolved; this work does not establish native behavior.
+
+Revision 34 records the user's constraint that narrow feeds must use one column and tablet
+presentation needs a separate adaptive review. The browser computes an effective count from
+available width/text size while retaining the requested wide-window count. Its cutoffs are
+provisional CSS heuristics. Wider fixtures cover landscape 720 × 480 and 840/1280 × 960;
+they do not approve a tablet shell. DESIGN.md owns the adaptive constraints and pending review.
+The named-layout proposal now includes per-action visibility/order, above/below-content
+toolbar placement, and Compact's existing hidden/Always show option. Compact's in-row editor
+and the parent workbench synchronize. More stays available, including hidden votes.
+
+Current revision-34 browser verification: **144 family/width/text/appearance views passed**
+without feed/row horizontal overflow or multiple narrow-window columns. This includes all
+six fixture widths at 100/130/200%, plus Light/Dark/AMOLED coverage at narrow, landscape and
+wide sizes. Focused interaction checks covered icon hiding/showing/reordering, toolbar
+placement, reset and saved-copy restoration, retained wide-column preference, Compact's
+Shift+F10 reveal/menu synchronization, RTL at 200%, and More access after hiding every icon.
+The last check found a missing-hidden-vote-menu case; it was repaired and retested with both
+vote actions reachable. An actual 360px browser viewport had no editor overflow, seven rows
+with 48px button targets, and a bounded dialog dismissed with Escape. JavaScript syntax and
+diff checks passed. The existing MutationObserver reload diagnostic reproduced and remains
+unresolved; successful fixture checks do not close it. No Gradle/device run, native change,
+installation, commit or push in this step.
+
+Evidence: `.gradle/design-layouts17-adaptive34-verification.json` and
+`design-layouts17-action-editor34.png`. Earlier revision counts above are historical.
+
+Revision 35 records **below-content as the Large card toolbar default**, with Above retained
+in Settings, and the user's requirement to cap icons to the available width. Large/Compact
+toolbars now keep one row, reserve More, retain full-size targets and move lower-priority
+actions into More. Counts are measured with the actions; multi-column cards use their own
+width. The selected priority order survives narrowing. Resizing a focused action into More
+moves focus there. Large's upvote accessibility label includes the point count.
+
+Fresh checks after correcting an inherited Large-toolbar content-width sizing defect:
+**108 family/width/text/appearance combinations, covering 1,080 toolbar rows, passed**
+one-row, bounds, More availability and ≥48px target checks with all seven actions selected.
+Coverage: Large/Compact, six widths, 100/130/200%, Light/Dark/AMOLED. Focused checks also
+passed for two-column card widths, Card 2 + Above + RTL + 200%, an overflowed Upvote reached
+and used through More, and Copy link focus falling back to More when the real browser window
+narrowed to 360px. A long batch exceeded the browser-tool time limit; verification was rerun
+in bounded batches. Syntax/diff checks passed, and the capped-toolbar capture was reviewed.
+The earlier reload diagnostic remains open. No native/Gradle/device work or Git publication.
+Evidence: `.gradle/design-layouts17-toolbar35-verification.json` and
+`design-layouts17-toolbar35.png`. Revision-34 counts above are historical.
+
+Revision 36 records Filled as the selected Compact card surface default, alongside Large
+card. The family editor, Reset and Composition default now resolve Compact to Filled;
+Outlined and Flat remain available. Focused browser checks passed for all three selections,
+reset/default resolution, narrow Dark at 200% and AMOLED at 100%, without horizontal row/feed
+overflow. Compact still starts with its toolbar hidden. Syntax/diff checks passed; the Compact
+capture was reviewed. The prior 108-view toolbar matrix was not rerun for this default-only
+change. No native/Gradle/device work or Git publication. Evidence:
+`.gradle/design-layouts17-filled36-verification.json` and `design-layouts17-filled36.png`.
+
+Revision 37 records Fit whole media as the selected Large card preview default. This was
+already the fixture default; Square crop remains configurable. Fresh browser checks confirmed
+initial Fit/contain rendering, Square/cover selection and Reset returning to Fit/contain.
+Copy/syntax/diff checks passed and the preview capture was reviewed. No new layout matrix or
+Gradle/device run was needed for this decision/copy update. Video previews remain placeholders;
+these image checks do not establish native video framing, autoplay or performance. Evidence:
+`.gradle/design-layouts17-framing37-verification.json` and `design-layouts17-framing37.png`.
+
+Gallery clarification supersedes revision 34's narrow Gallery fallback: **at least two
+columns, Fit whole media scaled to tile width**. Continuum source confirms two-column
+portrait/landscape defaults, staggered placement, natural-ratio previews and the existing
+tap/long-press media/detail swap preference. Revision 38 corrects the HTML grid and adds
+measured staggered placement. Initial rapid-resize checks exposed overlap; synchronous
+placement/resize updates repaired it. **54 settled grid combinations passed** across six
+widths, 100/130/200% and Light/Dark/AMOLED for column minimum, no overlap/overflow, fitted
+aspect ratios and ≥48px More targets. One intermediate reflow sample needed another settled
+observation; this is not evidence of native layout performance. Actual 360px viewport and
+RTL checks passed; the Gallery one-column option is disabled, while narrow Large card stays
+one column.
+
+Selected Gallery viewer behavior: media-first + Comments; **Horizontal by default, Vertical
+selectable in Settings**; swipe through album images before the next visual post. The proposal
+retraces the sequence backward. Only visual-media posts enter this stream; text/link tiles
+open details. Closing keeps the current post visible in Gallery. Revision 39 reuses the
+existing viewer with scoped axis/exit callbacks and keeps zoom paging locks, controls and
+playback/gate policy. Its direction is captured by the browser's named-layout copies;
+native preference scope/migration and the horizontal presentation remain implementation work.
+
+Fresh revision-39 checks: **24 viewer combinations passed** across both axes, Light/Dark/
+AMOLED, narrow/landscape and 100/200% for horizontal bounds, ≥48px controls and Comments.
+Actual horizontal drags entered an album, advanced its image, then the next post; a zoomed
+drag kept the same page. An actual vertical drag passed with Vertical selected. Keyboard
+checks covered both axes, backward album boundaries, first-post bounds and the inactive axis.
+Comments/text tiles reached the details route fixture; current-post grid visibility/focus
+passed after swiping to another post and exiting, including a farther tile. Direction Reset
+and saved-copy reapply passed. The original Vertical feed's ArrowDown behavior remained.
+Gated media stayed unloaded before reveal, unavailable media kept its error state, and
+the final-post boundary stayed on the final visual post.
+Syntax/diff checks and grid/viewer captures passed review. No native changes, Gradle/device
+run, installation, commit or push. Earlier reload diagnostic remains unresolved.
+Evidence: `.gradle/design-layouts17-gallery39-verification.json`,
+`design-layouts17-gallery39-grid.png` and `design-layouts17-gallery39-viewer.png`.
+
+Revision 40 records the user-selected boundary: Horizontal stays limited to Gallery entry;
+the standalone feed remains Vertical swipe. Gallery grid defaults to visual media only, with
+All posts retained. Browser checks confirmed direction-control visibility only in the
+standalone Gallery workbench, seven default visual tiles/two columns, ten tiles (including
+three text/link fallbacks) with All posts, and Reset restoring the visual-only default.
+Syntax/diff checks passed; the earlier grid/viewer matrix was not rerun for these default/
+scope-control edits. Evidence: `.gradle/design-layouts17-gallery40.png` and
+`design-layouts17-gallery40-verification.json`. No native/Gradle/device work or Git publication.
+
+Create/act study 18 revision 41 implements the user-selected unified composer with a compact
+six-type selector. Text is the first interactive proposal; the other five forms are explicitly
+pending and cannot submit. DESIGN.md owns its grouping and source-backed contracts. Native
+services/account/flair/restoration remain authoritative; the browser uses synthetic data and
+in-memory input only, with no Reddit requests or uploads.
+
+Current browser verification: missing subreddit/title focus and feedback; required flair
+blocking versus best-effort loading/failure; guest/account-loading blocking; all six selector
+routes with Text retained; selected-text formatting and focus return; safe Markdown preview
+(literal HTML stayed text), inert link destination preview and forward/reverse dialog focus
+wrap; simulated failure retained writing/flair/options, retry succeeded; posting/dirty exit,
+discard/clear/reopen, shared Home cancel and Search return. Escape returned preview focus.
+All 36 appearance × text size × preview-size cases had no form horizontal overflow or measured
+button/select/summary/checkbox-label targets below 48px (rounding tolerance 0.5px). An actual
+360px browser at 200% text also kept page/form/dialog within horizontal bounds. Light and
+AMOLED/large-text captures were visually reviewed; current console warning/error query was
+empty. Evidence: `.gradle/design-compose18-verification41.json`,
+`design-compose18-review41.png` and `design-compose18-large-text41.png`. These checks do not
+establish native keyboard/TalkBack, real account/rule/API validation, restoration or performance.
+The earlier reload diagnostic remains unresolved. No Gradle/device run, native source/identity
+change, installation or Git publication was performed for this specimen.
+
+Revision 42 implements the user's choice to keep Spoiler, NSFW and reply notifications
+visible below the body, using a labelled fieldset instead of a disclosure. Targeted browser
+checks passed for mouse/Space toggling and keyboard progression to Preview, plus six views:
+Light/Dark/AMOLED at 100%/720px landscape and 200%/360px narrow. Controls remained exposed,
+labels had at least 48px height and the form had no horizontal overflow. The options capture
+was visually reviewed; syntax/diff checks passed. The full revision 41 interaction matrix
+was not rerun for this grouping change. Evidence: `.gradle/design-compose18-options42.png`
+and `design-compose18-options42-verification.json`. No native/Gradle/device or Git publication.
+
+Revision 43 implements the selected Preview placement beside Post in the top bar. At 200%
+text the pair moves together onto a second header row. Twelve header cases (four preview
+sizes × three text sizes) retained adjacent buttons, at least 48px targets, no title overlap
+and no header horizontal overflow. Actual 360px/AMOLED/200% and a Dark spot check passed;
+captures were visually reviewed. Preview opened the existing dialog without losing input;
+Escape returned focus, Tab progressed from Preview to Post, and pending forms/closed composer
+disabled Preview. Syntax/diff checks passed. Evidence: `.gradle/design-compose18-header43.png`,
+`design-compose18-header43-large.png` and `design-compose18-header43-verification.json`.
+Earlier broad form checks remain revision 41 evidence; no native/Gradle/device or publication.
+
+Revision 44 adds the Link-post proposal after inspecting `PostLinkActivity`, its XML/menu and
+`TitleSuggestionUtils`. URL-before-title is proposed; Suggest title, optional formatted body,
+shared header/options and separate in-memory Text/Link bodies are demonstrated. The browser
+does not fetch entered URLs; title lookup and posting are synthetic. Image/Gallery/Video/Poll
+remain disabled follow-up forms. DESIGN.md records capabilities and boundaries.
+
+Current checks passed: empty-URL suggestion/post feedback and focus; explicit suggestion
+success and failure retention; cancellation after manual title/URL edits; inert URL plus
+formatted-body preview and Escape focus return; separate body/URL retention through type
+changes; formatting with no invented Link image-upload action; guest/account-loading/required
+flair gates versus best-effort lookup failure; posting locks, failed-post field/option retention,
+simulated success, Search return, discard clearing inactive Text input, URL-only dirty-exit
+prompt and long-URL preview wrapping. All 36 appearance × text-size × preview-size views had
+no measured form/header horizontal overflow or measured visible controls below 48px (0.5px
+rounding tolerance). Actual 360px/200% had no page/form horizontal overflow. Light and
+AMOLED/large-text captures were visually reviewed; current warning/error query was empty.
+Syntax/diff checks passed. Evidence: `.gradle/design-compose18-link44-verification.json`,
+`design-compose18-link44.png` and `design-compose18-link44-large.png`. Earlier reload diagnostic
+remains unresolved; no native account/API/IME/TalkBack/restoration/performance proof, Gradle/
+device run, installation or Git publication.
+
+Revision 45 applies the selected Link order: Title → URL → Suggest title → optional Body.
+Targeted browser checks confirmed Tab from Title to URL to Suggest title, completed suggestion
+success and correct field order without form overflow at 720px/100% and 360px/200%. The capture
+was visually reviewed; diff checks passed. Evidence: `.gradle/design-compose18-link-order45.png`
+and `design-compose18-link-order45-verification.json`. The revision 44 matrix was not rerun
+for this DOM reorder. No native/Gradle/device changes or Git publication.
+
+Revision 46 adds the single Image-post proposal after inspecting `PostImageActivity`, its XML
+and the `SubmitPostService` image/GIF job paths. The user selected Title → Image → optional
+Body; visible Replace/Remove and replacement staging remain proposed details. The chooser/camera use bundled samples; GIF preview is a static
+first frame. Camera denial/unavailable, picker/preview failure and posting remain synthetic.
+Native URI permissions, camera/temp-file cleanup, decoding, GIF processing, real upload/
+server errors and restoration remain authoritative and unverified by the browser.
+
+Current browser checks passed: required-image feedback/focus, chooser cancellation, camera
+denial/unavailable, selected image/focus/Contain fit, cancelled/failed replacement retention,
+camera cancel/confirmation, GIF poster, image/body preview, preview failure/retry without
+an added posting block, separate Text/Link/Image body retention, Text and Link field regression,
+guest/account-loading/required-flair versus lookup-failure gates, shared Search return,
+posting locks and failed-post attachment/body retention. Remove kept writing and focused the
+chooser; image-only dirty exit prompted and discard cleared image/inactive input. All 36
+appearance × text-size × preview-size selected-image cases had no measured form/header
+horizontal overflow, Contain framing and no measured visible controls below 48px (0.5px
+rounding tolerance). Empty chooser at 360px/200% and actual 360px/200% picker bounds/targets/
+forward/reverse focus wrap passed. A close click immediately after viewport reset had no
+effect; a settled retry opened the expected discard prompt, with no console warning/error.
+Selected-image and large-picker captures were visually reviewed. Syntax/diff checks passed.
+Evidence: `.gradle/design-compose18-image46-verification.json`, `design-compose18-image46.png`
+and `design-compose18-image46-picker-large.png`. Earlier reload diagnostic remains unresolved.
+No native changes, Gradle/device run, installation or Git publication.
+
+Revision 47 adds the Gallery-post proposal after inspecting its Activity, adapter, ViewModel,
+caption/URL sheet and upload utility. It demonstrates ordered bundled samples, the existing
+20-image/180-caption limits, per-image Edit/Remove, optional formatted body and safe preview.
+Selection-time ready/pending/failure states are synthetic; no device files/camera or uploads.
+DESIGN.md owns the source contracts and proposed grid/editor placement.
+
+Current browser checks passed: empty-gallery feedback/focus; append order/distinct IDs;
+caption save/cancel/focus and metadata retained after earlier-image removal; caption/body/
+inert-URL preview; pending Add/edit/remove and all-image Post guards; completion unlock;
+failure removal by identity after an index shift; cap at 20 with 20 unique IDs despite repeated
+sample files, and Add returning at 19; posting locks/failure retention; type-switch input,
+guest/required-flair gates, simulated success/Search return, discard and Gallery-only dirty
+exit. The first caption stress check exceeded 180 despite maxlength; explicit input/save
+guards fixed it, with 180-character and Unicode-boundary retests passing. A long UI batch
+timed out/reset the tool session; the page was preserved and cap checks passed again in a
+bounded batch. This is an automation limitation, not an app performance measurement.
+
+All 36 appearance × text-size × preview-size grid cases had no measured form/header horizontal
+overflow or measured visible controls below 48px (0.5px rounding tolerance). Actual 360px/200%
+kept two grid columns without page/form overflow; details-dialog bounds, forward/reverse focus
+wrap and Escape passed. Light grid/details and AMOLED large-text details captures were visually
+reviewed. Current warning/error query was empty; syntax/diff checks passed. Evidence:
+`.gradle/design-compose18-gallery47-verification.json` (includes summaries of checks observed
+before the tool reset), `design-compose18-gallery47.png`, `design-compose18-gallery47-details.png`
+and `design-compose18-gallery47-details-large.png`. Earlier reload diagnostic remains unresolved.
+Browser fixtures do not verify native uploads, account/API/media policy, URI/camera handling,
+IME/TalkBack, recreation/restoration or performance. No native changes, Gradle/device run,
+installation or Git publication.
+
+Revision 48 adds the Video-post proposal after inspecting its Activity/XML, player constants
+and service error paths. It demonstrates selected/recorded bundled media, an optional formatted
+body, visible playback/edit actions and separate file-access/processing failures. Gallery
+caption/link fields remain behind Edit provisionally after the user's request to continue;
+that unanswered question is retained for consistency review.
+
+Current checks passed: required-video focus/feedback, picker Cancel/failure, camera permission/
+unavailable fixtures, muted start-after-selection, Play/Pause, 10-second seek boundaries,
+keyboard seeking and mute; recording Cancel/confirmation and clip/position retention; paused
+Post Preview at the editor position with formatted body, close cleanup/focus, Search/type-change
+pause and input retention; posting locks and distinct file/processing failure retention;
+preview failure/retry without an added Post block; Remove preserving writing/releasing the
+player; Video-only dirty exit and discard. The initial served URL exposed a zero-length
+seekable range, so initial seek probes stayed at zero. Revision 48.1's page-local object URL
+for the bundled clip fixed that fixture transport issue: seekable duration 5.055s, keyboard
+seek to 0.2s and forward clamp to 5.055s were observed. This is not native policy/performance
+verification; no arbitrary URL or device media is fetched.
+
+All 36 appearance × text-size × preview-size cases had no measured form/header horizontal
+overflow, Contain framing and no measured visible controls below 48px (0.5px rounding tolerance).
+Actual 360px/200% controls and post-preview bounds/forward/reverse keyboard wrap passed. Light
+and AMOLED/large-text captures were visually reviewed. Current console warning/error query
+was empty; syntax/diff checks passed. Evidence: `.gradle/design-compose18-video48-verification.json`
+(includes the initial seek diagnostics and corrected checks), `design-compose18-video48.png`
+and `design-compose18-video48-large.png`. Earlier reload diagnostic remains unresolved.
+Native audio/eligibility/loop settings, URI/camera access, upload/processing, account/API,
+IME/TalkBack and restoration remain unverified. No native changes, Gradle/device run,
+installation or Git publication.
+
+Revision 49 adds the Poll proposal after inspecting its Activity/XML, `PollPayload` and
+submission service. It starts with two options, supports Add/Remove up to six, omits empty
+options in order, and uses a compact 1–7 day selector with the existing three-day default.
+These presentation choices remain proposals. Text/Poll body image insertion remains a
+follow-up placeholder; native uploaded-image/rich-text/camera paths must be retained.
+
+Current Poll checks passed: empty/one-option feedback and focus; Add focus/six-row cap;
+Remove renumbering, preserved values and two-row floor; ordered preview/blank omission,
+literal HTML-like option text and formatted body; one-/seven-day values; preview keyboard
+wrap/Escape/focus return; type-switch and failure retention; pending editing locks, simulated
+success and account/flair guards; Keep composing/discard, option-only and duration-only dirty
+prompts; shared Search round trip. All 36 appearance × text-size × preview-size cases had no
+measured form/header overflow or visible Poll controls below 48px (0.5px rounding tolerance).
+Actual 360px/200% form and preview bounds passed. Light and AMOLED/large-text captures were
+visually reviewed. The current console warning/error query was empty; syntax/diff checks
+passed. Evidence: `.gradle/design-compose18-poll49-verification.json`,
+`design-compose18-poll49.png` and `design-compose18-poll49-large.png`. Earlier reload diagnostic
+remains unresolved. These browser checks establish no native account/API, uploads, server
+validation, IME/TalkBack, restoration or performance correctness. No native changes,
+Gradle/device run, installation or Git publication.
+
 Ignored evidence: `.gradle/design-foundations-verification.json`,
 `.gradle/design-foundations-07-review.json`, `.gradle/design-navigation-verification.json`,
 `.gradle/design-navigation-extra.json`, `.gradle/design-navigation09-verification.json`, and the
@@ -413,19 +900,63 @@ Contrast checks cover explicit fixtures, not every arbitrary custom theme or ren
 The browser does not establish Android IME/drag behavior, TalkBack, nonlinear scaling,
 landscape/tablet/system-bar handling, process restoration, real API behavior or performance.
 Gradle/device checks were not rerun; foundation verification above remains historical evidence.
-No native source/identity, installation or Git publication changes were made.
+Those earlier study runs made no native source/identity, installation or Git publication changes.
 
 User-requested setup: GPT-6.1 Sol / High for synthesis/prototypes; up to two useful,
 non-recursive subagents with GPT-6 Luna / Medium for narrow read-only work or GPT-6.1 Sol /
 High for demanding analysis. Two Luna / Medium audits covered theme/font/scope and search/
 navigation contracts. This records requested setup, not a claim that tools changed the main model.
 
-Continue **this chat** with Inbox: inspect existing notification/message categories, unread/read
-and reply actions, account/Guest gates, refresh/paging and restoration. Show the current route
-before a small HTML proposal using the shared shell, then ask about grouping and reading
-density. [Profile study 12](prototypes/relaxe-exploration/profile.html?rev=16) now demonstrates
-the selected expanding header, adjacent Follow/separate Save user and post-context-first
-Comments. Preserve its own/other-user/Guest distinctions and source contracts from DESIGN.md.
+Continue **this chat**; [study 18’s Poll composer](prototypes/relaxe-exploration/compose.html?rev=49&type=poll)
+is the current review. The unified composer/compact selector choice is accepted; its detailed
+Text layout is a proposal apart from the selected visible Spoiler/NSFW/reply-notification
+controls and Preview beside Post. Title-first Link order is selected; separate per-type body
+retention remains a proposal. The Image form now demonstrates bundled-sample attachment,
+camera/error and replacement/removal states. Image before optional Body is selected;
+attachment-action details remain for consistency review. Gallery now has a two-column grid
+and per-image caption/link editor proposal, kept behind Edit provisionally. Video now has a
+playable bundled-sample form; always-visible controls while editing are selected. Other Video
+details and native resume behavior remain unapproved. Poll now has an interactive proposal.
+The user requested continuation without selecting the initial Poll field arrangement; keep
+two fields plus Add option provisional. Next review inline image insertion for Text/Poll. Retain all
+six native types and their services;
+uploads, user-profile posting, real rules/allowed types and restoration remain separate work.
+[Study 17’s layout checkpoint](prototypes/relaxe-exploration/layouts-overview.html?rev=40)
+remains the accepted layout-direction reference.
+The surface comparison remains a reference; Filled is selected for Large and Compact cards.
+The user selected Large card, Compact card, Vertical swipe and Gallery, with adjustable
+elements, positions and surfaces within families. Keep Card 1 and Card 2 as Large card
+compositions; **Card 1 (text above preview) is the selected Large card default** as of
+2026-10-26. Card 2 remains selectable and customizable. Reject Compact 2 and omit Card 3 as a
+separate proposed layout. Compact uses
+the accepted refined A base and hidden customizable toolbar. Large card's below-content toolbar
+default and a width-limited action count are selected; Above remains configurable. Revision 35
+demonstrates one row with More reserved and lower-priority actions in More. The scope clarification is resolved: Horizontal stays limited to Gallery entry for now; the
+standalone feed remains Vertical swipe. Gallery grid defaults to visual media, with All posts
+available. Gallery entry/content/axis/album/scope/return rules are selected and demonstrated in HTML; no native horizontal viewer is implemented.
+Gallery keeps at least two columns even on phones, with Fit whole media
+scaled to tile width; this supersedes revision 34's Gallery one-column fallback. Minor layout defaults return in the consistency pass. Large card's Fit whole media default is
+selected; Square crop stays configurable. Card 1 + Filled is the Large card default;
+Compact also defaults to Filled. Outlined and Flat stay available; other defaults remain open for consistency review.
+Continue create/act, then settings/accounts/onboarding. A dedicated tablet adaptive-shell/
+pane review is required before native implementation; wide feed previews do not approve a
+tablet UI. These HTML choices do not implement
+native layout-ID migration: map legacy choices/account/context overrides explicitly before
+native work. Recently visited’s two visible Subreddits/Users tabs and visible Subscribe,
+Follow and Save user actions remain selected. Inline filter/time labels remain proposals.
+After the source-backed History behavior
+explanation, the user chose to retain Continuum's basics and explicitly include thumbnail-to-
+media viewing without requiring post details. DESIGN.md owns that requirement and its existing
+settings/account/retention boundaries. Source inspection confirms thumbnail, gallery and
+fullscreen-video handlers already call the guarded read-marking helper in several layouts;
+this is existing coverage to preserve, not proof that every redesigned native route works.
+No native implementation or device verification was performed for this decision. The user
+selected Today / Yesterday / Earlier headings in revision 21; its wording now distinguishes
+stored record time from last-visit time. Preserve that read-state model. Recently
+visited's tab/action decisions do not approve new recording, deletion or account-switch behavior.
+Saved study 14 retains accepted Posts/Comments tabs plus the source selector; Find in Saved
+inside More remains provisional after the user's general request to continue. Inbox's compact
+selector and two-line previews, and Profile's header/actions/comment context remain selected.
 [Study 11](prototypes/relaxe-exploration/navigation.html?study=11&destination=subscriptions&rev=14)
 now retains the accepted single four-category selector and visible stars, with tighter rows
 as requested. Final row density must be judged on Android; favorites grouping and list-filter
@@ -440,8 +971,8 @@ accepted, alongside the toolbar/gesture revision and current header proportions/
 HTML level. The user selected a large
 banner/description on first load/at top, collapsing to a compact header as posts scroll beneath;
 returning to top expands it again. Preserve a restored below-header position rather than force
-the banner on return. After Inbox, continue with Saved/History as small personal-surface
-reviews; retained feed layouts, create/act and settings/accounts/onboarding follow.
+the banner on return. Saved/History/Recently visited now have the selected directions recorded
+above; create/act is the active review group.
 Use the corrected Reddit terminology in DESIGN.md; search labels are Posts/Subreddits/Users,
 and opaque fixture/native identifiers remain compatible. AGENTS.md now links this vocabulary.
 Study 09b's simplified entry, compact type/scope selector, history/tools and current results
@@ -450,9 +981,12 @@ expanded search. Keyboard-on-open/focus policy is deferred to native review, alo
 Back/reopening and accessibility; it does not block the remaining HTML groups. The browser reload
 diagnostic above remains unresolved. The latest work changes HTML/JS/CSS fixtures and design/
 handoff guidance only. No native source/identity, Gradle/device run, installation or Git
-publication was performed. Native implementation remains outside this task.
+publication was performed during those earlier studies. The styling checkpoint was later pushed
+as recorded above; the user authorized the subsequent documentation/linked-study checkpoint
+on 2026-10-26. Native implementation remains
+outside this task.
 
-Chat assessment (2026-10-24): a new chat is not required for the current HTML review milestone;
+Chat assessment (2026-10-26): a new chat is not required for the current HTML review milestone;
 the branch, accepted decisions and next group remain coherent and are documented here. Keep
 this chat for the remaining small review groups. Start a separately authorized task when
 moving to native implementation or another materially different objective.

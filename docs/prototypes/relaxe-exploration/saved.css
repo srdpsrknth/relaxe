@@ -1,0 +1,23 @@
+/* Study 14: existing saved sources, separate from global Reddit Search. */
+.destination[data-saved=true]:not([hidden]){display:flex;flex-direction:column;padding:0;overflow:hidden}
+.saved-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px;border-bottom:1px solid var(--outline)}
+.saved-source{flex:1;min-width:0;display:grid;gap:2px;font-size:calc(11px * var(--scale));color:var(--secondary)}
+.saved-source select{min-height:48px;max-width:100%;width:100%;background:var(--card);color:var(--fg);border:1px solid var(--outline);border-radius:var(--control-radius);padding:8px;font-size:calc(14px * var(--scale))}
+.saved-tabs{display:flex;flex:1;min-width:0;gap:4px}.saved-tabs button{flex:1;min-width:0;padding:8px 4px;border:0;overflow-wrap:anywhere}
+.saved-controls>button{border:0}.saved-controls svg{width:24px;height:24px}
+.saved-menu{display:grid;padding:8px;border-bottom:1px solid var(--outline);background:var(--card)}.saved-menu button{text-align:start;border:0}
+.saved-filter{padding:8px 12px;display:flex;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--outline)}.saved-filter label{display:grid;gap:4px;flex:1;min-width:0;font-size:calc(11px * var(--scale));color:var(--secondary)}
+.saved-filter input{min-width:0;width:100%;min-height:48px;padding:8px;border:1px solid var(--outline);background:var(--card);color:var(--fg);border-radius:var(--control-radius);font-size:calc(15px * var(--scale))}
+.saved-help,.saved-notice{font-size:calc(12px * var(--scale));line-height:1.4;overflow-wrap:anywhere;margin:0;padding:8px 12px;color:var(--secondary)}.saved-notice:empty{display:none}
+.saved-stage{flex:1;min-height:0;overflow:hidden;position:relative}.saved-stage iframe{width:100%;height:100%;border:0;display:block}
+.saved-comments{height:100%;overflow:auto;padding:0 0 var(--shared-bar-height);font-size:calc(14px * var(--scale));line-height:1.45}
+.destination .saved-comment{margin:0;padding:0;border:0;border-radius:0;border-bottom:1px solid var(--outline)}.saved-comment>button{display:block;border:0;border-radius:0;padding:12px 16px;text-align:start;width:100%}
+.saved-comment strong,.saved-comment .saved-body{display:block;overflow-wrap:anywhere}.saved-comment strong{font-size:calc(14px * var(--scale));line-height:1.35;margin-block:4px}.saved-body{font-size:calc(13px * var(--scale));line-height:1.45}.saved-meta{font-size:calc(11px * var(--scale));line-height:1.5;color:var(--secondary);overflow-wrap:anywhere}
+.saved-empty,.saved-detail{height:100%;overflow:auto;padding:16px 16px calc(var(--shared-bar-height) + 16px)}.saved-empty h3,.saved-detail h3,.saved-detail p{overflow-wrap:anywhere}.saved-detail-actions{display:flex;gap:8px;flex-wrap:wrap}
+.saved-fixtures{margin-top:16px;border-top:1px solid var(--line);padding-top:16px}.saved-fixtures[hidden]{display:none}
+.nav-phone[data-large-text=true] .saved-source{flex-basis:100%}.nav-phone[data-large-text=true] .saved-tabs{flex-basis:calc(100% - 56px)}
+.saved-controls select:focus-visible,.saved-filter input:focus-visible{outline:3px solid var(--focus);outline-offset:-3px}
+
+.shared-shell-owner .destination[data-saved=true]{padding-bottom:0!important}
+
+.saved-fixtures label[hidden]{display:none}.history-list-title{flex:1;min-width:0;font-size:calc(13px * var(--scale));line-height:1.4;color:var(--secondary);overflow-wrap:anywhere}

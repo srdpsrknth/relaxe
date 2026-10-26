@@ -1,0 +1,5 @@
+.surface-status{border-inline-start:3px solid #80502f;padding:10px 14px;background:#fffaf2;font-size:14px;line-height:1.5;margin:20px 0 0}
+.panel-caption{min-height:120px}.panel-caption h2{font-family:Georgia,serif;font-size:30px;font-weight:400}
+.comparison-help{margin-top:20px}.layout-jumps{padding-top:8px}
+footer a{display:inline-flex;align-items:center;min-height:48px}
+@media(max-width:600px){.layout-jumps{padding-inline:12px}.panel-caption{min-height:130px}}

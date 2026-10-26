@@ -74,9 +74,9 @@ when each group becomes active; do not treat the following order as approval of 
 2. **Shell/navigation (HTML direction accepted):** toolbar, destinations/tabs/drawer,
    account/subreddit switching and search entry. Native keyboard policy, Back, insets,
    restoration and large-screen adaptation remain implementation review items.
-3. **Browse/personal surfaces (active):** subreddits, subscriptions/multireddits, search/filter lists,
+3. **Browse/personal surfaces (directions selected):** subreddits, subscriptions/multireddits, search/filter lists,
    profiles, inbox, saved/history and other retained feed layouts, in small review groups.
-4. **Create/act:** post/reply editors, formatting/attachments, action customization,
+4. **Create/act (active; six post-type proposals drafted):** post/reply editors, formatting/attachments, action customization,
    moderation/reporting, sheets/dialogs, feedback and media/share/download utilities.
 5. **Settings/accounts/onboarding and consistency:** preference organization, login/API/access,
    theme editor and account scope, then a cross-surface consistency pass.
@@ -502,7 +502,403 @@ block, report, multireddit, filter, share and layout controls are labelled route
 No API request, real follow/save, message, report or native persistence is implemented.
 Loading, missing banner, long bio, details failure with retained posts, empty contributions,
 follow unavailability/failure and Guest states are review fixtures. ROADMAP.md records actual
-verification, repairs and the remaining browser diagnostic. Continue with Inbox next.
+verification, repairs and the remaining browser diagnostic. Inbox study 13 follows below.
+
+## Inbox study 13 (2026-10-24)
+
+**Selected requirement: Boost-inspired Inbox views**, following the user's screenshot:
+All, Unread, Messages, Sent and Mentions must be reachable; tabs are not required. This
+supersedes the earlier two-visible-tabs selection. **The compact selector and two-line
+reply/message previews are now selected** at HTML design level. Revision 18 uses those five
+views plus Comment replies and Post replies, a direct Mark all read action and More.
+Open [study 13](prototypes/relaxe-exploration/navigation.html?study=13&destination=inbox&rev=18)
+through HTTP. The earlier placeholder and two-tab draft were shown before this revision.
+Action placement and exact native geometry remain consistency/implementation review work.
+
+All shows received items; Sent stays separate and names the recipient with To. Unread shows
+only unread received items and updates after a successful synthetic read. Mentions and reply
+views select their matching specimens. Each view retains its own in-document offset; account
+switching and Search/results return preserve the selected view in this fixture. These local
+arrays are not a native paging, API-filtering or persistence implementation. Native filters
+must cover the complete account-scoped listing, not only an already loaded client page.
+
+Rows show the other party, textual Unread marker and time; replies/mentions add type/subreddit,
+parent post title and a two-line body preview. Messages use the subject and displayed message
+preview. Tinted unread rows supplement the text marker. Opening shows full synthetic text with
+a labelled context/thread route. The user selected two-line previews; native Markdown bodies
+currently render without this truncation. At large text, actions wrap below
+the full-width selector. Final density remains Android review work.
+
+Mark all read remains account-wide even when viewing a subset or Sent; its label names Inbox
+scope. More contains New private message, Refresh and Back to top. Compose and Reply are
+labelled route previews that send nothing. Loading, initial failure/retry, empty, read-status
+failure, paging failure/retry and Guest account access are synthetic review states. Sent
+specimens do not acquire incoming unread state or offer Reply to the user's own message.
+The shared bottom bar and Search/results return are reused.
+
+Current source: `InboxActivity` still builds Notifications from `FetchMessage.WHERE_INBOX`
+and Messages from `WHERE_MESSAGES`; native seven-view navigation is not implemented. A
+Messages launch extra takes precedence over the restored tab. Retain account scope,
+`DISABLE_SWIPING_BETWEEN_TABS` and explicit-launch/resume precedence when extending this
+presentation. Current native resume stores the tab, not the prototype's view offsets.
+
+`InboxFragment` retains refresh and initial/page error handling. `MessageRecyclerViewAdapter`
+uses recursive unread detection, the displayed message, existing context links for inbox
+items and the private-thread activity for Messages. Preserve optimistic read rollback,
+success-only badge decrement, account-wide mark-all semantics, Markdown/link/media handling,
+deleted/subreddit parties and Room-backed user marks/tags. The simple fixture read set does
+not establish correctness for native threads or unread descendants. Guest does not receive
+signed-in Inbox content. Existing API/access/account/theme/font mechanisms remain.
+
+Source references: [Reddit message API](https://www.reddit.com/dev/api/#GET_message_where)
+documents inbox/unread/sent listings; local `FetchMessage` also exposes messages/comments
+constants and `RedditAPI.getMessages` accepts a listing path. Exact Mentions/Post replies
+endpoint and parser coverage must be verified during native implementation, without replacing
+access mechanisms or inventing unsupported moderator-mail access from the screenshot.
+
+Continue with Saved/History. Thread/editor design belongs to create/act; exact Inbox action
+placement can return in the consistency pass. ROADMAP.md records verification and limitations.
+
+## Saved study 14 and History preparation (2026-10-24)
+
+**Selected: Posts / Comments tabs plus a separate Reddit saved / Local saved source selector.**
+The user chose this over a single four-view selector. The previous Saved placeholder was shown
+before drafting [study 14](prototypes/relaxe-exploration/navigation.html?study=14&destination=saved&rev=19).
+The draft reuses the accepted compact renderer/actions/media in a separate scoped frame;
+Home’s fixtures/state remain separate. Saved comments use parent-post context before full
+comment text, following the profile pattern. This composition and final density remain review
+work. `AccountSavedThingActivity` currently has four pages, with query matching applied across
+page changes; the new grouping does not merge those content sources.
+
+More → Find in Saved currently reveals an inline filter field. Always-visible filtering is
+the pending alternative. The query carries across both tabs and sources, separately from
+bottom global Reddit Search. More also exposes Refresh, a layout route preview and the existing
+Reddit Saved posts cache-bypass fixture only in its applicable source/tab. Loading, empty,
+failure/retry, no-match and Guest specimens are included. Native full-list searching, cache
+reconciliation, comment actions and persistence are not implemented by these fixture arrays.
+Post-save fixture state is partitioned by account/source; pending synthetic actions settle
+before destroying their iframe so a failed save does not become a stale success after return.
+That is browser fixture lifecycle handling, not a proposed native request policy.
+
+Guest uses its existing device-local saved-post route, not signed-in recovered Local Saved;
+the fixture fixes its source to On this device and disables Comments. Native Guest routing
+is evidenced by `MainActivity` selecting `ReadPostType.ANONYMOUS_SAVED_POSTS` in `HistoryActivity`.
+History/Recently visited remain drawer route previews for the next small review.
+
+`LocalSaved` reconciles signed-in saved fullnames against Reddit's listing; promoted missing
+items appear in Local Saved. It is not a general offline-download switch or the Guest save
+store. Guest saves use the existing anonymous read-post mechanisms. `SavedThingSearchFilter`
+matches all whitespace-separated terms and the existing exact `/r/subreddit` form, while
+saved searching continues loading further pages. Keep query/cache/bypass behavior, action
+side effects and account boundaries; a search within Saved is distinct from global Reddit
+Search in the bottom bar. Current resume restores a selected Saved page and post-tab anchor;
+comment tabs have no equivalent feed anchor. `HistoryActivity` hosts a history post fragment
+selected by `ReadPostType`; Recently visited remains a separate surface. This inventory is
+source evidence, not approval to combine histories, change recording preferences or erase data.
+
+## History behavior review and media-entry requirement (2026-10-24)
+
+**Approved: retain Continuum's basic History model, including recording when the user taps a
+thumbnail to view media without opening post details.** Media-only entry must participate in
+the same account-scoped read/history mechanism and its existing settings, retention and clearing
+rules. This is a coverage requirement for the redesigned image, gallery, GIF and video routes;
+it does not create a separate media history or a record for every repeat visit. Preserve the
+existing recording opt-out. Merely displaying a thumbnail or preloading media is not the
+explicit viewing action described by the user. Passive autoplay and additional media-viewer
+navigation triggers have not been separately approved as new recording rules.
+
+The source already marks posts read in several thumbnail/gallery/fullscreen entry handlers,
+so this requirement includes preserving existing behavior rather than assuming all such paths
+need a new implementation. Native coverage across all redesigned routes remains to be verified.
+**Study 15: Today / Yesterday / Earlier date headings are selected.** Revision 21 retains the
+accepted compact cards, hidden post actions and shared bottom navigation. A small Added label
+distinguishes the stored History record time from the post's age; it does not claim a reliably
+updated last-visit time. Date headings group that record time. The continuous-list comparison
+remains in the workbench only. Exact density, time formatting and Android behavior still need
+native review; the browser writes no History records. More contains Refresh, Change post layout
+and a labelled History settings route preview; that extra shortcut placement remains a proposal.
+The previous Saved filter placement remains a provisional More entry, not an explicit approval.
+
+Current-source findings:
+
+- `ReadPost` stores account name, post ID, a millisecond timestamp and record type in Room.
+  Its key is account + post ID + type, so this is one read-state record per post/account,
+  not an event for every visit. Insert uses replace; a new write updates the timestamp.
+- Normal automatic paths (`PostRecyclerViewAdapter.markPostRead` and detail ViewModel
+  `tryMarkingPostAsRead`) skip posts already marked read. Consequently, reopening a known
+  read post is not a reliable last-visit timestamp update. Do not equate stored time with
+  first-read or last-visit time without defining new behavior and verifying all entry paths.
+- Account-scoped Mark Posts As Read defaults off. Opening/detail handling can mark unread
+  posts when enabled. Media-only thumbnail taps in card and compact holders, gallery taps,
+  fullscreen-video entry and configured fullscreen previews also call the guarded marking
+  helper before opening media. These paths require read handling to be enabled for that feed,
+  the master preference, and an unread post; opening the details page is not required.
+  Separate after-vote and on-scroll options also default off; the feed
+  invokes the guarded marking helper. On-scroll marking occurs on holder recycling, which
+  is not proof the user opened or read the content. Explicit read/unread actions use their
+  own stored-state path in supported feeds.
+- The default enabled history-limit target is 500, configurable down to a minimum 100 or
+  disabled. The writer prunes the oldest 100 records while above the target before insertion;
+  the configured number is not a strict count after every write. The helper also supplies
+  limits to separate Guest saved/voted/hidden record types; retain those distinctions.
+- `ReadPostDao` selects this account/type in descending stored timestamp order, 25 records
+  per page. `HistoryPostPagingSource` fetches current post data through existing Reddit info
+  calls (authenticated or Guest), with existing filtering. The local record is not a full
+  saved copy of the post, comments or media, nor an offline availability guarantee.
+- Marking a post unread deletes its READ_POSTS record. Account stored-data management can
+  delete that account's read history without deleting other accounts or Guest saved/voted/
+  hidden types. History toolbar actions currently provide Refresh and Change post layout.
+  Read appearance and automatic hiding remain separate settings using the same read state.
+- Recently visited is separate: account/type-scoped subreddit and user rows, ordered by
+  `last_visited`, with name search and separate Subreddits/Users tabs. Search history and
+  Saved are also distinct surfaces; do not combine or clear them as part of a History redesign.
+
+Source anchors: `readpost/ReadPost.java`, `ReadPostDao.java`, `ReadPostModification.java/.kt`,
+`ReadPostsUtils.java`, `settings/PostHistoryFragment.java`,
+`adapters/PostRecyclerViewAdapter.java`, `viewmodels/ViewPostDetailFragmentViewModelNew.kt`,
+`post/HistoryPostPagingSource.java`, `account/AccountStoredData.kt` and
+`recentlyvisited/RecentlyVisitedDao.kt`. These are code findings, not device verification.
+
+## Recently visited study 16 (2026-10-24)
+
+**Selected: two visible Subreddits / Users tabs.** Revision 23 replaces the initial compact
+selector proposal following the user's explicit choice. Keep Recently visited separate from
+post History, search history, Saved and Subscriptions. The shared drawer, account caption,
+bottom navigation and global Search remain present; the bar hides on downward reading and
+returns on upward reading, with existing focus/accessibility exceptions.
+
+Current proposal: compact rows show name, icon placeholder and a last-visited label, ordered
+newest first. An inline name filter applies across both tabs. Subreddit rows show Subscribe;
+user rows show Follow and a separate Save user bookmark. **The user selected keeping Subscribe,
+Follow and Save user visible.** Actions stay beside the name at normal text sizes and wrap below
+it at large text. Inline filter placement, time labels and final density remain proposals,
+not blanket approval from the tab/action choices. More currently previews Recently
+visited settings. There is no invented per-row delete or separate clear action.
+
+Source-backed contracts to preserve:
+
+- `RecordRecentlyVisited` records only after subreddit/user data has loaded, when the account's
+  separate Recently visited setting is enabled (default off). It excludes existing subscribed
+  subreddits and followed/saved users at record time; own profiles and pseudo-subreddits such
+  as All/Popular are also excluded. Preserve the special `u_` profile-feed checks.
+- The Room key is account + name + type. Replace updates `last_visited` on eligible revisits;
+  the DAO orders newest first and trims to 50 per account/type. This differs from post History's
+  automatic already-read guard. These stores must not be merged.
+- Subscribing/following/saving from an existing visited row keeps that row. Live subscription
+  tables supply its current action state. Guest uses existing local subscription/follow/save
+  helpers and content restrictions; signed-in actions retain their existing API/failure paths.
+- Name matching uses the existing account/type-scoped, case-insensitive database query. The
+  native query carries across tabs; closing its search clears it. The proposed always-visible
+  inline filter changes presentation, not the native matching or account boundary.
+- Turning the account's recording setting off also purges its Recently visited rows. No browser
+  specimen changes that setting or deletes native data. Preserve backup and account-cascade
+  behavior. The native activity closes on account switching; its dedicated resume contract
+  stores the selected tab, rather than claiming the prototype's in-memory offsets are native
+  process restoration.
+
+Source anchors: `recentlyvisited/RecordRecentlyVisited.kt`, `RecentlyVisited.kt`,
+`RecentlyVisitedDao.kt`, `activities/RecentlyVisitedActivity.java`,
+`fragments/RecentlyVisitedListingFragment.java`, `adapters/RecentlyVisitedRecyclerViewAdapter.java`
+and `settings/RecentlyVisitedPreferenceFragment.java`. These are source findings, not device
+verification. HTML fixtures cover ready/off/loading/empty/load-failure/action-failure states,
+account isolation and labelled destination/settings previews. No native recording or Reddit
+action is implemented by these synthetic arrays.
+
+## Retained feed layouts study 17 (2026-10-25)
+
+**Selected direction: four layout families, with customizable elements and positions within
+families.** Keep Card 1 and Card 2 as Large card compositions. Use the accepted refined A
+compact feed as Compact card; reject Compact 2. Card 3 is not a separate proposed layout.
+Vertical swipe and Gallery complete the set. This is a presentation decision, not a native
+preference migration or permission to discard stored layout choices. **Large card default:
+Card 1, text above preview**, selected on 2026-10-26. Card 2 remains selectable/customizable;
+**Filled is the selected Large and Compact card surface default** (2026-10-26); Settings must retain
+Filled / Outlined / Flat choices. Other defaults remain open; native preferences are unchanged.
+Large card's toolbar defaults below content, with Above retained as a setting; direct actions
+are capped to the actual width with More reserved (details under Named custom layouts).
+**Large card preview framing defaults to Fit whole media** (2026-10-26). Preserve the whole
+image or available video frame within the preview area; Square crop remains configurable.
+This selects the fixture's existing Fit default, not a change to autoplay, media access,
+content gating or the accepted fullscreen viewer. Gallery also uses Fit whole media, scaled
+to its columns, as clarified below.
+
+| Selected family | Working direction |
+| --- | --- |
+| Large card | Card 1 + Filled is the default; Card 2, Outlined and Flat remain selectable; adjustable elements, order and surface |
+| Compact card | Accepted refined A base + Filled, with hidden customizable actions; adjustable elements, thumbnail placement and surface |
+| Vertical swipe | Accepted visual-media viewer and its autoplay/control policy; media-specific controls remain a separate review |
+| Gallery | At least two columns, including phones; Fit whole media scaled to tile width; swipe-viewer entry requested, content/direction under clarification |
+
+[Family/settings preview](prototypes/relaxe-exploration/layouts-overview.html?rev=40) replaces
+the five-source comparison. Choose a family in Layout settings; its changes stay independent
+of the other previews. The first settings proposal covers filled/outlined/flat surfaces,
+metadata/title order, author/flair/age visibility, compact thumbnail left/right/hidden, large
+preview framing/actions/text excerpts and Gallery framing/columns/media-only content.
+Specific controls, ranges, other defaults, final names and settings organization remain proposals.
+This browser workbench is not an approved native Settings screen. Vertical swipe reuses the
+accepted viewer rather than introducing card controls there. Compact retains its existing
+long-press customization flow and accessible alternatives.
+
+Surface reference: [comparison](prototypes/relaxe-exploration/surfaces.html?rev=36)
+shows Filled, Outlined and Flat rows beside one another, using identical Card 1 content.
+A family selector switches all three to the accepted Compact renderer. Filled uses a tonal
+surface without a visible outline; Outlined uses the canvas color with an outline; Flat rows
+use the canvas with square outer edges and a divider. The comparison leaves visibility,
+ordering and actions fixed. Filled is selected for both Large and Compact cards. Revision 36
+applies the Compact default in the family editor, family Reset and standalone study's
+Composition default. Outlined and Flat remain selectable. Existing per-family customization
+remains available. This focused board is review scaffolding, not native Settings organization.
+
+### Named custom layouts (selected direction, 2026-10-26)
+
+Settings must offer **Save as layout** so users can keep named custom configurations based
+on the four families. The user explicitly included card size, icon visibility/position,
+feed gaps and the positions of title, preview and toolbar. Custom layouts are presentation
+presets built from these families, rather than additional renderer families. They must be
+reusable and persist natively; final library/chooser organization and account/context assignment
+still need review. Preserve existing account ownership and contextual overrides.
+
+Revision 33’s first working proposal adds named copies to the family workbench. It captures
+current controls plus card padding, feed gap, large-preview height limit and compact thumbnail
+size. Sizes remain content-driven so large text can grow. Save requires a name; duplicate
+names in a family are rejected. Applying a copy restores its presentation controls. Further
+edits make a draft; Reset restores family defaults without deleting copies. **Selected saving
+behavior (2026-10-26): always save a new named copy.** Existing saved configurations stay
+unchanged; no in-place Save changes action is offered. Renaming, deleting and picker placement
+remain separate management reviews.
+Names use text nodes, and dialog keyboard focus wraps and returns to its origin/picker.
+
+The browser library is in memory and clears on reload, as labelled. It excludes accounts,
+search, global theme and media/access policy; it establishes no native persistence or account
+boundary. Revision 34 extends the proposal with individual action visibility/order and
+above/below-content toolbar placement for Large and Compact cards. Checkboxes and Up/Down
+controls provide keyboard alternatives to dragging. More stays available and fixed last;
+hidden actions remain reachable there. Existing defaults are preserved (Large's five direct
+actions below content; Compact's four hidden actions). Compact's existing long-press menu
+and Always show setting synchronize with this editor. These controls are included in new
+named copies; editor organization and other defaults remain review proposals.
+
+**Selected toolbar rules (2026-10-26): Large card defaults to below post content; Above
+remains a setting. Cap direct actions to the number that comfortably fits the actual toolbar
+width.** Keep one row, readable counts and full touch targets; do not squeeze buttons, wrap
+them into another row or allow horizontal overflow. Reserve space for More. The revision 35
+proposal treats selected icons as a priority order: lower-priority actions beyond capacity
+stay reachable in More, and widening restores them without editing the saved order. Capacity
+uses each card's width (including multi-column cards), action/count widths and text size;
+there is no universal fixed icon count. Compact uses the same cap when its toolbar is revealed.
+The browser's 48px target floor and 4px gaps demonstrate the rule, not final Android geometry.
+If resizing removes a focused action, focus moves to More. Overflow actions retain their
+vote/save and other action behavior; fitting does not change read state or saved configurations.
+
+### Responsive columns and tablet review (selected constraint, 2026-10-26)
+
+Narrow **card feeds** must show one column. **Gallery is an explicit exception:** the user
+clarified that it must retain at least two columns, including narrow phones and large text,
+with whole-media previews scaled to tile width. This supersedes revision 34's Gallery
+single-column fallback. Wider Gallery column counts and tablet shell composition remain open.
+For card feeds, multiple columns are appropriate only when available width supports readable items, such as a sufficiently wide
+landscape phone or tablet window. Orientation or device type alone must not enable them:
+split-screen, text size and future side panes can reduce usable space. Keep the preferred
+wide-window count when temporarily showing one column; restore it when space permits.
+
+Revision 34 introduced effective versus preferred columns and a disabled card-column picker
+when only one fits. Revision 38 keeps Gallery at two columns and disables its one-column
+choice; it demonstrates staggered tiles and natural-ratio Fit previews rather than shrinking
+text/touch targets. Preview sizes include 720 × 480, 840 × 960 and 1280 × 960. The card CSS-width
+cutoffs/minimum card widths and text multiplier are provisional browser heuristics, not
+approved Android dp breakpoints or proof of native scaling. Existing portrait/landscape/
+unfolded column preferences require an explicit mapping before native changes.
+
+**Tablet presentation needs a dedicated adaptive review before native implementation.**
+Review navigation rail/sidebar versus bottom navigation, bounded reading widths, feed/detail
+panes, media and dialogs, window height/IME, split-screen/folds, selection/Back and restoration.
+No tablet shell or pane arrangement is approved; the wide feed fixture does not establish one.
+Use Android's [window-size guidance](https://developer.android.com/develop/ui/views/layout/use-window-size-classes)
+and [canonical layouts](https://developer.android.com/develop/ui/views/layout/canonical-layouts)
+as implementation references: decisions follow the current app window and preserve state
+through resizing, rather than assuming a physical tablet is always wide.
+
+### Gallery entry and swipe viewer (selected behavior, HTML proposal, 2026-10-26)
+
+The user requests Gallery → tap a post → a viewer that can move between posts by swiping.
+**Selected: media-first with a Comments action; horizontal post swiping by default, with
+Vertical selectable in Settings.** Revision 39 proposes this behavior in HTML by reusing the
+accepted media viewer; it is not a fifth feed family or a completed native horizontal layout.
+**Selected boundary: Horizontal is limited to Gallery entry for now.** The standalone feed
+remains Vertical swipe; no general Swipe-axis setting or additional feed family is selected.
+**Selected grid default: visual-media posts only, with All posts still available.** This is
+independent of the viewer's visual-only stream. Revision 40 applies this default in the family
+editor, standalone Gallery and Reset, and hides Gallery's axis control in other workbenches.
+Do not silently add it as a fifth feed family, treat two gesture axes as interchangeable, or
+confuse next-post navigation with images within one Reddit gallery post. **Selected sequence:**
+swipes follow the chosen axis through the current post's images, then advance to the next
+visual post. The proposal retraces this sequence backward, entering the previous album at
+its last image. Explicit image controls remain available; labelled Previous/Next post controls
+can jump between posts. Zoom locks paging, following the accepted viewer's existing policy.
+**Selected scope:** browse visual-media posts only, in the current filtered feed's order;
+text/link tiles open post details instead. **Selected return:** closing the viewer keeps the
+current post visible in the grid. The prototype scrolls to and focuses its media tile.
+Gallery's viewer direction is configurable, and its named browser configurations capture it;
+native setting scope/migration still needs explicit design. System Back/edge/zoom gesture
+arbitration and restoration through recreation require native review. Existing accounts,
+read/history guards, vote/save effects,
+gates, playback policy and media-page restoration remain requirements.
+
+Continuum source reference: `PostFragmentBase.getNColumns` and
+`number_of_columns_in_post_feed_preferences.xml` default Gallery to two in portrait and
+landscape. `PostFragment` uses `StaggeredGridLayoutManager`; `item_post_gallery.xml`,
+`AspectRatioGifImageView` and `PostRecyclerViewAdapter` bind aspect-ratio/center-inside previews
+unless fixed-height settings apply. The Gallery holder's tap/long-press behavior uses
+`click_to_show_media_in_gallery_layout` (default true): media tap/detail long-press, swapped
+when disabled; text posts open details. It calls guarded read marking on entry. Preserve
+`media_only_posts_in_gallery_layout` (also default true) and explicitly map the existing
+tap/long-press preference rather than silently resetting users' choices. Preserve
+the native preference and access contracts; inspecting this code is not device verification
+or evidence of native correctness for the requested cross-post horizontal viewer.
+
+Revision 28's source inventory compared `PostRecyclerViewAdapter.onCreateViewHolder` and
+`item_post_with_preview`, `item_post_card_2_*`, `item_post_card_3_*`, `item_post_compact_2*`
+and `item_post_gallery*`. The current sketches retain the shared foundation; they are not
+native pixel replicas. Gallery albums use cover entries opening the existing viewer; inline
+album paging and feed autoplay are not simulated. Explicit More buttons remain browser access.
+
+The customization philosophy applies across families, not just Compact card. Reuse existing
+Continuum preferences for context/default layouts, fixed-height previews, visibility,
+thumbnail size/side, compact toolbar, columns, Gallery policy and fonts. New controls may be
+needed, but no parallel theme/account store is approved. Before native implementation, define
+an explicit mapping for existing layout IDs and account/context overrides, including legacy
+Card 3 and Compact 2 choices; do not silently discard saved preferences or restoration state.
+API access, read/save/vote effects and media policy remain unchanged contracts.
+
+Historical primary references, researched without installing either app:
+
+- Sync's developer releases describe its view families and expanded Slides options
+  ([v22.3.3](https://www.reddit.com/r/redditsync/comments/t5yrba/)), configurable image/title
+  order ([v22.3.6](https://www.reddit.com/r/redditsync/comments/t8acw7/)), separate post/comment
+  customization ([v20 beta 27](https://www.reddit.com/r/redditsync/comments/kxlrbe/)) and
+  full-height album previews ([v22.4.20](https://www.reddit.com/r/redditsync/comments/u72362/)).
+- Boost's [official overview](https://boostforreddit.com/) describes multiple view families
+  and per-subreddit choices. Its [2017 developer notes](https://boostforreddit.com/blog/)
+  document preview placement, [1.6.0](https://boostforreddit.com/blog/2017/11/24/boost-for-reddit-1-6-0/)
+  text-preview lines, [1.10.0](https://www.reddit.com/r/BoostForReddit/comments/ec4rt6/)
+  icons/link thumbnails/thumbnail side, and
+  [1.3.1](https://boostforreddit.com/blog/2017/03/17/boost-for-reddit-1-3-1-auto-night-mode-mute-videos-autoplay-in-swipe-view-and-more/)
+  management of saved views per subreddit.
+
+These references are version-specific; they do not establish current installed behavior or
+arbitrary action reordering. Some old linked image demos were unavailable. The user has now
+selected the four-family/customization direction above, superseding the earlier proposal to
+retain every source layout as a separate option. Large card's below-content toolbar default
+and width-limited action count are selected. Filled is selected for Compact card as well.
+Gallery's two-column minimum and Fit framing are selected. Its requested viewer is media-first
+with Comments, horizontal by default and optionally vertical, with the sequence/scope/return
+rules above. Horizontal stays limited to Gallery entry, and the grid defaults to visual media
+with All posts available. These directions are sufficient to proceed to create/act; exact
+settings organization, minor layout defaults and interaction/density can return in the
+consistency pass. Tablet adaptation and native migration remain separate reviews.
+Next review: Create post entry and composer, then reply/edit/action flows and
+settings/accounts/onboarding. Native migration remains separately authorized work.
+Browser verification and remaining limitations are recorded in ROADMAP.md.
 
 ## Feed and media review decisions (2026-10-23)
 
@@ -689,6 +1085,170 @@ identity, goldens or build files changed and no Gradle/device rerun was justifie
 post-details mockup review is closed with the main-post Reply addition. Native preference
 mapping, composer integration and device refinement remain separate implementation work.
 
+### Create/act review: unified composer selected (2026-10-26)
+
+Begin with Create post. Source inventory: `PostTypeBottomSheetFragment` offers Text, Link,
+Image, Gallery, Video and Poll, routing to separate activities. `PostTextActivity` and
+`activity_post_text.xml` provide account/subreddit selection, rules, flair requirements,
+NSFW/spoiler, reply notifications, title/body, Markdown formatting/preview and image insertion.
+Submission requires a selected subreddit, nonempty title and a loaded signed-in account;
+account changes re-fetch flair requirements. Preserve existing submission/upload services,
+error handling, dirty-exit/posting-exit prompts and restored input/context. Do not infer a
+persistent post-draft library from Activity state restoration or the separate comment drafts.
+
+The user selected **one composer with a compact post-type selector**, retaining all six types
+and their capabilities. [Study 18 revision 49](prototypes/relaxe-exploration/compose.html?rev=49&type=poll)
+implements HTML proposals for all six types. The user selected **Preview beside Post in
+the top bar**; Close stays at the start. At 200% text, Preview and Post remain together on a
+second header row so labels and touch targets fit. Account,
+subreddit/Rules and type/flair remain explicit. The user selected **visible Spoiler, NSFW
+and reply-notification controls below the body**; revision 42 replaces the folded Post options
+row with a labelled, non-collapsible group. Other detailed composer placement remains proposed.
+
+The fixture supports title/body entry, selection formatting, a safe limited Markdown preview,
+required-field feedback, account/guest/flair states, simulated submission success/failure and
+dirty/posting-exit prompts. Text survives preview, type changes, Search overlays and failed
+attempts in page memory only; reload clears it. Native Activity restoration remains required;
+this does not approve or implement persistent post drafts. Flair lookup is a best-effort hint:
+loading/failure alone does not block posting; a known unmet flair requirement does.
+
+Link source inventory: `PostLinkActivity`/`activity_post_link.xml` provide URL, title,
+optional formatted body and an explicit Suggest title action alongside the shared context
+and options. Submission requires a nonempty URL, title, selected subreddit and loaded
+signed-in account; it retains the entered URL in the existing job/service extras. Preserve
+incoming link/title prefill and URL/body dirty-exit/restoration. Title lookup is separate:
+it trims/prepends HTTPS when needed for lookup, uses `TitleSuggestionUtils` for supported
+YouTube oEmbed versus bounded HTML-title reads, cancels replaced requests and handles failure.
+This is source evidence, not proof of a redesigned native route.
+
+The user selected **Title first** for Link posts. Revision 45 orders Title → URL → Suggest
+title → optional Body, superseding revision 44's URL-first proposal. It preserves the selected
+header/options. Suggestion success replaces the title
+only after pressing the action; failure retains it. Both results are synthetic, with no URL
+fetch. Pending fixture suggestions cancel on title/URL edit, type change, posting or leaving;
+this scaffolding does not establish native callback correctness. Preview shows an inert URL
+destination and the optional formatted body. Local URL validation checks presence only;
+native/server validation remains authoritative. Text and Link bodies stay separate in page
+memory while sharing title/context; discard clears both bodies and the URL. Type-switch
+retention is a proposal and adds no persistent draft model. Link's native image-upload callback
+is empty; the fixture's Link formatting does not invent an image insertion action.
+
+Image source inventory: `PostImageActivity`/`activity_post_image.xml` provide title, optional
+formatted body, an image-library choice (`image/*`), camera capture and selected-image preview/
+Select again. A selected URI is required alongside the existing title/subreddit/account/flair
+checks. Preserve shared-image intent data, URI/input/context restoration, camera permission
+and unavailable/cancel/error handling, temporary-capture cleanup and service result feedback.
+GIF detection uses MIME then the URI extension and routes through the existing video/GIF
+submission path. `SubmitPostService` owns upload/submission; no new crop/compression UI or
+upload-size promise follows from this inventory. The Image body toolbar's image-upload
+callback is empty, so this form must not invent inline image uploads.
+
+The user selected **Image before optional Body** in revision 46: Title → Image → optional
+Body, retaining the selected header and visible options. Choose image and Take photo open bundled-sample chooser/camera fixtures,
+with no device-file, camera or upload access. The selected image fits its preview without
+cropping; GIFs use a labelled static first frame. Replace and Remove remain visible. Proposed
+replacement keeps the previous attachment until a new choice is confirmed; Cancel/failure
+keeps it, while Remove clears only the selection. This differs from native Select again's
+immediate clear and remains a proposal. Optional Image body text is retained separately from
+Text/Link in page memory; type changes keep the image and discard clears every form's input.
+The camera/selection/preview errors and Retry are synthetic. Preview failure alone keeps the
+selection and does not add a posting block. Real URI grants, decoding, camera lifecycle,
+upload/GIF processing, notifications and restoration still require native verification.
+Inline Text attachments remain a separate pending review; this specimen only covers the
+single Image-post form.
+
+Gallery source inventory: `PostGalleryActivity`, `RedditGallerySubmissionRecyclerViewAdapter`,
+`PostGalleryViewModel` and the caption/URL bottom sheet provide a selection-order image grid,
+camera/library add, optional per-image caption (180 characters) and outbound URL, removal and
+an optional formatted post body. The adapter caps the list at 20 and hides the add tile there;
+the current submit check requires at least one image and a payload for every entry. Selection
+starts each upload before final posting; Add is guarded while uploading, caption editing waits
+for a payload, and pending removal is normally unavailable except when its thumbnail fails.
+Upload failure removes the corresponding entry. Stable IDs distinguish duplicate pictures and
+shifted positions. The ViewModel retains upload work/outcomes across configuration changes,
+with idempotent application rather than repeated uploads. Preserve the existing URI/camera
+cleanup, account/flair/options, restoration, media-ID payload and submission-service contracts.
+
+Revision 47 proposes Title → two-column image grid → optional Body. Each image has an Edit
+action for a labelled caption/outbound-URL dialog plus an accessible Remove action. Caption
+save/cancel and the 180-character limit are demonstrated; previews show captions, inert URL
+destinations and the formatted post body. The grid keeps selection order; no reordering UI is
+introduced by this specimen. Whole-image thumbnail framing, editor placement and action
+presentation remain proposals. The two-column composer fixture does not approve tablet UI.
+Camera/library reuse bundled samples; bench controls simulate ready, pending/completion and
+failed uploads without transferring files. The existing cap, pending guards, failure removal
+and duplicate-image identities are retained in those fixtures. Type changes/Search/failed
+posting retain Gallery input in page memory; discard clears it. Native upload ownership,
+URI grants, real account changes, callbacks, recreation and process restoration remain separate
+verification. No new cross-account attachment store or persistent draft model is established.
+
+After the user's request to continue, Gallery caption/link fields remain behind Edit as a
+provisional choice; the unanswered placement question is not blanket approval of those details.
+
+Video source inventory: `PostVideoActivity`/`activity_post_video.xml` support a selected/shared
+or camera-recorded video URI, title, optional formatted body and the shared context/options.
+The source starts playback after selection, reads the existing loop preference, uses
+`DurationAwareSeekPlayer` and the existing 10-second seek constants, pauses on stop and releases
+the player on destruction. Preserve URI/context restoration, camera permission/cancel/error
+handling and selected-account/flair checks. The service retains file-access/cache, thumbnail,
+upload/processing and final-submission feedback. Do not invent a trim/compression/size-limit
+UI or a second upload path from this inventory. The body toolbar's image-upload callback is
+empty. Activity URI restoration does not establish preserved seek position or playback state.
+
+Revision 48 proposes Title → Video → optional Body, with Choose/Record, visible Replace/Remove,
+Play/Pause, 10-second seeks, mute and a labelled keyboard-accessible position slider. Controls
+stay visible while editing, as selected by the user. This editing rule is separate from the
+accepted feed/media viewer's tap-to-reveal and roughly four-second hiding policy.
+The bundled sample attempts muted playback after selection; native mute, autoplay eligibility,
+loop, focus and lifecycle preferences remain authoritative. Replacement/capture are staged
+sample choices; cancellation keeps the current clip/position. Dialogs, Search, type changes,
+posting and page exit pause playback. Post Preview starts a separate paused player at the
+editor position and stops it on close; returning to the editor requires Play. These fixture
+choices do not approve a native resume-policy change. Preview failure keeps the selection and
+does not add a posting block. File-access and processing failures are separately simulated and
+retain input. Each form's body and the clip/position remain page-local; discard clears them.
+
+The original served sample exposed a zero-length seekable range in this browser. Revision
+48.1 loads only the bundled `garden.mp4` into one page-local object URL, reused by the editor/
+preview and revoked on non-cached page exit. This permits actual browser seeking; it is HTML
+transport scaffolding, not a native media strategy or performance result. No entered URL,
+device file, camera or upload endpoint is accessed by the fixture.
+
+Poll source inventory: `PostPollActivity`/`activity_post_poll.xml` show six option fields,
+collect nonempty strings in field order and require at least two options. Voting length is
+an integer slider from 1–7 days, default 3. The optional formatted body supports image
+insertion/capture via existing uploaded-image and rich-text paths. `PollPayload` and
+`SubmitPostService` retain selected-account/destination, flair, post options, duration, ordered
+options and submission/error handling. Native Preview currently previews the body; a combined
+poll preview is a presentation proposal. No new option-length cap, deduplication or reorder
+requirement is established by this inspection; retain server validation and feedback.
+
+Revision 49 proposes Title → optional Body → Poll options → Voting length → shared post
+options. Start with two labelled fields, Add option up to six, and show Remove when more than
+two rows exist. Removing a row preserves the remaining values/order, renumbers their labels
+and focuses a surviving field; Add focuses the new field. Empty strings are omitted from
+the ordered preview, matching native collection. Voting length uses a compact 1–7 day
+selector with the existing three-day default. These presentation details remain proposed.
+Preview includes formatted body, nonempty options and duration without voting controls.
+Submission is simulated; failure/type changes/Search preserve body/options/duration in page
+memory. Posting locks option editing, and discard resets to two empty rows/three days. Poll
+option edits and duration changes trigger the fixture's dirty-exit guard. Inline image
+insertion remains an explicit follow-up placeholder for both Text and Poll, not a removed
+native capability.
+
+Actual uploads, user-profile posting, allowed-type/rule fetching, type-change
+safeguards and full native Markdown rendering remain later review work. Synthetic rules and
+accounts establish no API, server-validation or account-switch correctness. Reuse existing
+account/API/access/submission/upload/restoration contracts when implementing natively.
+
+The user's request to continue after revision 49 leaves the two-field/Add option presentation
+provisional; it is not an explicit selection over six visible fields. Next review: inline
+image insertion for Text/Poll, retaining that Poll choice for the consistency pass. Keep Gallery caption placement
+and attachment-action details for consistency review; inline attachments and reply/edit/action
+flows remain.
+Browser interaction/large-text/theme evidence is recorded in ROADMAP.md; Android keyboard,
+TalkBack, lifecycle/restoration and performance remain unverified.
+
 ### UI review tracker
 
 This is a review inventory, not approval to redesign every surface now. Record user decisions
@@ -698,15 +1258,15 @@ account scope, accessibility and restoration requirements from ARCHITECTURE.md t
 | Area | Current decision/status | Next review |
 | --- | --- | --- |
 | Compact feed | Refined A accepted at HTML design level; cards, metadata/stat grouping, hidden toolbar and customization required | Native refinement/validation when implementation is separately authorized |
-| Other feed layouts | Existing layouts retained | Decide which need presentation changes after compact is settled |
+| Other feed layouts | Four families selected: Large card (Card 1/2 compositions), Compact card, Vertical swipe, Gallery; Compact 2 rejected; Card 3 not separate | Study 17 revision 34 adds named copies, icon/toolbar controls and adaptive columns; review remaining defaults and a dedicated tablet shell, then map legacy preferences before native work |
 | Post details and comments | Study 04 accepted for now: full post → comments, top-right −/+ branch collapse, explicit main-post Reply for top-level comments | Native preference mappings, composer integration and Android refinement; exact styling separately |
 | Vertical photo/gallery/video/GIF | A selected; autoplay; tap-revealed overlays; confirmed ~4s playing timeout; Comments goes to default details | Native gesture/timeout/accessibility/policy/restoration validation; exact styling separately |
 | Long-press/action options | Customizable actions required | Final placement, order/toggle controls, defaults, scope/persistence and accessible alternatives |
 | Shared visual foundations | A typography + B moderate rounding + C solid icons selected; reuse existing wallpaper/custom theme mechanisms through component-role mapping | Native geometry/assets, full role parity and accessibility validation remain later work |
 | Shell/navigation | Study 09b accepted at HTML design level: shell/drawer, balanced → expanded search, compact type/scope selector, history/tools and current results presentation | Keyboard-on-open deferred to native review; layout/preference mappings, insets, Back and restoration remain implementation work |
 | Subreddits/search/list surfaces | Search 09b and subreddit/shared-shell revision 12 accepted at HTML level; study 11 single list selector and visible stars selected, tighter rows requested and demonstrated | Judge final row density on Android; retain list details for consistency review and continue to Profiles |
-| Profiles/inbox/saved/history | Profile study 12 expanding header, adjacent Follow/separate Save user and parent-post context first selected; Inbox/Saved/History still route previews | Inbox messages/notifications next, then Saved/History; native profile geometry/actions/accessibility remain implementation work |
-| Creation/editing/moderation | Not styled or approved | Post/reply editors, formatting/attachments, validation, moderation/report flows |
+| Profiles/inbox/saved/history | Profile study 12 header/actions/comment context selected; Inbox study 13 compact selector and two-line previews selected; Saved tabs/source, History date headings and Recently visited two tabs/visible row actions selected | Recently visited filter/time labels remain proposals; History keeps Continuum basics with explicit media-only viewing; native geometry/actions/accessibility remain implementation work |
+| Creation/editing/moderation | Unified composer with compact six-type selector, visible Spoiler/NSFW/reply-notification controls, Preview beside Post, Title-first Link, Image-before-Body order and always-visible Video editing controls selected; study 18 revision 49 adds the browser-checked Poll proposal | Poll initial option fields, inline attachments, reply/edit and moderation/report flows; Gallery caption placement/attachment details remain provisional; native contracts retained |
 | Settings/accounts/onboarding | Review 07 has preference-row specimens; existing theme mechanism inspected, area design not reviewed | Preference organization, login/API-key/access setup, account options and theme editor in proposed group 5 |
 | Sheets/dialogs/feedback | Search entry accepted in study 09b; keyboard policy deferred to native review; other shared dialog details open | Action/confirmation menus, destructive feedback and focus in create/act group |
 | Media utilities/downloads | Existing behavior retained | Provider/external-open/share/save/download surfaces and status feedback |

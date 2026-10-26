@@ -32,7 +32,7 @@ function openSearch(owner=owners()[0],button){if(!owner)return;show();origin=but
  overlay=document.createElement('iframe');overlay.className='shared-search-frame';overlay.title='Search and results';overlay.src=url.href;owner.append(overlay);modal=true;inertBackground(owner);owner.querySelector('[data-destination="search"]')?.setAttribute('aria-expanded','true');
 }
 window.addEventListener('message',event=>{if(event.origin!==location.origin)return;
- if(event.source===document.getElementById('shell-feed')?.contentWindow&&event.data?.type==='relaxe-shell-scroll'){scrollPosition(event.source,event.data.y,event.data.intent);return}
+ if(['shell-feed','library-feed'].some(id=>event.source===document.getElementById(id)?.contentWindow)&&event.data?.type==='relaxe-shell-scroll'){scrollPosition(event.source,event.data.y,event.data.intent);return}
  if(!overlay||event.source!==overlay.contentWindow)return;const owner=overlay.closest('.shared-shell-owner');
  if(event.data?.type==='relaxe-shell-scroll'){scrollPosition(event.source,event.data.y,event.data.intent);return}
  if(event.data?.type==='relaxe-search-open'){modal=true;inertBackground(owner);owner.querySelector('[data-destination="search"]')?.setAttribute('aria-expanded','true');overlay.contentWindow.postMessage({type:'relaxe-shell-theme',tokens:themeTokens(owner),inset:owner.querySelector('.shared-shell-nav')?.offsetHeight||80},location.origin)}

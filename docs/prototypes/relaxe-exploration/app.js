@@ -24,6 +24,10 @@ const mediaPosts = posts.filter(p=>p.src);
 // Scoped header studies reuse these post/action renderers.
 if(['subreddit-study','profile-study','navigation-study'].some(key=>new URLSearchParams(location.search).has(key)))window.RelaxeFeedStudy={
  fixturePosts(){return posts.map(p=>({...p}))},
+ mediaGestureMode(){return 'preview'},
+ mediaDismissEnabled(){return true},
+ openPostDetails(id){const post=posts.find(post=>post.id===id);if(!post)return;dialogOrigin={action:post.src?'open-media':'open-post',post:id,direction:'a'};handle('gallery-details',post,'a')},
+ resetMediaFraming(){fitOverride=null;zoom=1;render()},
  savedFixtures(){return [...saved]},
  pendingFixtures(){return pending.size>0},
  settlePendingFixtures(){for(const finish of [...pendingFixtureJobs.values()])finish()},
@@ -61,7 +65,7 @@ function formatTime(seconds){if(!Number.isFinite(seconds))return '0:00';return M
 function immersiveMedia(d){
  const p=mediaPosts[mediaIndex],page=pages.get(p.id)||0,key=d.id+':'+p.id,isPlaying=playKey===key;
  let state=settings.state;if(state==='ready'&&p.gated&&!revealed.has(p.id))state='gated';if(state==='ready'&&p.unavailable)state='error';
- const fill=fitOverride===true;
+ const fill=fitOverride===null?window.RelaxeFeedStudy?.mediaFraming?.(p)==='fill':fitOverride;
  const src=p.pages?p.pages[page]:p.src;
  const content=state==='ready'?(p.type==='Video'?`<video data-key="${key}" src="assets/${src}" ${isPlaying?'autoplay':''} ${muted?'muted':''} loop playsinline preload="none" aria-label="Flower video sample"></video>`:`<img draggable="false" src="assets/${p.type==='GIF'&&!isPlaying?'earth-poster.png':src}" alt="${esc(p.type==='GIF'?'Rotating Earth visualization':p.pages&&page===0?'Sunlight falling through a green forest':'Mountain peaks in evening light')}">`):'';
  const tools=state==='ready'?`<div class="media-tools">${['Video','GIF'].includes(p.type)?btn('play',isPlaying?'Pause media':'Play media',isPlaying?'Ⅱ Pause':'▷ Play',`aria-pressed="${isPlaying}"`):btn('zoom',zoom>1?'Reset zoom':'Zoom image',zoom>1?'1× Reset':'2× Zoom')}${p.type==='Video'?btn('mute',muted?'Unmute video':'Mute video',muted?'Muted':'Sound on'):''}${btn('fit',fill?'Fit whole media':'Fill viewport',fill?'Fit':'Fill')}${p.pages?btn('gallery-prev','Previous gallery image','←',page===0?'disabled':'')+`<span>${page+1}/2</span>`+btn('gallery-next','Next gallery image','→',page===1?'disabled':''):''}</div>${p.type==='Video'?'<div class="media-seek"><label class="seek-label" for="media-seek-a">Seek video</label><input id="media-seek-a" type="range" min="0" max="1000" value="0" aria-label="Seek video"><output class="playback-time" aria-live="off">0:00 / 0:00</output></div>':''}`:'';
@@ -74,7 +78,9 @@ const toolbarChoices=[
  {id:'external',label:'Open externally',icon:'↗'},
  {id:'save',label:'Save / unsave',icon:'◇'},
  {id:'share-post',label:'Share',icon:'⇧'},
- {id:'copy-link',label:'Copy link',icon:'⧉'}
+ {id:'copy-link',label:'Copy link',icon:'⧉'},
+ {id:'author',label:'User',icon:'u/'},
+ {id:'subreddit',label:'Subreddit',icon:'r/'}
 ];
 const defaultToolbar=['vote-up','vote-down','post-details','external'];
 let toolbarOrder=[...defaultToolbar];
@@ -186,7 +192,7 @@ function measure(){
   $('#measure-'+d.id).innerHTML=`<strong>${full}</strong> complete rows · ${Math.round(box.height)}px feed viewport<br>Median ${isRefined()?'card body':'row'} ${median}px · ${settings.width} × ${{360:800,390:844,600:960,720:480,840:960,1280:960}[settings.width]} · text ${settings.text*100}%`;
  }
 }
-function setMedia(index){mediaIndex=Math.max(0,Math.min(mediaPosts.length-1,index));zoom=1;playKey=null;manualPaused=null;playbackSuspended=false;mediaNotice='';mediaControlsVisible=false;mediaSeeking=false;render()}
+function setMedia(index){if(window.RelaxeFeedStudy?.mediaFraming?.(mediaPosts[Math.max(0,Math.min(mediaPosts.length-1,index))]))fitOverride=null;mediaIndex=Math.max(0,Math.min(mediaPosts.length-1,index));zoom=1;playKey=null;manualPaused=null;playbackSuspended=false;mediaNotice='';mediaControlsVisible=false;mediaSeeking=false;render()}
 function stepGalleryViewer(delta){
  if(zoom!==1)return;
  const post=mediaPosts[mediaIndex],page=pages.get(post.id)||0,nextPage=page+delta;
@@ -238,13 +244,15 @@ function handle(action,p,d,choice){
  if(action==='toggle-controls')setMediaControls(!mediaControlsVisible);
  else if(action==='hide-controls')setMediaControls(false);
  else if(action==='open-post'&&openToolbar===p.id&&!alwaysShowToolbar){openToolbar=null;render()}
- else if(action==='open-post'||action==='post-details'){read.add(p.id);destination('Post & comments',`Existing post-details and comments destination for “${esc(p.title)}”. This is a route fixture; the accepted post-details design is study 04. Native integration must preserve account, sort and restoration.`)}
+ else if(action==='open-post'||action==='post-details'||action==='gallery-details'){read.add(p.id);destination('Post & comments',`Existing post-details and comments destination for “${esc(p.title)}”. This is a route fixture; the accepted post-details design is study 04. Native integration must preserve account, sort and restoration.`)}
  else if(action==='more-row')showRowMenu(p);
  else if(action==='configure-toolbar')configureToolbar();
  else if(action==='toolbar-defaults'){toolbarOrder=[...defaultToolbar];alwaysShowToolbar=false;configureToolbar()}
  else if(action==='toolbar-up'||action==='toolbar-down'){const i=toolbarOrder.indexOf(choice),j=i+(action==='toolbar-up'?-1:1);if(i>=0&&j>=0&&j<toolbarOrder.length){[toolbarOrder[i],toolbarOrder[j]]=[toolbarOrder[j],toolbarOrder[i]];configureToolbar();$('#sheet-content').querySelector(`[data-choice="${choice}"][data-action="${action}"]`)?.focus()}}
  else if(action==='external')destination('Open in external browser','Destination preview: the original outbound link, with the Reddit permalink for a text post. Production should reuse the existing external-open route. This sample does not launch a browser.');
  else if(action==='go-community')destination('Go to subreddit',`Subreddit destination: ${esc(p.sub.replace(/^r\//,''))}.`);
+ else if(action==='author')destination('Open profile',`Profile destination: u/${esc(p.author)}.`);
+ else if(action==='subreddit')destination('Open subreddit',`Subreddit destination: ${esc(p.sub)}.`);
  else if(action==='about-author')destination('About username',`Author destination: ${esc(p.author)}.`);
  else if(action==='mark-unread'){read.delete(p.id);destination('Marked unread','Read state was cleared for this local fixture only.')}
  else if(['hide-post','report-post','mute-community','share-post','copy-link'].includes(action))destination({'hide-post':'Hide post','report-post':'Report post','mute-community':'Mute subreddit','share-post':'Share post','copy-link':'Copy link'}[action],'Preview of the existing upstream action. No account changes, report, clipboard write or sharing occurs in this design study.');
@@ -260,7 +268,7 @@ function handle(action,p,d,choice){
  else if(action==='play'){const key=d+':'+p.id;if(isRefined()){manualPaused=playKey===key?key:null;playbackSuspended=false;mediaNotice=''}playKey=playKey===key?null:key;render()}
  else if(action==='mute'){muted=!muted;render()}
  else if(action==='zoom'){zoom=zoom===1?2:1;render()}
- else if(action==='fit'){fitOverride=!(fitOverride===null?d==='c':fitOverride);zoom=1;render()}
+ else if(action==='fit'){fitOverride=!(fitOverride===null?(isRefined()?window.RelaxeFeedStudy?.mediaFraming?.(p)==='fill':d==='c'):fitOverride);zoom=1;render()}
  else if(action==='retry'){if(p?.unavailable){info('Retry fixture','This original-media fixture remains unavailable. In the app, retry must keep the current post and offer provider/open externally when already supported.')}else{settings.state='ready';$('#state').value='ready';render()}}
  else if(action==='reveal'){if(p)revealed.add(p.id);settings.state='ready';$('#state').value='ready';render()}
  else if(action==='saved')info('Saved posts',saved.size?posts.filter(x=>saved.has(x.id)).map(x=>esc(x.title)).join('<br><br>'):'No saved fixture posts yet.');
@@ -291,7 +299,7 @@ document.addEventListener('keydown',e=>{
  if($('#sheet').open)return;
  if(isRefined()&&settings.surface==='media'&&e.key==='Escape'){e.preventDefault();if(zoom>1){zoom=1;render()}else if(mediaControlsVisible)setMediaControls(false);else handle('exit-media',mediaPosts[mediaIndex],'a');return}
  if(e.key==='Escape'&&openToolbar){openToolbar=null;render();return}
- if((e.key==='F10'&&e.shiftKey)||e.key==='ContextMenu'){const row=e.target.closest('[data-longpress]');if(row){e.preventDefault();toggleToolbar(row.dataset.post);return}}
+ if((e.key==='F10'&&e.shiftKey)||e.key==='ContextMenu'){const row=e.target.closest('[data-longpress]');if(row){e.preventDefault();triggerLongPress(row.dataset.post);return}}
  if(settings.surface!=='media'||(['SELECT','INPUT','BUTTON'].includes(e.target.tagName)&&!e.target.matches('.tap-catcher')))return;const navigation=mediaNavigation(),a=navigation?(navigation.axis==='horizontal'?{ArrowRight:'viewer-next',ArrowLeft:'viewer-previous'}:{ArrowDown:'viewer-next',ArrowUp:'viewer-previous'})[e.key]:{ArrowDown:'next',ArrowUp:'previous',ArrowLeft:'gallery-prev',ArrowRight:'gallery-next'}[e.key];if(a){e.preventDefault();handle(a,mediaPosts[mediaIndex],'a')}
 });
 document.addEventListener('pointerdown',e=>{inputModality='pointer';if(e.target.closest('.immersive')){mediaPointerActive=true;clearTimeout(mediaHideTimer)}});
@@ -312,17 +320,19 @@ function bindMediaChrome(){
  }
 }
 function toggleToolbar(id){openToolbar=openToolbar===id?null:id;render()}
+function triggerLongPress(id){if(window.RelaxeFeedStudy?.longPress?.(id))return;toggleToolbar(id)}
 function bindLongPress(){
  document.querySelectorAll('[data-longpress]').forEach(row=>{
-  let timer=null,origin=null;
+  let timer=null,origin=null,moved=false;
   const cancel=()=>{clearTimeout(timer);timer=null;origin=null};
   row.addEventListener('pointerdown',e=>{
    if(e.button!==0||!e.isPrimary||e.target.closest('.row-toolbar'))return;
-   origin={x:e.clientX,y:e.clientY};timer=setTimeout(()=>{suppressClickUntil=Date.now()+500;toggleToolbar(row.dataset.post)},550);
+   moved=false;origin={x:e.clientX,y:e.clientY};timer=setTimeout(()=>{suppressClickUntil=Date.now()+500;triggerLongPress(row.dataset.post)},550);
   });
-  row.addEventListener('pointermove',e=>{if(origin&&Math.hypot(e.clientX-origin.x,e.clientY-origin.y)>8)cancel()});
-  for(const event of ['pointerup','pointercancel','pointerleave'])row.addEventListener(event,cancel);
-  row.addEventListener('contextmenu',e=>{e.preventDefault();cancel();if(Date.now()>suppressClickUntil)toggleToolbar(row.dataset.post)});
+  row.addEventListener('pointermove',e=>{if(origin&&Math.hypot(e.clientX-origin.x,e.clientY-origin.y)>8){moved=true;cancel()}});
+  row.addEventListener('pointerup',()=>{if(moved&&row.classList.contains('layout-gallery'))suppressClickUntil=Date.now()+500;cancel()});
+  for(const event of ['pointercancel','pointerleave'])row.addEventListener(event,()=>{if(origin)moved=true;cancel()});
+  row.addEventListener('contextmenu',e=>{e.preventDefault();cancel();if(Date.now()>suppressClickUntil)triggerLongPress(row.dataset.post)});
  });
 }
 document.addEventListener('click',e=>{if(Date.now()<suppressClickUntil&&e.target.closest('[data-longpress]')&&!e.target.closest('.row-toolbar')){e.preventDefault();e.stopImmediatePropagation();suppressClickUntil=0}},true);
@@ -332,7 +342,7 @@ function bindGestures(){
   let origin=null;
   el.addEventListener('pointerdown',e=>{if(e.target.tagName==='VIDEO'||!e.isPrimary)return;origin={x:e.clientX,y:e.clientY,id:e.pointerId};(e.target.matches('.tap-catcher')?e.target:el).setPointerCapture(e.pointerId)});
   el.addEventListener('pointercancel',()=>origin=null);
-  el.addEventListener('pointerup',e=>{if(!origin||origin.id!==e.pointerId)return;const dx=e.clientX-origin.x,dy=e.clientY-origin.y;origin=null;if(Math.max(Math.abs(dx),Math.abs(dy))>=8)suppressMediaClickUntil=Date.now()+350;if(zoom>1)return;if(Math.max(Math.abs(dx),Math.abs(dy))<48)return;const p=mediaPosts[mediaIndex],navigation=mediaNavigation();if(navigation){const along=navigation.axis==='horizontal'?dx:dy,across=navigation.axis==='horizontal'?dy:dx;if(Math.abs(along)>Math.abs(across)*1.3)handle(along<0?'viewer-next':'viewer-previous',p,el.dataset.gesture);return}if(Math.abs(dy)>Math.abs(dx)*1.3)handle(dy<0?'next':'previous',p,el.dataset.gesture);else if(Math.abs(dx)>Math.abs(dy)*1.3&&p.pages)handle(dx<0?'gallery-next':'gallery-prev',p,el.dataset.gesture)});
+  el.addEventListener('pointerup',e=>{if(!origin||origin.id!==e.pointerId)return;const dx=e.clientX-origin.x,dy=e.clientY-origin.y;origin=null;if(Math.max(Math.abs(dx),Math.abs(dy))>=8)suppressMediaClickUntil=Date.now()+350;if(zoom>1)return;if(Math.max(Math.abs(dx),Math.abs(dy))<48)return;const p=mediaPosts[mediaIndex],navigation=mediaNavigation(),mode=window.RelaxeFeedStudy?.mediaGestureMode?.()||'vertical';if(mode!=='vertical'&&dy>=48&&Math.abs(dy)>Math.abs(dx)*1.3&&window.RelaxeFeedStudy?.mediaDismissEnabled?.()!==false){handle('exit-media',p,el.dataset.gesture);return}if(mode==='preview'){if(Math.abs(dx)>Math.abs(dy)*1.3&&p.pages)handle(dx<0?'gallery-next':'gallery-prev',p,el.dataset.gesture);return}if(navigation){const along=navigation.axis==='horizontal'?dx:dy,across=navigation.axis==='horizontal'?dy:dx;if(Math.abs(along)>Math.abs(across)*1.3)handle(along<0?'viewer-next':'viewer-previous',p,el.dataset.gesture);return}if(Math.abs(dy)>Math.abs(dx)*1.3)handle(dy<0?'next':'previous',p,el.dataset.gesture);else if(Math.abs(dx)>Math.abs(dy)*1.3&&p.pages)handle(dx<0?'gallery-next':'gallery-prev',p,el.dataset.gesture)});
  });
 }
 render();

@@ -89,3 +89,11 @@ html[data-card-study] .layout-card-actions button[hidden],html[data-card-study] 
 html[data-card-study][data-layout-kind=gallery] .scroll{grid-auto-rows:4px}
 html[data-card-study][data-layout-kind=gallery][data-preview-height=fit] .layout-card-preview{min-height:0}
 html[data-card-study][data-layout-kind=gallery][data-preview-height=fit] .layout-card-preview img{height:auto;max-height:none;object-fit:contain}
+
+/* Only the Settings live sample: outer Settings owns its header and navigation. */
+html[data-settings-feed] .nav-status,html[data-settings-feed] .shell-bar,html[data-settings-feed] #shell-nav,html[data-settings-feed] .shared-shell-nav,html[data-settings-feed] .shell-notice{display:none!important}html[data-settings-feed] #nav-phone{padding-bottom:0!important}html[data-settings-feed] .shell-content{min-height:0;flex:1}
+
+.layout-gallery-caption{display:block!important;width:100%;min-height:48px;text-align:start;background:var(--card)!important;color:var(--fg)!important;padding:8px!important;font-size:calc(14px * var(--scale))!important;line-height:1.4!important}.layout-gallery-caption span{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;overflow-wrap:anywhere}
+
+/* Gallery has no permanent More button. Details remain reachable without holding. */
+html[data-card-study] .gallery-details-shortcut{position:absolute;inset-inline-start:0;bottom:0;width:1px!important;min-width:1px!important;height:1px;min-height:1px!important;padding:0!important;overflow:hidden;clip-path:inset(50%);white-space:nowrap}html[data-card-study] .gallery-details-shortcut:focus-visible{width:100%!important;height:auto;min-height:48px!important;padding:8px!important;clip-path:none;white-space:normal;z-index:5;background:var(--card);color:var(--fg);border:2px solid var(--focus);text-align:start;overflow-wrap:anywhere}

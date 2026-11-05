@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Relaxe · Private message study 22</title>
+  <link rel="stylesheet" href="foundations.css?rev=07"><link rel="stylesheet" href="shared-shell.css?rev=11.1">
+  <link rel="stylesheet" href="compose.css?rev=50"><link rel="stylesheet" href="message.css?rev=60">
+</head>
+<body>
+<header class="bench">
+  <div class="topline"><a href="../../DESIGN.md">Relaxe for Reddit</a><span>CREATE & ACT / 22</span><span class="badge">Private message · revision 64</span></div>
+  <div class="intro"><div><p class="eyebrow">A DIRECT CONVERSATION</p><h1>One recipient.<br>Room to write.</h1></div><p>A dedicated private-message composer, using the same styling as Reply and Edit. Recipient, Subject and Message retain their existing roles. The compact Markdown toolbar is selected for the documented private-message API.</p></div>
+  <form class="controls" aria-label="Private message study controls" onsubmit="return false">
+    <label>Appearance<select id="message-appearance"><option value="light">Light</option><option value="dark">Dark</option><option value="amoled">AMOLED</option></select></label>
+    <label>Theme<select id="message-palette"><option value="blue">Wallpaper · blue fixture</option><option value="rose">Wallpaper · rose fixture</option><option value="amber">Custom · amber fixture</option><option value="stone">Neutral fallback</option></select></label>
+    <label>Text size<select id="message-scale"><option value="1">100%</option><option value="1.3">130%</option><option value="2">200%</option></select></label>
+    <label>Preview window<select id="message-width"><option value="390">390 × 844</option><option value="360">360 × 800</option><option value="600">600 × 960</option><option value="720">720 × 480 · landscape</option></select></label>
+    <label>Fixture<select id="message-fixture"><option value="ready">Ready</option><option value="send-error">Send failure</option><option value="guest">Guest</option></select></label>
+  </form>
+  <p class="small">Selected: retain Continuum’s legacy PM functionality, Markdown toolbar, Preview beside Send and Keep writing / Discard message confirmation. Defer external Chat; no new Chat client or compatibility system. Synthetic recipient/account; no real send or upload. No saved PM drafts. Live availability needs native verification.</p>
+</header>
+<main class="compose-workspace">
+  <section aria-label="Private message preview">
+    <div class="phone compose-phone" id="message-phone">
+      <div class="compose-status" aria-hidden="true">9:41 <span>92%</span></div>
+      <header class="compose-bar"><button type="button" id="message-close" aria-label="Close message composer"></button><h2>New message</h2><div class="compose-header-actions" role="group" aria-label="Message actions"><button type="button" id="message-preview" class="preview-button">Preview</button><button type="submit" form="message-form" id="message-send" class="primary">Send</button></div></header>
+      <div class="compose-scroll scroll" id="message-scroll">
+        <p class="field-help" id="message-account">From u/weekendreader</p>
+        <p class="compose-notice" id="message-notice" role="status" hidden></p>
+        <form id="message-form" novalidate>
+          <label class="writing-label" for="message-recipient">Recipient</label>
+          <input id="message-recipient" value="trailnotes" placeholder="Username" autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="message-recipient-error">
+          <p class="field-error" id="message-recipient-error" role="alert" hidden></p>
+          <label class="writing-label" for="message-subject">Subject</label>
+          <input id="message-subject" maxlength="100" placeholder="What’s it about?" aria-describedby="message-subject-count message-subject-error" autocomplete="off">
+          <p class="field-help message-count" id="message-subject-count">0 / 100</p>
+          <p class="field-error" id="message-subject-error" role="alert" hidden></p>
+          <label class="writing-label" for="message-body">Message</label>
+          <textarea id="message-body" rows="8" placeholder="Write your message…" aria-describedby="message-body-error"></textarea>
+          <div class="format-bar" id="message-tools" role="group" aria-label="Format message">
+            <button type="button" data-message-format="bold" aria-label="Bold"><strong>B</strong></button>
+            <button type="button" data-message-format="italic" aria-label="Italic"><em>I</em></button>
+            <button type="button" data-message-format="link">Link</button><button type="button" id="message-more" aria-label="More formatting options"></button>
+          </div>
+          <p class="field-error" id="message-body-error" role="alert" hidden></p>
+          <p class="field-error" id="message-error" role="alert" hidden></p>
+        </form>
+        <section id="message-closed" hidden><h3 id="message-result-title">Message composer closed</h3><p class="post-result" id="message-result" role="status"></p><button type="button" id="message-reopen">New message</button></section>
+      </div>
+      <dialog id="message-dialog" aria-labelledby="message-dialog-title"><header class="dialog-bar"><h3 id="message-dialog-title"></h3><button type="button" id="message-dialog-close" aria-label="Close dialog"></button></header><div id="message-dialog-content"></div></dialog>
+    </div>
+  </section>
+  <aside class="compose-notes">
+    <p class="eyebrow">PRIVATE MESSAGE / CONTINUUM ALIGNMENT SELECTED</p><h2>Familiar form.<br>Shared writing tools.</h2>
+    <p>Continuum opens a dedicated form, optionally prefilling the recipient from Inbox or a user route. The sending account is the active account. Recipient, Subject and Message are required; the existing subject limit is 100 characters.</p>
+    <p>The compact Markdown toolbar is selected: Bold, Italic, Link and More insert text only, without an Images or GIF picker. Reddit’s <a href="https://www.reddit.com/dev/api/#POST_api_compose">compose API</a> documents a raw Markdown body; its <a href="https://developers.reddit.com/docs/api/redditapi/models/type-aliases/SendPrivateMessageOptions">private-message model</a> confirms that format. Preview beside Send is selected; it checks formatting without submitting.</p>
+    <p>The selected direction retains Continuum’s legacy PM reading, composing and replying through its existing API. Follow reviewed upstream compatibility fixes; defer the external Chat shortcut and add no Chat client or custom compatibility/read-only system. Reddit’s <a href="https://support.reddithelp.com/hc/en-us/articles/39411701270036-How-to-use-Reddit-Chat">current messaging help</a> describes Chat and read-only PM archives, so live availability still needs native verification. Nothing in this fixture establishes a successful API send.</p>
+    <p>Native sending uses the current account’s authenticated ComposeMessage path, checks HTTP and API errors, and retains the form on failure. This fixture illustrates pending, error, retry and completion without sending anything. Input locking while pending is a proposal, not verified native behavior.</p>
+    <p>The selected confirmation says “Discard message?” and “Your unsent message will be discarded.” Keep writing preserves the recipient, subject and body. Discard message clears the unsent writing and closes the composer; dismissing the dialog preserves writing. The inspected native form exits directly; this confirmation is a later presentation change. It adds no saved-draft repository. Reply/Edit comment draft requirements do not automatically apply to private messages. <a href="message.html?rev=63&amp;scenario=unsent">Review the selected unsent-message prompt</a>.</p>
+    <p><a href="message-thread.html?rev=64">Study 23 compares the legacy PM thread presentation</a>. Native account switching, configuration/process restoration, IME, TalkBack, real Markdown rendering and network behavior remain unverified. Tablet composition remains a later review.</p>
+    <p><a href="edit-post.html?rev=59">Edit post comparison · placement open</a> · <a href="reply.html?rev=56">Reply reference</a> · <a href="navigation.html?destination=inbox&amp;rev=18">Inbox reference</a> · <a href="../../DESIGN.md">Review decisions</a></p>
+  </aside>
+</main>
+<script src="foundations-theme.js?rev=07"></script><script src="message.js?rev=62"></script><script src="shared-shell.js?rev=28"></script>
+</body></html>

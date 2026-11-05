@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="1200" viewBox="0 0 600 1200">
+  <title>A tall mountain and river illustration</title>
+  <rect width="600" height="1200" fill="#bfd5db"/>
+  <circle cx="428" cy="180" r="74" fill="#fff0c9"/>
+  <path d="M0 500 180 284 340 505 435 392 600 555V1200H0Z" fill="#7796a3"/>
+  <path d="m180 284-74 89 67-27 39 23 29-4Z" fill="#edf1e8"/>
+  <path d="M0 651 112 505 306 695 470 520 600 668V1200H0Z" fill="#486b71"/>
+  <path d="M0 830Q120 665 290 762T600 720V1200H0Z" fill="#294f4b"/>
+  <path d="M337 721C170 836 438 878 300 969S211 1106 450 1200H165C-14 1080 167 990 204 943S120 809 337 721Z" fill="#aacbd0"/>
+  <g fill="#183d39"><path d="m60 755-56 165h37l-31 70h104l-31-70h34Z"/><path d="m508 791-61 179h40l-34 77h114l-34-77h40Z"/><path d="m87 997-65 192h130Z"/></g>
+  <path d="M0 1175Q111 1110 200 1198H0ZM465 1198q70-95 135-76v78Z" fill="#153631"/>
+</svg>

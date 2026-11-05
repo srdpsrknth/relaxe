@@ -32,7 +32,7 @@ function openSearch(owner=owners()[0],button){if(!owner)return;show();origin=but
  overlay=document.createElement('iframe');overlay.className='shared-search-frame';overlay.title='Search and results';overlay.src=url.href;owner.append(overlay);modal=true;inertBackground(owner);owner.querySelector('[data-destination="search"]')?.setAttribute('aria-expanded','true');
 }
 window.addEventListener('message',event=>{if(event.origin!==location.origin)return;
- if(['shell-feed','library-feed'].some(id=>event.source===document.getElementById(id)?.contentWindow)&&event.data?.type==='relaxe-shell-scroll'){scrollPosition(event.source,event.data.y,event.data.intent);return}
+ if(['shell-feed','library-feed','compact-feed'].some(id=>event.source===document.getElementById(id)?.contentWindow)&&event.data?.type==='relaxe-shell-scroll'){if(event.source===document.getElementById('compact-feed')?.contentWindow&&document.getElementById('settings-phone')?.dataset.settingsView!=='feed')return;scrollPosition(event.source,event.data.y,event.data.intent);return}
  if(!overlay||event.source!==overlay.contentWindow)return;const owner=overlay.closest('.shared-shell-owner');
  if(event.data?.type==='relaxe-shell-scroll'){scrollPosition(event.source,event.data.y,event.data.intent);return}
  if(event.data?.type==='relaxe-search-open'){modal=true;inertBackground(owner);owner.querySelector('[data-destination="search"]')?.setAttribute('aria-expanded','true');overlay.contentWindow.postMessage({type:'relaxe-shell-theme',tokens:themeTokens(owner),inset:owner.querySelector('.shared-shell-nav')?.offsetHeight||80},location.origin)}
@@ -46,5 +46,5 @@ document.addEventListener('keydown',event=>{if(['PageDown','PageUp','ArrowDown',
 document.addEventListener('focusin',event=>{if(event.target.closest('.shared-shell-nav'))show()});
 document.addEventListener('scroll',event=>{const target=event.target;if(!target.matches?.('.scroll,.detail-scroll,.destination'))return;const intent=Date.now()<intentUntil;if(hosted||embedded){parent.postMessage({type:'relaxe-shell-scroll',y:target.scrollTop,intent},location.origin)}else scrollPosition(target,target.scrollTop,intent)},true);
 window.RelaxeShell={markup,show,openSearch,closeSearch,setInset,setContext(data){context={...context,...data}},mount};
-new MutationObserver(mount).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden']});mount();document.dispatchEvent(new Event('relaxe-shell-ready'));
+function start(){if(!document.body)return;new MutationObserver(mount).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden']});mount();document.dispatchEvent(new Event('relaxe-shell-ready'))}if(document.body)start();else document.addEventListener('DOMContentLoaded',start,{once:true});
 })();

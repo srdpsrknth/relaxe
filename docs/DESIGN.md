@@ -6,6 +6,11 @@ Approved on 2026-10-23. These are design constraints; no new visual system or la
 been implemented in the fresh fork.
 
 - **Relaxe for Reddit** is an independent presentation experience built on Continuum.
+- Product-facing names, warnings and policy links must use **Relaxe for Reddit**, not the
+  upstream brand. Relaxe needs its own privacy policy; an upstream repository/policy is not
+  a substitute. Preserve source identifiers, actual subreddit names, provenance and required
+  legal attribution. This is an HTML/product direction, not authorization for native identity
+  changes or wholesale renaming.
 - Use progressive screen replacement with shared styling across the app. The finished
   experience should be cohesive; intermediate builds may retain existing secondary screens.
 - Material You/Material 3 and relevant Expressive principles are inspiration. Exact colors,
@@ -41,9 +46,18 @@ alternatives, then approve components before broad implementation. Cover foundat
 components, loading/error/empty/selected states, and screen patterns. Do not choose an entire
 design system from a single card mockup or expand speculative settings prematurely.
 
+The user clarified that HTML studies decide hierarchy, placement, interactions and styling
+direction. Their browser controls, exact spacing and rendering are provisional. Translate
+accepted intent into refined native Android components and existing Continuum mechanisms,
+then review native density, feedback, keyboard/gestures, accessibility and adaptive layouts
+on Android; the browser appearance is not a pixel-for-pixel shipping specification.
+
 ## Whole-app styling review 07 (2026-10-23)
 
 **Foundation direction selected:** A's typography + B's moderate rounding + C's solid icons.
+**Icon review is deferred to Android implementation**, explicitly requested by the user.
+Current HTML glyphs are placeholders; exact artwork, glyph choice and sizing are not signed
+off. Keep the shared style direction, but do not spend the remaining HTML pass polishing icons.
 A and B's colors are liked, but the user wants wallpaper-dependent Material colors through
 Continuum's existing theme mechanisms, mapped to the replacement components. This supersedes
 the serif-heading exploration preference. No fixed shipping palette is selected. Preserve
@@ -755,8 +769,10 @@ Settings must offer **Save as layout** so users can keep named custom configurat
 on the four families. The user explicitly included card size, icon visibility/position,
 feed gaps and the positions of title, preview and toolbar. Custom layouts are presentation
 presets built from these families, rather than additional renderer families. They must be
-reusable and persist natively; final library/chooser organization and account/context assignment
-still need review. Preserve existing account ownership and contextual overrides.
+reusable and persist natively. Saved copies appear below the four families on Feed layouts
+(selected in study 32 revision 83). Revision 147 selects shared device-library definitions with
+independent account/context applied snapshots and management below; native mapping still needs
+implementation. Preserve existing account ownership and contextual overrides.
 
 Revision 33’s first working proposal adds named copies to the family workbench. It captures
 current controls plus card padding, feed gap, large-preview height limit and compact thumbnail
@@ -1097,7 +1113,7 @@ error handling, dirty-exit/posting-exit prompts and restored input/context. Do n
 persistent post-draft library from Activity state restoration or the separate comment drafts.
 
 The user selected **one composer with a compact post-type selector**, retaining all six types
-and their capabilities. [Study 18 revision 49](prototypes/relaxe-exploration/compose.html?rev=49&type=poll)
+and their capabilities. [Study 18 revision 50](prototypes/relaxe-exploration/compose.html?rev=50&type=text)
 implements HTML proposals for all six types. The user selected **Preview beside Post in
 the top bar**; Close stays at the start. At 200% text, Preview and Post remain together on a
 second header row so labels and touch targets fit. Account,
@@ -1232,9 +1248,37 @@ selector with the existing three-day default. These presentation details remain 
 Preview includes formatted body, nonempty options and duration without voting controls.
 Submission is simulated; failure/type changes/Search preserve body/options/duration in page
 memory. Posting locks option editing, and discard resets to two empty rows/three days. Poll
-option edits and duration changes trigger the fixture's dirty-exit guard. Inline image
-insertion remains an explicit follow-up placeholder for both Text and Poll, not a removed
-native capability.
+option edits and duration changes trigger the fixture's dirty-exit guard. Revision 49 left
+inline insertion as a placeholder; revision 50 below replaces it for Text and Poll.
+
+Inline-image source inventory: `UploadedImagesBottomSheetFragment` exposes library/camera
+selection and a reusable filename/media-key list. `Utils.uploadImageToReddit` uploads,
+records an `UploadedImage` and inserts a block at the current body selection on completion,
+with leading/trailing newlines. Camera scratch files are cleaned up on success/failure;
+picked files are not deleted. Text/Poll save the uploaded-image list in Activity state and
+reuse the existing submission/rich-text paths. `UploadedImageBlockParser` matches known media
+keys and reads captions as plain text; `RichTextJSONConverter` emits the image ID/caption.
+The upstream notice warns about formatting loss during conversion, preview limitations,
+inability to edit submitted embedded-image posts and changing accounts inside the composer.
+Preserve those constraints and verify native account/upload/lifecycle ownership separately.
+
+The user selected a visible **Images** button beside body formatting for Text/Poll, as shown
+in revision 50. This entry placement is accepted at HTML design level.
+Its manager offers Choose image, Take photo and reusable thumbnails; inserting replaces
+the selected body range with a Markdown image block. Deleting that block removes the image
+from the post while leaving it available for reuse in this composition. No server-delete,
+cross-post image library, persistent drafts or rich-text editor is introduced. Captions stay
+plain text between brackets. Only known bundled sample IDs render as images in Preview;
+unknown IDs and entered image URLs do not trigger image fetching. GIF is a static first frame.
+
+Sample pending/failure/picker/camera outcomes retain writing. A delayed result inserts only
+if the original type/account/body still match; otherwise the ready image waits in that type's
+image list for explicit insertion. Discard cancels pending work and clears both lists. The
+fixture holds Post while a sample upload is pending and fixes the account once images exist;
+these are proposed guards reflecting the upstream warning, not verified native behavior or
+approval of new account-switch/restoration rules. Revision 50.1 refreshes the manager when
+completion occurs while it is open, and keeps insertion feedback current. Manager composition
+and these guards remain proposals; the entry-placement choice does not approve those details.
 
 Actual uploads, user-profile posting, allowed-type/rule fetching, type-change
 safeguards and full native Markdown rendering remain later review work. Synthetic rules and
@@ -1242,12 +1286,3010 @@ accounts establish no API, server-validation or account-switch correctness. Reus
 account/API/access/submission/upload/restoration contracts when implementing natively.
 
 The user's request to continue after revision 49 leaves the two-field/Add option presentation
-provisional; it is not an explicit selection over six visible fields. Next review: inline
-image insertion for Text/Poll, retaining that Poll choice for the consistency pass. Keep Gallery caption placement
-and attachment-action details for consistency review; inline attachments and reply/edit/action
-flows remain.
+provisional; it is not an explicit selection over six visible fields. Reply study 19 follows
+below. Keep Poll fields, Gallery caption placement and attachment-action details for
+consistency review; reply/edit/action flows remain.
 Browser interaction/large-text/theme evidence is recorded in ROADMAP.md; Android keyboard,
 TalkBack, lifecycle/restoration and performance remain unverified.
+
+## Reply composer study 19 (2026-10-26)
+
+Source inventory: `CommentActivity`/`activity_comment.xml` provide a dedicated writing screen
+with parent title/body Markdown where supplied, account selection, body formatting, Preview,
+Send, uploaded images/camera and Giphy. Main-post replies and comment replies pass distinct
+parent fullnames/depth; comment replies also return the adapter position. Caller guards cover
+Guest, archived/locked posts and locked comments. Existing parent text-selection/copy, links,
+spoilers, comment faces and media/data policy remain native requirements. Author labels in
+the proposal need mapping from caller data; they are not established existing Intent extras.
+
+`CommentActivityViewModel` owns sending/result delivery across configuration changes and
+prevents duplicate sends. The selected account feeds the existing authenticator/`SendComment`
+path. Successful submission returns comment/parent data and deletes the reply draft; failure
+keeps input. Back while sending warns that leaving may not stop submission. Nonempty Back
+offers save/leave/cancel; leaving without saving does not delete an older draft, while empty
+Back deletes it. Global account switching finishes the native Activity.
+
+Draft limitation: the current `CommentDraft` key is parent fullname + REPLY/EDIT, without an
+account key. It stores text/time but no uploaded-image/GIF metadata. Activity state retains
+attachments separately across recreation. Do not claim account-isolated drafts, cross-exit
+attachment recovery or process-restoration correctness. Resolve those boundaries explicitly
+before native implementation; this HTML work introduces no migration or new persistence.
+
+**User-required future Reply drafts:** restore text, images and GIF selections together for
+the same account and parent post/comment. Preserve the REPLY/EDIT distinction. This supersedes
+keeping native text-only storage with a warning. The native schema and metadata lifecycle
+still require separately authorized implementation; existing source does not satisfy this
+requirement. The user also selected complete recovery for comment EDIT drafts, separately
+from Reply drafts; study 20 records that requirement.
+
+[Study 19](prototypes/relaxe-exploration/reply.html?rev=56) proposes a dedicated
+Reply/Comment screen, a compact two-line parent preview with **Expand / Collapse**, account
+selection, writing area and formatting/Images, plus Preview/Send together in the header.
+Parent context scrolls with the form. The workbench compares **Full on entry**, main-post,
+comment and long-comment targets. It preserves target identity through expansion/preview and
+guards target changes with the exit choices. This is a proposal; study 04's inline editor was
+shown as the earlier fixture and remains unchanged, not a separate approved editor strategy.
+
+The HTML demonstrates safe limited Markdown, validation, pending/failure/success feedback,
+Save draft/Leave without saving/Cancel, older-draft retention, empty-close deletion and
+success cleanup. Revision 56 stores snapshots of text, reusable sample-image metadata and the selected sample
+GIF, keyed by account + parent + REPLY in page memory; reload clears them. Search returns
+to the same reply. Revision 51.1 shows Guest explicitly and dismisses stale sending-exit
+prompts on completion. Closed-screen failure recovery is fixture behavior, not proof of
+native result delivery after leaving. Native keyboard-on-entry is present in source; the
+browser does not settle Android IME/insets/focus policy.
+
+**User-selected Reply toolbar:** keep **GIF beside Images**, with Italic available in More.
+This retains the one-row normal-text toolbar; larger text can wrap. The GIF sample flow and
+other formatting placements remain proposals apart from that selection.
+
+Revision 54 adds the Reply Images manager proposal: Choose image, Take photo and reusable
+thumbnail/filename rows that insert an image again. It follows the existing Text/Poll manager
+direction, using bundled samples only. Selecting a sample inserts its image block at the
+current selection; Preview resolves known samples with their caption/description. Removing
+the block leaves the sample available for reuse. Picker/camera/upload/processing failure
+fixtures retain text. Selection is immediate: real upload progress, timing, cancellation,
+permissions and URI ownership are not simulated or verified here.
+
+The native `UploadedImagesBottomSheetFragment` and `UploadedImagesRecyclerViewAdapter` already
+provide Choose/Take and reusable filename/key rows. **User-selected presentation: thumbnail
+and filename rows** for the reusable image list.
+`Utils.uploadImageToReddit` uploads immediately and inserts at the selection present when the
+callback completes, rather than a captured earlier selection. Preserve the existing upload/
+access path and camera scratch cleanup (never delete a user-picked file). No native behavior
+changes are made. Native rich Markdown/parent selection and real provider flow remain later.
+
+The fixture fixes the account while image descriptors exist and refuses to send unknown
+sample tokens without descriptors. These guards remain proposals. Revision 56 restores its
+bundled sample metadata with the saved writing, including the reusable list. Where account
+selection is available, the proposal guards the old account’s writing before loading the
+new account’s draft. This demonstrates the selected isolation without establishing native
+account/draft recovery or choosing the final account-switch interaction.
+
+**User-selected terminology:** use **Expand / Collapse** to reveal/hide the parent post or
+comment. Do not call this “Show context,” which implies the surrounding Reddit thread. The
+compact-versus-full parent display default remains provisional; the user corrected labels
+and requested an alternate reply style rather than selecting that default.
+
+**User-required option:** Settings must offer a separate Reply screen and an inline editor
+directly below the comment being replied to. Revision 52 adds a thread sketch with Reply on
+the main post and two comments. Clicking Reply inserts the shared editor below that target;
+surrounding comments remain. In this proposal one editor is open at a time, target changes
+offer the existing draft choices, and presentation changes keep the same writing/target.
+Close/save collapses the inline editor and returns focus to its Reply button. Success clears
+the saved draft and collapses the editor; this sketch reports a synthetic result rather than
+implementing native comment insertion. Preview/Send/Close move into the inline editor, whose
+writing area starts shorter. These detailed placements and one-editor behavior remain proposals.
+
+The workbench's Reply style selector previews the future Settings choice; it is not native
+preference storage. **User-selected default: Inline below comment**, with Separate screen
+retained as an option. Preference scope/migration remains open. The native
+source still uses `CommentActivity`; a suitable existing inline-style preference was not found
+in the inspected comments/post-details settings. Reuse existing account-scoped preference and
+reply/send/restoration mechanisms when implementing, with explicit stable target/editor state
+through RecyclerView recycling. No Android correctness/performance is established here.
+
+Revision 52.1 repairs focus after a draft-guarded target move and a narrow large-text header;
+52.2 uses a shorter initial inline writing area without changing text. Revision 53 starts
+inline without a URL override; `style=screen` still opens the separate comparison.
+
+GIF source detail: `CommentActivity.onGifSelected` retains one `GiphyGif` descriptor and inserts
+`![gif](giphy|ID|downsized)` at the current selection. `GiphyGifBlockParser` requires matching
+metadata. Do not infer support for several independently selected GIFs from the toolbar. The
+fixture likewise keeps one sample descriptor, now included in its page-memory draft snapshot.
+Provider eligibility/media policy and native restoration remain implementation work.
+
+Revision 56 supersedes revision 55’s text-only closing warning with **Save draft** and a summary
+that writing and image/GIF selections will return together. Cancel retains the active editor;
+Leave without saving keeps the older complete snapshot; empty close deletes only the current
+account/parent Reply draft. Successful submission likewise clears only that draft.
+`scenario=attachment-exit` opens a synthetic image+GIF closing example. No persistent browser
+storage, actual file/URI recovery, upload/provider request or native migration is implemented.
+
+**User-selected editing behavior:** Edit comment follows the same Reply style setting: Inline
+by default, with Separate screen available. Study 20 below begins the edit presentation review.
+Exact native spacing, feedback and gestures remain refinement work. ROADMAP.md records checks.
+
+## Edit comment study 20 (2026-10-26)
+
+[Study 20](prototypes/relaxe-exploration/edit-comment.html?rev=58) reuses the Reply writing,
+formatting, image/GIF and shell code with a distinct Edit mode. **Selected:** follow the Reply
+style setting. The first proposal opens below your comment, fixes the author, loads existing
+content, and places Preview / Save changes together. **User-selected inline presentation: keep
+the original comment visible above the editor**, with metadata and surrounding comments retained.
+Revision 58 removes the comparison control and retires the replace-body option; this adds no
+Settings preference. The original-image fixture (`media=1`)
+loads known bundled metadata into both displayed comment and editor Preview.
+
+Source: `CommentsRecyclerViewAdapterNew` supplies `EXTRA_EDIT_AND_DELETE_AVAILABLE` for the
+account’s own comment when the post exists and is neither archived nor locked. Its separate
+Reply guard also checks comment lock; the inspected Edit menu guard does not. `CommentMoreBottomSheetFragment` passes fullname, Markdown, media metadata and adapter position to the
+native `EditCommentActivity`. Other entry routes still need review; this is not proof of all
+native eligibility. Preserve Guest/account ownership and existing API/access mechanisms.
+
+`EditCommentActivity` maps original media URLs back to metadata keys, retains image/Giphy
+helpers and Preview, and submits plain Markdown or existing rich-text conversion through its
+ViewModel. Success returns parsed comment or modified-content fallback plus position and clears
+only the EDIT draft; `ViewPostDetailFragmentViewModelNew` reconciles a parsed result using
+fullname if the old position moved. Failure retains editing input. Empty or unchanged Back
+clears the edit draft; changed Back offers save/leave/cancel. Those exits are demonstrated in
+HTML. Native result/lifecycle, metadata conversion, IME and accessibility remain unverified.
+
+Proposal details: disable Save changes while unchanged or saving; reject empty submission
+without turning it into Delete; keep writing on failure; on success update the existing
+synthetic comment, mark it edited and close the editor. Closing/Cancel restores the displayed
+body without publishing changes. **User-required Edit comment drafts:** restore text, images
+and GIF selections together for the same account/comment, separately from Reply drafts. The
+HTML already demonstrates complete snapshots. Current native EDIT storage remains text-only
+and lacks an account key; native persistence/migration and metadata recovery are unimplemented.
+
+Revision 58’s `scenario=edit-draft` demonstrates the selected complete recovery with original
+image metadata plus a new sample image/GIF. This is page-memory behavior only, not evidence of
+native draft isolation or recovery. Continue to Edit post study 21, then private-message and
+action flows. Exact Android rendering remains later refinement.
+
+## Edit post study 21 (2026-10-26)
+
+[Study 21](prototypes/relaxe-exploration/edit-post.html?rev=79) now follows the selected
+**shared Reply/Edit comment style setting: Inline by default, Separate screen available**.
+The post title, subreddit and author remain fixed; Preview / Save changes share the header
+or inline action row. Inline keeps the original visible and updates that same post after
+saving. Revision 79 defaults to the original post with an Edit action; `style=screen` previews
+the other supported preference. The workbench control illustrates the shared setting, not
+native preference storage or integration. The standalone placement comparison is retired.
+
+Source: the inspected `ViewPostDetailFragmentNew` menu exposes Edit for the current author’s
+`Post.TEXT_TYPE` post; dispatch rejects a non-null media-metadata map with the existing
+cannot-edit-images message. Do not reuse comment archive/lock guards without checking each
+post entry route. `EditPostActivity` receives fullname/title/body/subreddit, displays the title
+as text and edits the body. Its two-argument `MarkdownBottomBarRecyclerViewAdapter` constructor
+disables image and Giphy entries, despite retained upload callbacks. The prototype preserves
+all eleven Markdown actions and does not expose image/GIF selection or post-type changes.
+HTML Preview is a safe limited subset; full native Markdown rendering remains separate.
+
+`EditPostActivityViewModel` owns duplicate-send/result state across configuration changes and
+submits only body text through the existing authenticated `editPostOrComment` path. It checks
+HTTP/API errors; success returns to the caller, while failure leaves writing available. The
+HTML demonstrates pending/failure/retry, same-post update, unchanged Close without a prompt,
+and changed Close with Keep editing / Discard changes. Unlike the comment editor’s exit
+condition, an emptied changed post body still prompts on Close. Leaving while saving warns
+that the update may continue. Closed-editor failure recovery is a browser illustration, not
+proof of native delivery after leaving. Preserve caller refresh/results and account switching.
+
+No saved Edit post draft is used by this inspected Activity/ViewModel flow, so the proposal
+adds no Save draft action. The complete Reply and comment EDIT draft requirements do not
+establish a post-edit draft mechanism. Native migration, eligibility across other callers,
+real API/Markdown errors, IME/insets, accessibility, restoration and performance remain later.
+
+Edit post presentation is selected. Sharing the style does not merge its eligibility, body-
+only update, attachment restrictions or discard/no-draft contract with Reply/comment editing.
+Exact Android geometry, keys/account-scoped preference mapping and native integration remain
+implementation work. Continue to Settings overview study 32; detailed form/guard/feedback
+proposals remain for consistency/native review rather than blanket approval.
+
+## Private message study 22 (2026-10-26)
+
+[Study 22](prototypes/relaxe-exploration/message.html?rev=64) proposes a dedicated New message
+form with the shared styling and bottom navigation. Recipient → Subject → Message preserves
+the native field order. The sending account is shown explicitly; recipient prefill, required
+fields and the existing 100-character subject limit are retained. This is private messaging,
+not Reddit Chat or a comment reply.
+
+**Selected by the user’s support condition:** keep compact Bold / Italic / Link / More controls
+below Message, since Reddit documents Markdown private-message bodies. Its
+[compose API](https://www.reddit.com/dev/api/#POST_api_compose) specifies raw Markdown, and its
+[SendPrivateMessageOptions](https://developers.reddit.com/docs/api/redditapi/models/type-aliases/SendPrivateMessageOptions)
+also defines the body as Markdown. Formatting changes the text being composed, not a sent
+message. The plain-entry comparison is retired. There are no Images/GIF entries.
+**Preview beside Send is selected:** it lets users check formatting without submitting, then
+returns to the same writing. The safe limited HTML preview never executes HTML or
+fetches links and is not a replacement for the native Markdown renderer.
+
+**Compatibility remains unverified:** Reddit’s
+[current Chat help](https://support.reddithelp.com/hc/en-us/articles/39411701270036-How-to-use-Reddit-Chat)
+describes direct messaging moving to Chat and old private messages as a read-only archive.
+The API documentation establishes the text format, not live sending availability for the
+existing Continuum route. Audit that capability and supported rendering before native work;
+no Chat integration or successful live send is claimed by this HTML decision.
+
+**Continuum comparison and selected product direction:** the checked-out baseline retains its
+legacy PM implementation. Native Inbox separates Notifications from Messages; PM threads use
+sent/received balloons with Markdown rendering and a bottom reply field. New message calls
+`/api/compose`, while thread Reply calls `/api/comment` for the PM fullname. These controls
+remain in source; there is no inspected Chat integration, migration, automatic read-only
+fallback or dedicated Chat shortcut. The unread badge workaround excludes dependence on the
+account-wide count that can stick on inaccessible Chat/archived items; see ARCHITECTURE.md.
+This source inspection is not a live sending/reading test.
+
+**User approved:** stay aligned with Continuum's messaging functionality while applying
+Relaxe styling. Retain legacy PM reading, composing and replying through the existing API,
+plus the selected Markdown toolbar. Follow relevant upstream compatibility fixes through
+reviewed imports. Defer the external Chat shortcut. Do not build a Chat client, a custom
+compatibility-detection/read-only system, or new messaging transport for this redesign.
+This supersedes the earlier external-shortcut recommendation and read-only PM alternatives;
+neither was selected. Live availability/rendering still needs verification during native
+work; this does not imply new automatic runtime gating. Preserve existing account, API/access,
+read/count and error handling mechanisms. The decision does not approve all remaining form
+details or saved PM drafts. Preview and the unsent-message confirmation were selected
+separately.
+
+`SendPrivateMessageActivity` obtains the active account token, optionally prefills a recipient,
+checks all three fields and calls `ComposeMessage`. That helper uses the existing authenticated
+compose API and checks HTTP/API errors. Native failure keeps the form and re-enables Send;
+success exits. The inspected Activity has no explicit saved-draft repository or custom discard
+prompt; its save-state override only calls super. This does not establish process restoration
+or account-switch correctness. Preserve the native access path and audit those contracts later.
+
+**User-selected unsent-message confirmation:** changed Close or navigation shows
+“Discard message?” with “Your unsent message will be discarded.” Keep writing returns to the
+same recipient, subject and message without losing text; Discard message clears the unsent
+writing and closes the composer. Dismissing the dialog is non-destructive. An unchanged form
+with only the original recipient prefill closes directly. This adds an exit confirmation to
+the presentation; it does not add saved PM drafts or change sending/account/API mechanisms.
+
+The browser also illustrates required-field errors/focus, pending, failure/retry, completion
+and Search returning to the same writing. Input locking while pending remains a proposal.
+Leaving while sending warns delivery may continue; that warning and browser recovery after a
+closed failure remain illustrative only. No saved private-message drafts are selected or implemented;
+the selected Reply/comment EDIT draft requirements do not implicitly extend to this flow.
+
+Next review: study 23 thread/reply presentation, retaining the selected PM writing direction
+where composition is supported. Retain sent-versus-received, read/count, account and thread identity
+contracts. Then continue action customization/reporting/moderation and media utilities before
+settings/accounts/onboarding, tablet adaptation and consistency. No native changes are made.
+
+## Legacy PM thread study 23 (2026-10-26)
+
+[Study 23](prototypes/relaxe-exploration/message-thread.html?rev=65) uses **user-selected
+received-left / sent-right bubbles**, following Continuum. Keep author/You labels and the
+same root/reply content and buffer. The stacked-row comparison is retired; it does not
+establish a native preference, and the old `presentation=rows` parameter no longer changes
+the fixture. Exact native density, geometry and keyboard behavior remain later refinement.
+
+The source baseline is `ViewPrivateMessagesActivity` and
+`PrivateMessagesDetailRecyclerViewAdapter`: passed-in root/replies, sent/received layouts,
+Markwon rendering, latest-message initial positioning and a bottom reply field. Its
+`ReplyMessage` API helper and read/count/result contracts remain unchanged targets; this is
+not a Chat transport or a native implementation. The local controller demonstrates empty
+validation/focus, Markdown/limited safe Preview, pending/failure/retry, successful append,
+Guest blocking, discard guard and shared Search returning to the same reply buffer.
+
+The thread's writing controls follow the selected PM direction: Markdown, Preview beside
+Send and unsent-message confirmation, without attachment pickers or saved PM drafts. Their
+bottom arrangement, visible timestamps, subject heading and density are proposals. Native
+per-message timestamp/copy actions are not modeled; preserve them when implementing. The
+fixture waits for an in-progress reply before leaving; that is not an approved native
+pending-exit policy. Browser appends/readiness do not establish API delivery, unread updates,
+account/process restoration or IME correctness. The independently scrolling composer at
+large text/short height is a review fixture, not an approved tablet/keyboard solution.
+
+Next review: post More actions in study 24. Remaining PM detail density, timestamps/copy and
+pending-exit/IME behavior return during consistency/native review; no new PM transport or
+saved-draft mechanism is added.
+
+## Post More actions study 24 (2026-10-26; ordering selected 2026-10-27)
+
+[Study 24](prototypes/relaxe-exploration/post-actions.html?rev=67) uses **user-selected grouped
+sections**, with **reorderable sections and reorderable actions within each section**.
+The flat comparison is retired; the old `organization=flat` parameter no longer changes it.
+Default sample headings are Post, Navigate, Share and copy, Reading and Manage; they do not
+collapse. Their names and the full action inventory remain consistency-review details.
+This does not alter the accepted hidden Compact toolbar, width cap,
+More availability or required action customization; those controls/settings mappings remain
+separate reviews. The visible More post actions button is a study trigger, not a permanent
+button on the collapsed shipping feed card.
+
+Revision 66 adds an ordering-editor proposal at `surface=order`, or via the workbench's
+Preview surface selector. Up/Down controls move a whole section or an action inside its
+section. Moves update the menu preview; Done returns to More, while Reset order restores only
+the current fixture account's defaults. Disabled boundary controls and spoken position
+announcements accompany focus-preserving moves. The user requested reordering, not cross-section
+action moves, renaming or new visibility/capability controls; those are not added.
+
+Keep the full configured order even when availability hides a row. The editor retains all
+sample actions with unavailable labels; More still applies account/post eligibility after
+ordering. An unavailable action cannot be enabled by moving it. Section/action identity uses
+stable IDs, not translated display text. Settings location, native drag/accessibility actions,
+save/reset presentation, persistent storage and future-action reconciliation remain native
+mapping/review work through existing preference mechanisms.
+
+**Selected scope:** one More section/action order per active account, shared across every
+feed layout, including saved custom layouts. Guest retains a separate order. Layout copies
+do not copy or fork More ordering. The prototype uses Guest/signed-in page-memory buffers;
+it does not establish native persistence, import/backup or account-switch restoration.
+
+Source baseline: `PostOptionsBottomSheetFragment` / `fragment_post_options_bottom_sheet` use
+labelled rows with conditional visibility. The inspected Guest branch hides Reply, Crosspost
+and Report; locked/archived posts independently hide Reply, not those other two actions.
+Report receives the subreddit and thing fullname. Native own-post notification and moderation
+actions depend on ownership/handler; media, recovery and preferences govern other rows.
+Guest hiding has a local path while authenticated hiding uses the existing API/results.
+Preserve all these boundaries, caller identity/position, read/save/filter behavior, permissions
+and rollback during later native replacement. This text-post sample is not a complete action
+inventory. Save, subreddit/author and read rows also reflect the accepted Compact More design
+and need existing helpers/caller mapping, rather than a parallel action backend.
+
+Fixture toggles for Save, Hide and read state change page memory only, separately for Guest
+and the signed-in account. Other buttons announce route previews; no API, clipboard, download,
+share or report occurs. The contained sheet demonstrates dismissal/focus return, background
+inertness, keyboard wrap, scrolling and readable labels. Native touch/drag/Back, accessibility
+services, API/account effects and performance remain unverified. Final icon assets, complete
+action inventory, Settings entry, real report/moderation and utility flows remain open.
+
+The ordering scope is selected. Next review: study 25 Report presentation below; use numbered
+choices in chat and wait before selecting a presentation.
+
+## Report presentation study 25
+
+[Study 25](prototypes/relaxe-exploration/report.html?rev=69) demonstrates the **selected
+category pills → relevant details → explicit Submit → confirmation flow in a bottom sheet**.
+The user selected the sheet for all stages. Revision 69 retires the screen comparison and its
+workbench selector; old presentation query parameters are ignored. Exact labels, category
+inventory, immediate pill advancement, sheet geometry and footer placement remain proposals.
+Native sheet expansion, gestures, Back/insets and accessibility still require implementation
+and device review through existing mechanisms.
+
+The source baseline is `ReportActivity`, `ReportReasonRecyclerViewAdapter`, `ReportReason`,
+`post/FetchRules` and `thing/ReportThing`. Four general reasons precede fetched subreddit
+rule short names. One checkbox selection spans both lists and can be cleared. General reasons
+remain available when rules fail; no free-text Other field is exposed in the inspected form.
+Preserve the exact native `site_reason`/`rule_reason`, selected-reason markers, localized
+payload strings, subreddit/thing fullname and OAuth helper. Browser labels are not payloads.
+
+Revision 68 replaces the combined list with five representative categories: Subreddit rules
+and Continuum's four general reason families. Spam demonstrates sample sub-reasons; Subreddit
+rules shows one clearable rule choice. Other categories show an explanation before Submit.
+This is not Reddit's complete current taxonomy. Spam sub-reason labels and native API mappings
+are unverified proposals; no new capability is established by the browser. No free-text Other
+input is added. The broader flow is selected, not an endorsement of all sample reasons.
+
+The fixture resets to categories on Post/Comment change and new sessions, retains the current
+step/selection across appearance/presentation changes, and provides rules-loading/empty/failure
+and synthetic submission outcomes. Back returns focus to the category and retains its detail
+if reopened; switching category clears it. Escape goes back from details, then closes from
+categories. Demo failure retains the form/reason; success shows a separate confirmation with
+Done returning to the original post. Native Back/lifecycle behavior remains unverified.
+No extra Hide/Block operation, reason, draft, network request or native state is simulated.
+This does not establish the real report endpoint's side effects; see the research below.
+Loading/empty copy and persistent inline feedback are presentation proposals; native rules
+failure currently uses a Snackbar and submit validation/results use Toasts.
+
+Guest reporting is not established by this comparison. The native post menu hides Report for
+Guest; the inspected comment Report binding is outside its signed-in edit/delete block and
+the layout does not hide it. Audit caller/access behavior before native changes rather than
+imposing the post menu's eligibility globally. Report is distinct from moderator actions.
+Native Back/insets, restoration, access/results and accessibility remain verification work.
+
+**Official Reddit flow research (2026-10-27; followed by flow selection):** the user requested
+research of the official app's category pills and follow-up steps before selecting a container.
+Reddit's [2020 inline-report announcement](https://www.reddit.com/r/modnews/comments/jr4y9n/big_update_to_the_inline_reporting_experience/)
+describes category definitions, separation of subreddit-rule versus sitewide issues, and
+post-submission confirmation. Its age makes it evidence of the flow's rationale, not an
+exact current Android screenshot. The [2024 reporting update](https://www.reddit.com/r/modnews/comments/1fpcso8/new_multicontent_reporting_experience/)
+confirms reason-specific follow-up with Spam sub-reasons, including excessive reposting.
+It also describes moderator-only multi-content reports (same user/subreddit/reason), which
+must not be implied as a general user capability. The [current post/comment help](https://support.reddithelp.com/hc/en-us/articles/360058309512-How-do-I-report-a-post-or-comment)
+confirms More → Report and separate optional blocking. Custom subreddit reports depend on
+the subreddit's setting; additional-information fields depend on the applicable report flow.
+
+The supported design model is **category → explanation/relevant follow-up → explicit submit
+→ confirmation**, with branch length varying by reason. It is not an assertion that every
+category needs exactly two screens. Exact current Android pill labels/order/geometry were
+not independently verified; the live Reddit browser page presented a human-verification
+challenge, which was not completed. No report or authenticated submission was attempted.
+
+The [public report API](https://www.reddit.com/dev/api/#POST_api_report) documents implicit
+hiding for reported links/comments. Revision 67's no-network success fixture leaves the
+post visible, but that is not an approved no-hide contract. Later native work must verify
+server behavior and caller/cache/list reconciliation without adding duplicate Hide calls.
+Public parameter names do not establish parity with every official-app category/follow-up;
+validate exact mappings/access through existing Continuum helpers before promising support.
+
+The bottom-sheet choice is recorded. Next review: study 26 deletion confirmation content
+below. Report taxonomy/payload parity, eligible routes and native effects remain later work.
+
+## Delete confirmation study 26
+
+[Study 26](prototypes/relaxe-exploration/delete.html?rev=70) uses the **selected compact
+post/comment excerpt**, together with the active account, target, warning and Cancel/Delete.
+Revision 70 retires the brief comparison and selector; old `preview=brief` links still show
+the excerpt. Excerpt length, exact warning, contained dialog presentation, initial Cancel
+focus and persistent result feedback remain proposals. Relaxe offers no deletion Undo.
+This is author deletion, separate from moderator Remove and from reporting.
+
+Inspected source: `ViewPostDetailFragmentNew` offers own-post Delete and asks Delete This
+Post/Comment + Are you sure? + Cancel/Delete. `CommentMoreBottomSheetFragment` takes caller
+edit/delete eligibility inside its signed-in/token block. Post-details ViewModel deletion
+uses `ThingDeletion.kt`, retaining fullname/token and result events. Post success closes
+details. Comment success keeps a [deleted] parent when it has replies, otherwise removes
+the comment; failure does not apply that update. Profile deletion uses `DeleteThing.java`
+with its own result handling. Preserve these caller/identity/event boundaries rather than
+assuming one visual dialog establishes complete route parity or consistent synchronization.
+
+The synthetic owner fixture can confirm a page-memory outcome; other-author/Guest fixtures
+offer no Delete action. Cancel/Escape/outside dismissal leaves content unchanged. Failure
+closes the dialog and leaves the target visible; synthetic success illustrates the inspected
+post/comment distinctions. Reset demo is a workbench control, not a product Undo. No Reddit
+request or native content is changed. Real pending/duplicate handling, result parsing,
+access/ownership, restoration, cross-screen effects and accessibility remain Android work.
+
+The compact excerpt is selected. Next review: study 27 moderator action arrangement below.
+Native deletion integration, result handling and accessibility remain later work.
+
+## Moderator actions study 27
+
+[Study 27](prototypes/relaxe-exploration/moderation.html?rev=72) uses the **selected compact
+wrapping buttons** for Approve / Remove / Mark as spam. Other actions stay labelled rows.
+Revision 71 retires the full-width comparison/selector and ignores legacy `primary` query
+parameters. Review/Post controls/Comment controls headings reuse the More grouping direction,
+but these names, exact geometry and context copy remain proposals; no moderator-specific
+ordering preference is added. Buttons must fit available width and wrap for large text.
+
+Source baseline: `PostModerationActionBottomSheetFragment.kt` has nine normal post actions;
+`CommentModerationActionBottomSheetFragment.kt` has five comment actions. Both hide Approve
+when approved and Remove/Mark as spam when removed. Post controls include sticky, lock,
+NSFW, spoiler, caller-optional Change flair and moderator distinction; comment controls
+include lock and moderator distinction. Toggle labels reflect the supplied model flags.
+Preserve separate Remove versus spam flag, current account, target fullname/position, caller
+flair suppression and existing handlers/API/results. This is not author Delete or a new
+moderator dashboard, queue or permission system.
+
+The fixture targets the active moderator's own content, with explicit state presets and
+Member/Guest/no-handler variants. Ineligible fixtures expose neither entry nor hidden action
+rows. This is an illustrative boundary, not proof of uniform native gates: post More checks
+`isCanModPost` and a valid parent handler; comment More uses `isCanModComment` with parent/
+activity launch paths, and the inspected comment sheet casts its parent handler. Audit those
+routes before native replacement; do not infer a completed fix or fine-grained permissions.
+
+Buttons announce route previews only; no approval/removal, model mutation, request or
+persistence occurs. **Confirmation is selected for Remove and Mark as spam**, showing the
+account, target and compact excerpt before the explicit action. Revision 72 retires the
+immediate comparison/selector and ignores legacy confirmation query parameters. Approve and
+other controls keep direct route previews. Confirmation identifies account, post/comment and excerpt; Cancel/Escape returns
+to the same action, while confirming dismisses and previews its route. Target/access/state
+changes cancel the pending preview; theme/size changes retain it. This is not
+a new Settings preference. Real pending/result/failure feedback, removal reasons, all native
+caller routes, restoration and accessibility remain further review/implementation work.
+
+Inspected `PostFragment`, `ViewPostDetailFragmentNew` and `CommentsListingFragment` removal
+handlers delegate directly to their ViewModels; no confirmation was found in those paths.
+The details ViewModel sends fullname + spam flag through the existing OAuth `removeThing`,
+then updates removal/approval state and publishes the matching success/failure event. The
+selected confirmation adds a design requirement before dispatch; native implementation
+remains later work. It is not existing native behavior in the inspected paths.
+Preserve distinct spam flags and success/failure/event semantics rather than treating the
+browser route announcement as a successful moderation action.
+
+Remove/Spam confirmation is selected. Author Delete retains its separate existing
+confirmation. Next: study 29 Share presentation below; real moderator result/pending and
+removal-reason integration still require later review/implementation.
+
+## Download actions study 28
+
+[Study 28](prototypes/relaxe-exploration/downloads.html?rev=73) now uses **separate download
+rows**, selected by the user for direct access to each available output. Revision 73 retires
+the one-entry/chooser comparison and ignores legacy arrangement query parameters. This is a
+Media excerpt of More; it does not add a permanent feed button or approve complete menu
+order/viewer mappings.
+
+`PostOptionsBottomSheetFragment` exposes image/video/GIF downloads by post type, a GIF video
+row only when `mp4Variant` exists, and gallery-current-item download only with a supplied
+nonnegative gallery index. Gallery Download all remains available without that index. Keep
+the same post/album scope; never substitute index zero for an unknown current item. Source
+labels the current gallery row Download image; the fixture's Download current item and count
+subtitles are wording proposals. Mixed media, provider eligibility and all caller routes need
+native verification. The photo stands in for media; there is no GIF/video playback here.
+
+The fixture includes a three-item gallery with/without current position, single image/video,
+GIF with/without a video variant and an ordinary link with no download row. Guest/signed-in
+fixtures share sample download choices. Selections only announce a route and dismiss.
+Close/Escape returns to the post; account/media changes clear the previous route and rebuild
+available actions so a stale gallery item is not retained. No request, download, permission,
+file, folder change or service job occurs.
+
+Preserve native permission/version checks and flags, configured image/GIF/video/NSFW folders,
+filenames, content/data/media policy, `DownloadMediaService` versus Reddit-video service and
+gallery-all handling. Browser choices establish neither storage correctness nor provider/
+job success. Setup/progress/failure, sharing/external-open and Android restoration/accessibility
+remain later review/implementation work.
+
+## Share actions study 29
+
+[Study 29](prototypes/relaxe-exploration/share.html?rev=74) now uses **paired Share / Copy
+buttons beneath each URL**, selected by the user. Revision 74 retires the separate-row
+comparison and its selector. The pair uses a heading and destination-specific accessible
+names; grouping/order and exact wording remain proposals. This is the post Share sheet,
+not a replacement for every comment Share/thread route or the Android system share chooser.
+
+Source: `ShareBottomSheetFragment`, `fragment_share_link_bottom_sheet.xml`, the More caller in
+`PostOptionsBottomSheetFragment`, `BaseActivity.shareLink/copyLink` and `RedditLinkUtils`.
+Keep post-link Share/Copy, media-type-labelled Share/Copy when a media URL is supplied, and
+GIF video-variant rows only when media, post object and variant are available. The inspected
+Gallery caller supplies no media URL: do not invent a current-gallery-image share URL.
+Share post as image and Share with comments require a post object. Comment sharing uses
+supplied nonempty comments or fetches with the existing Guest/OAuth account path, BEST sort
+and filter before invoking the existing screenshot helper. Preserve error handling and image
+settings; the fixture does not fetch comments or generate files.
+
+Post/media preview strings and final Share/Copy dispatch retain the existing shared-domain
+preference/helpers. The variant is displayed from its raw value in this fragment but still
+passes through the activity helper on dispatch; do not bypass that helper. Native Share uses
+ACTION_SEND text/plain and the Android chooser; Copy uses the clipboard with version-aware
+feedback/failure handling. Theme/font, account/access, provider/media/content policy and
+restoration remain contracts. No new link rewrite, backend, clipboard or export mechanism is
+implemented by the HTML study.
+
+Fixtures cover image/text/Gallery/GIF/video/link, missing media URL, link-only without a post
+object, and Guest. Sample URLs are inert text. Buttons only announce route previews, dismiss
+and restore focus. Account/content changes clear earlier route feedback; appearance/size
+changes retain the sheet. Paired controls keep the same eligible routes, wrap at large text,
+contain keyboard focus and make their underlay inert. Browser checks establish no native
+sharing, clipboard, generated-image, loading/failure, accessibility or restoration correctness.
+
+## Download setup feedback study 30
+
+[Study 30](prototypes/relaxe-exploration/download-feedback.html?rev=75) now uses the selected
+**inline missing-folder notice**, with Download locations and Dismiss. It stays beside the
+attempted action until dismissed or a fixture reset, without a timer or blocking browsing.
+Revision 75 retires the dialog comparison and its selector; old style query parameters cannot
+restore it. The Settings button remains route-only: it sets no folder and starts no job.
+Returning from future native setup requires another explicit attempt; automatic retry is not
+proposed.
+
+Current `PostOptionsBottomSheetFragment.download()` checks the configured destination,
+shows `download_location_not_set` as a short Toast and dismisses if missing. Gallery-all
+checks relevant media destinations separately; it is outside this single-location slice.
+The selected inline notice and direct Settings action require later native presentation
+work; they are not existing behavior. `DownloadLocationPreferenceFragment` already owns separate
+Images/GIFs/Videos/optional NSFW settings, ACTION_OPEN_DOCUMENT_TREE and persisted read/write
+URI grants. Reuse those mechanisms and preference scope; the account fixture does not create
+per-account folder semantics. Missing location is distinct from denied permission, revoked
+folder access, transfer failure or a completed download.
+
+The preview includes the four destination labels, Guest, themes, large text and phone/
+landscape sizes. It has no storage, Settings writes, folder picker, permission prompt,
+notification, download service, real retry or file operation. Keep native permission/version,
+media variant, destination/NSFW, naming, policy, service/result and restoration contracts.
+Existing services own job progress/notifications; their correctness is not established here.
+Settings return and all native gates, failure, lifecycle and accessibility coverage remain
+later review/implementation work.
+
+The inspected `DownloadMediaService` and `DownloadRedditVideoService` already own progress
+and result notifications, including eligible finished-file Open/Share/Delete actions. Keep
+those service/notification mechanisms for native verification rather than invent a new HTML
+download manager or imply browser route feedback is a job result. Media-service stop returns
+false for rescheduling in the inspected path. Exact result, error, partial-gallery, permission,
+retry and lifecycle behavior still require native coverage.
+
+## In-app browser study 31
+
+[Study 31](prototypes/relaxe-exploration/browser.html?rev=78) keeps **Open in browser visible
+in the toolbar**, selected by the user. Quick Copy access must now be **editable in Settings**.
+Revision 77 replaces the workbench-only comparison with Browser settings: independent Show
+Copy link button and Long-press toolbar to copy link switches. **Both switches are selected to default on**; users can change either independently. Copy link always remains in More, alongside Refresh and
+Share link; the selected external action remains visible. Large text moves toolbar actions
+to a separate row. Title/address, menu geometry and exact wording remain proposals.
+
+More → Browser settings and the workbench preview button open the same scoped-settings
+specimen. Changes apply immediately in page memory and survive panel close/reopen, theme/size
+changes and local page navigation. Signed-in and Guest buffers stay separate. Reload clears
+these fixtures; no native preferences are written. Back/Escape from settings returns to the
+action list; Close/Done exits to the initiating control. The two switches may both be off,
+with Copy still reachable in More. Pending holds are cancelled when their setting changes.
+Use the existing account-scoped preference wrappers in native work; final category placement,
+keys, persistence, migrations and import/export mapping remain for Settings implementation.
+This requirement does not approve rearranging/hiding every browser action or a new storage
+system. Open in browser's selected visible default stays unchanged.
+
+Long press targets non-button toolbar areas; buttons retain their own actions. HTML touch/pen
+hold, desktop context-click and an explicit simulation button route to the same current-URL
+Copy preview. Movement, release/cancel/leave, context change, blur and visibility loss cancel
+a pending hold; the context-click fallback suppresses a duplicate following the timed preview.
+The illustrative 600ms threshold is not an approved Android timing. Native haptics, gesture
+arbitration and TalkBack/Switch Access custom actions remain implementation/verification work.
+The More action remains a labelled keyboard-accessible alternative; no clipboard writes occur.
+
+Sources: `WebViewActivity`, `res/menu/web_view_activity.xml`, `LinkResolverActivity` and the
+existing domain helpers. Entry continues to honor the existing link handler, Custom Tabs,
+ephemeral provider and specific-browser preferences, account scope and fallbacks. This study
+does not change the default or replace system-browser/Custom Tabs UI. Open in browser keeps
+ACTION_VIEW + `applyBrowserDomain`; Share/Copy keep their distinct shared-domain helpers.
+Actions use the current URL, not just the original link. Preserve errors and saved WebView
+state. Close finishes directly; system Back first navigates page history, then exits.
+The inspected WebView sets anonymous mode on Android O+ when the current token is absent;
+this fixture is not evidence of anonymity, cookies/session isolation or provider behavior.
+
+The local article and its single next-page transition demonstrate current-URL routing and
+Back/Close distinctions only. No WebView, real website, external launch, clipboard write,
+share request or reload occurs. Account fixture changes reset its local page state; this is
+not an approved new account-switch behavior. The shared bar reuses the selected app shell;
+WebView scroll/hide integration remains native work. Theme applies to app chrome; the example
+article keeps its own colors, rather than promising arbitrary website theming. Loading/error,
+redirect/long-address handling, real Back/history/restoration, insets, accessibility and
+performance remain further review/implementation work.
+
+Both Copy defaults and Settings customization are selected. Edit post's shared Reply/Edit
+style is also selected in revision 79. The create/act direction pass can move on; detailed
+form fields, category/reason wording, guards, result feedback and native contracts remain
+provisional or unverified where documented above.
+
+## Settings overview study 32
+
+[Study 32](prototypes/relaxe-exploration/settings.html?rev=92) now keeps **brief descriptions
+beneath category titles**, selected by the user. Revision 80 retires title-only rows and their
+selector. Existing source root sections/order remain; exact labels, summaries, decoration and
+header geometry are proposals. This does not approve every Settings surface or change a
+preference.
+
+The 25 root entries map to `res/xml/main_preferences.xml` and its title resources. The
+inventoried `MainPreferenceFragment` hides Security when `BiometricManager.canAuthenticate`
+for strong biometrics/device credential is unavailable, and routes Post/Comment Filter and
+Privacy Policy separately. The fixture demonstrates only the Security visibility boundary.
+Guest/account context is synthetic. Root group labels are navigation evidence, not proof that
+every child key has a uniform storage scope; retain per-key/account wrappers and native gates.
+All API-key/access, theme/font, media, account, backup/reset and privacy mechanisms stay intact.
+
+`SettingsActivity` already provides Search settings, account-chooser integration, fragment/
+title/back-stack navigation and resume recording. Most HTML category, Search settings and Switch account buttons announce routes only.
+Revision 80 additionally illustrates the local navigation path described below. No real search index, nested native
+preference, account switch, credential, authentication, reset, import/export or storage action
+occurs. The shared app bar is reused; native scroll/insets/restoration/accessibility remain
+unverified. Customizable feed layouts/actions, shared Reply/Edit style and browser Copy
+controls must be mapped into the existing system in later detailed Settings review.
+
+### Feed layouts entry (revision 80)
+
+**Interface → Posts and Feed → Feed layouts is selected.** Revision 82 applies the exact
+section name Posts and Feed to the Interface row and child heading. Native identifiers and
+preference keys remain unchanged. Revision 81 already retired the direct-root comparison,
+retaining all 25 source root entries.
+
+This reaches the shared illustrative four-family/saved-layout destination. No second layout
+store, preference keys or applying/resetting behavior is introduced. Existing Post preferences
+and their routes/overrides must remain available, with the accepted per-account/per-feed and
+saved-layout contracts.
+
+`interface_preferences.xml` routes Posts to `PostPreferenceFragment`; `post_preferences.xml`
+already owns default normal/unfolded/link layout choices, column configuration and Compact/
+Gallery options. The accepted new families/custom saved layouts need later native mapping
+into those mechanisms. A consolidated Feed layouts child page is a proposal,
+not an existing native child page. Keep width eligibility, media/content policy, saved-copy
+semantics, per-account scope and the accepted Settings customization requirements.
+
+Interface/Posts and Feed are navigation excerpts for this path, not complete preference
+forms or proof of platform visibility. Other Interface rows, saved examples and families except Large card
+announce routes only. Revision 84 adds the focused Large card editor below. Local Back restores parent scroll and initiating-row focus; local child
+entry moves focus to its heading. Theme/size changes retain the path, while workbench account/
+authentication changes reset it. These fixture resets do not approve new native
+account-switch or restoration behavior. Native Settings search, account-scoped writes, resume,
+imports/backups, keyboard/accessibility and detailed settings remain further work.
+
+### Saved-layout management (revision 146 direction selected; revision 147 HTML workflow)
+
+Current reference: [Feed layouts](prototypes/relaxe-exploration/settings.html?rev=145&page=layouts&focus=1).
+The user selected option 1: shared device library and the common management/snapshot rules. Existing selected rules
+stand: copies below four families; Open previews; explicit Use layout; Save as layout always makes
+a new named copy; no in-place overwrite; existing dirty-exit guard. Current HTML `savedByAccount`
+and `selectedBuffers` are scaffolding, not approved reusable-definition ownership or native schema.
+
+**Selected workflow:** one reusable layout library on this device, including Guest access,
+with independent account/context appearance selections. The separate-library alternative is retired.
+The workflow below changes no API/access,
+accounts, feed ordering/filtering, read/vote/save effects, media policy or restoration.
+
+| Step | Selected screen behavior |
+| --- | --- |
+| Browse | Saved copies remain below families on Feed layouts, labelled by name and family. Show current use in the account/context being reviewed; no automatic application on row tap |
+| Open/edit | Open the copy in the existing preview/editor. Changes are an unapplied draft. Use layout applies its current appearance; Save as layout creates another named copy and does not apply it. Keep editing / Discard changes retains its accepted behavior |
+| Apply | Name the exact target: this account’s default from Settings, or the existing current-feed/context override from a contextual editor. Preserve existing precedence and other overrides; do not turn one contextual use into an account/global reset |
+| Copy semantics | Apply a snapshot, without a live link that future library operations can mutate. Keep the originating preset identity only as useful presentation provenance; later edits become a custom selection. No mutable library reference is a prerequisite for rendering/restoration |
+| Rename | Options → Rename changes only the library label; preserve identity and appearance. Validate nonempty names and existing within-family duplicate rules. No feed reapply, overwrite or scope change |
+| Delete | Options → Delete asks confirmation and explains that current appearances will be kept. Remove only the reusable copy; active account/context snapshots retain their appearance and become custom selections without a saved-copy label. Never silently fall back to a family default |
+| Isolation | Library entries contain presentation values only. Exclude credentials, account identity, sort/filter, data/autoplay/content policy and shared per-account More-section ordering. Preserve accepted family toolbar capabilities without conflating them with shared More order |
+| Failure | Failed save/rename/delete retains the library, active selections and draft, with readable retry feedback and focus return. Account switching must resolve the current editor’s dirty guard and load that account’s own selection |
+
+Shared library is recommended because the same visual recipe can be reused without rebuilding it
+for every login; per-account application still satisfies per-account setup. This is an explicit
+proposal, not an inference from the theme library. Separate libraries offer stronger separation
+of preset names and eliminate cross-account library-management effects, at the cost of repeating
+creation. No cross-account copy/import feature is implicitly added by the separate-library option.
+Neither choice adds cloud synchronization. Guest is an existing local context, not a new account.
+Backup/reset/account-removal treatment must be mapped explicitly during native persistence design;
+do not automatically purge presets or change existing removal contracts based on this proposal.
+
+**Source evidence:** `AccountScopedKeys` includes `default_post_layout`, unfolded/link defaults and
+the whole `POST_LAYOUT_SHARED_PREFERENCES_FILE`. `SharedPreferencesUtils` defines front-page,
+subreddit, multireddit, user, search and History layout keys. The fixture’s row handler loads a
+saved snapshot into the editor; Use layout separately copies it into `selectedBuffers`. Saving
+always appends a snapshot, with within-family duplicate-name checks. Example rows are route-only,
+and native reusable-library persistence, stable IDs, management and migration are not implemented.
+Existing native layout IDs/context precedence must be explicitly mapped before new preferences.
+
+Revision 147 implements [shared saved-layout management](prototypes/relaxe-exploration/settings.html?rev=147&page=layouts&focus=1)
+using `settings-layout-library.js` and the existing editor. Seeded examples now open real fixture
+snapshots. Rows have separate Open and Options targets; Options offers Rename and confirmed Delete.
+Blank/within-family duplicate names are rejected; identities are monotonic and unaffected by rename.
+Names are rendered as text. Save as layout adds a shared snapshot and leaves application separate;
+Use after saving can identify that newly saved copy. Failed operations retain data and draft.
+`layout-failure=save|rename|delete|all` simulates one failure per operation for explicit retry.
+
+Use targets the account default from normal Settings, or a synthetic current-context override from
+the feed study. `layout-context=home|subreddit|user|default` supplies labelled fixtures (Home,
+r/EarthPorn, u/ridgewalker); these are not real native routing or complete override enumeration.
+Selected snapshots remain in existing account/context/family buffers; names/provenance are separate.
+Deleting a preset clears its saved-copy provenance while keeping all applied snapshots. Inherited
+account defaults are not overwritten by a contextual Use. The contextual editor’s Saved layouts
+entry uses the existing dirty guard and sheet-return path. Returning after Use reflects the selected
+family. Account fixture changes also resolve unapplied layout edits before switching.
+
+All data is page-memory and clears on reload. Library rows are shared with Guest; account selection,
+backup/reset/removal migration and native persistence are not implemented. Existing Settings opened
+in another tab has independent fixture memory. The current module projects only family presentation
+keys; it introduces no account/data/media-policy store or native API action.
+
+**Current verification:** pure library and actual host models pass shared Guest access, snapshot
+copies/field allowlist, stable IDs, name validation, open without apply, explicit account application,
+independent account snapshots, contextual/default isolation, rename/delete preservation, guard/
+discard and management-dialog failure/retry retention. Existing adaptive Settings/embed/host and
+focus/theme models were rerun and passed. These models do not render the snapshot/controls or prove
+actual focus/bounds. Syntax/static/reference/served-byte checks are recorded in ROADMAP.md. Browser
+opening again reports local browser use disabled in Work settings. No native/Gradle/device check.
+
+### Browse finishing and new-account starting layout (selected at revision 148)
+
+The user selected option 2, including the common finishing direction: keep Find in Saved under More, revealing its
+local filter with the query retained across Posts/Comments and source changes; keep global Reddit
+Search separate. Keep Subscriptions favorites once in a leading group and remaining entries below,
+alphabetical within each, with existing visible stars and Filter this list. Keep Recently visited’s
+inline name filter across its two tabs and a clear Visited relative-time label based on its stored
+visit timestamp. Preserve recording exclusions/cap/opt-out purge and Subscribe/Follow/Save user
+owners; do not add deletion or recording controls. Exact wording/density remains native refinement.
+
+Source `AccountSavedThingActivity` filters loaded items and continued paging; Find in Saved must
+not imply Reddit server search or a new complete offline index. `post_preferences.xml` defaults
+post/unfolded layout to legacy ID 0 (Card), while theme mode defaults to 2 (system, with the existing
+older-platform behavior). The onboarding study’s Compact highlight is a fixture candidate, not
+permission to migrate returning accounts to Compact.
+
+**Selected first-use starting layout:** Large card / Card 1 / Filled, highlighted on Layout for
+genuinely new account/Guest setup. Compact is no longer the starting candidate. All four live samples
+remain selectable. Follow system mode, the accepted unified Material theme system, optional Choose
+folder / Set up later and explicit Review/Finish remain. Existing/restored accounts load actual saved
+choices; this decision does not migrate a returning account or reset contextual overrides.
+
+[Revision-148 onboarding](prototypes/relaxe-exploration/settings.html?rev=148&page=onboarding&focus=1&setup-account=newreader)
+starts fresh drafts with Large, whose existing sample defaults are Card 1/Filled. Only fresh drafts
+show the starting-layout note. Existing-account `ensureExisting` stays separate; already chosen
+draft/progress is retained. Opening setup creates no completed marker or native preference write.
+The simplified existing-account fixture does not load every real custom composition/override;
+native setup must preserve those actual values rather than infer Card 1 from the family label.
+
+The browse arrangements already exist in the HTML: Find in Saved is under More, favorites lead
+Subscriptions once, and Recently visited has its own inline filter and Visited-labelled synthetic
+times. Their exact localized elapsed/date rendering must reuse native formatting and the accepted
+time settings. This selection does not replace an account’s formatter or fabricate visit recording.
+Earlier wording calling these arrangements or Compact/Follow system starting candidates provisional
+is superseded here; exact native geometry, caps, spacing, icons and motion remain implementation
+refinement, with source values preserved unless an explicit decision above changes them.
+
+Current setup/account models pass fresh signed-in/Guest Large + system, returning Compact/Dark
+retention, unchanged chosen draft/progress, account isolation, no completion on opening, new-login
+setup/Finish, optional folder deferral and returning-account bypass. API/account guard models also
+pass. Syntax/static/reference/HTTP results and the complete handoff are in ROADMAP.md. Browser use
+remains disabled in Work settings; no rendered or native accessibility/performance claim is made.
+Whole-app styling remains in progress pending the rendered review and native preparation boundaries.
+
+### Saved layouts access (selected, revision 83)
+
+**Saved custom layouts appear below the four families on Feed layouts**, selected by the
+user. Keep Layout families and Saved layouts sections on the same page. The separate-page
+comparison and its selector are retired. The synthetic examples Quiet reading (Compact/Filled)
+and Weekend photos (Gallery/Fit) remain navigation fixtures, not loaded user data.
+Account/context assignment, active-layout selection, native library persistence and management
+remain open under Named custom layouts. An identical catalog across account fixtures does
+not establish global ownership or cross-account access.
+
+Saved examples and families other than Large card preview customization routes only. Large
+card opens the focused editor below. Neither applies a feed layout, creates or overwrites a copy. Save as layout must always create a new named copy, as
+already selected; Rename/Delete and active-layout selection remain separate reviews. Local
+Back restores the parent row and scroll. No native route, preference key or storage changes.
+
+### Layout editor preview (selected, revision 84)
+
+**Show a live preview above the controls, scrolling with the same page**, selected by the user.
+Do not pin it or require a separate Preview screen. Study 32 starts with a focused Large card
+editor using the existing selected defaults: text above media (Card 1), Filled, Fit whole media
+and toolbar below content. Composition, surface, framing and toolbar placement update a
+non-interactive sample using the existing theme tokens, bundled mountain image and icon helper.
+This is an editor-organization illustration, not a replacement feed renderer or action-capacity
+implementation; study 17 remains the fuller customization/library reference. The other families,
+action visibility/order, spacing, columns and complete family editing remain outside this focused editor.
+
+**All layout controls visible under section headings is selected (revision 85).** Keep
+Appearance and Actions headings; the expandable sections and comparison selector are retired.
+This applies to the layout editor, not every unrelated Settings category. Local Back returns to
+Feed layouts and its initiating row; unapplied changes now use the selected exit guard below. Signed-in
+and Guest buffers are separate and clear on reload. They establish no native persistence,
+account-switch behavior, native saved-library ownership or contextual assignment. Revision 87
+adds new-copy saving in page memory as described below. Native
+preferences and their existing scope, media/access policy and restoration still require mapping.
+
+### Explicit layout activation (selected, revision 86)
+
+**Editor changes affect only the preview until Use layout is tapped**, selected by the user.
+Saving a new named copy remains separate from activating a layout. The focused editor now
+shows primary Use layout and secondary Save as layout actions after the controls. This action
+placement and exact feedback are proposals, not additional accepted defaults.
+
+Use layout copies the current presentation controls into a separate selection snapshot in page memory.
+Later edits cannot mutate that snapshot; subsequent Use layout replaces it. Draft, selection
+and new-copy buffers stay isolated by the synthetic account/Guest fixture and clear on reload.
+No real feed/default/context override or Android preference is changed. Native work must map
+explicit activation to the existing scoped mechanisms. Saving remains available after Use
+layout; the prototype keeps the editor open to demonstrate it. Exact post-Use height remains
+a proposal.
+
+### Unapplied changes and independent saving (selected direction, revision 87)
+
+**Keep editing / Discard changes is selected when leaving with unapplied edits.** Keep editing
+returns focus to the initiating control without changing the draft. Discard restores the last
+applied configuration (or initial defaults before the first Use layout). Existing named copies
+are retained. No-change or already-applied exits need no discard confirmation. Sheet collapse
+is not an exit and does not discard. The fixture guards header Back, sheet Close, Escape and
+shared app-bar exits. Workbench account/authentication switches remain comparison controls,
+not a native account-switch flow; native process/system navigation still requires verification.
+
+**Use layout and Save as layout remain independent**, including saving after Use layout.
+Revision 87 adds a name dialog and always creates a new page-memory copy, never overwriting.
+Empty/duplicate names are rejected; names use text nodes, focus returns after saving/cancelling,
+and both dialogs have keyboard focus wrapping. Saved copies appear below the four families,
+reopen in the editor, and remain unchanged by later edits or Discard. Saving before Use layout
+does not activate it. This is a focused Large card browser demonstration, not the complete native
+library, account ownership, contextual assignment, backup or persistence implementation.
+
+### Contextual layout sheet (HTML direction accepted; revision 87 onward)
+
+The user proposed opening layout controls above the current feed/post details as a collapsible,
+expandable bottom sheet, so changes can be seen on the underlying page. The feed version was accepted during the subsequent scrolling/control review; the current
+[feed-only preview](prototypes/relaxe-exploration/settings.html?rev=92&page=feed&focus=1&editor=1): Change layout opens
+the same Large card controls as a non-modal sheet. While open, its synthetic feed temporarily
+shows draft appearance. Use layout keeps the fixture selection; Discard restores the baseline.
+Collapse keeps the draft and reveals more feed; Expand restores controls. The standalone
+Settings entry retains its scrolling sample. This accepted feed direction retains the Settings route; it does not approve every other
+surface's sheet design.
+
+The prototype provides explicit Expand/Collapse buttons and heading/return focus. Review-only
+focus/editor query flags hide the workbench, fit the phone to the browser height and open the
+sheet; they are not native entry/restoration contracts. Initial
+60%/expanded 92% heights, an accessibility-driven larger sheet at 200% text, action placement
+and post-Use height are provisional HTML geometry. Drag gestures, IME/insets, touch/scroll
+coordination, TalkBack, feed-anchor restoration and native performance are unverified. The
+posts are synthetic and perform no read/save/vote/media/autoplay/network actions; the feed
+itself must remain scrollable as specified below.
+Do not repurpose feed-card controls to style post details/comments by assumption.
+
+### Independent feed scrolling (required, revision 88)
+
+**The feed must remain independently scrollable while the contextual layout editor is open.**
+The earlier fixture incorrectly sized its scroll range for the full phone height, leaving
+later content obscured by the sheet. Revision 88 limits the feed viewport to the exposed space
+above the sheet, observes height/window changes and removes the hidden app-bar padding from
+that exposed region. This allows the final post to be scrolled fully above the sheet. Closing
+restores the normal feed viewport/padding. Feed and editor controls have separate labelled,
+keyboard-focusable scroll regions; wheel/touch scrolling over one should not scroll the other
+or change the sheet detent. Collapse reveals more feed without discarding. An expanded or
+large-text sheet may cover the feed entirely; its hidden region is removed from keyboard/
+accessibility focus until exposed again. Native touch arbitration and accessibility remain
+unverified.
+
+Four synthetic posts (images and text) now receive the same temporary style changes without
+rebuilding the feed on each edit. Use layout, new-copy saving, Keep editing and Discard retain
+their existing boundaries. The feed's limited browser position handling is not proof of native
+anchor restoration across card resizing, media playback, paging or process recreation.
+
+The post-details context question was deferred at this checkpoint. It is now resolved by the
+user’s revision-143 choice: Post More → Appearance edits the reader and comments; contextual feed
+editing remains separate. See “Reader Appearance” below for the selected scope and current study.
+
+### Large card information and spacing (HTML control set accepted, revision 89)
+
+The user accepted this information/spacing control set before continuing to toolbar review.
+The contextual sheet and Settings editor share ten presentation controls at this checkpoint. Six additions
+reuse the study 17 parameter direction: title versus post-info order; author, post flair and
+post age visibility; content padding; and gaps between posts. All remain visible under section
+headings. The feed updates all four samples; Settings now has image and text samples to show
+spacing. Subreddit information stays inside each card; the duplicate heading outside feed cards
+is hidden so a zero gap removes the empty space between cards.
+
+The previous illustrative title-first arrangement remains, with author/flair/age shown, plus
+Default/Tight/Standard/Roomy padding and Default/None/Small/Medium/Large gaps. Exact defaults,
+preset ranges, grouping and final native units remain proposals. Default spacing preserves this
+study's existing geometry, not an approved Android dimension. Padding adjusts text/action
+insets while media stays edge-to-edge. Post flair means subreddit-assigned flair; it does not
+control NSFW/spoiler policy or content/access indicators.
+
+These parameters participate in explicit Use layout, dirty comparison, Discard rollback,
+new-copy saving and reopen. Saved copies remain independent from later applied/draft changes;
+Guest defaults and copies stay separate in page memory. Visible metadata separators hide with
+their field, and DOM reading order follows the chosen title/info order. This is browser evidence,
+not native TalkBack or persistent account/context mapping. **Next:** text excerpts, media-height limits and adaptive columns; revision 90 integrates the
+existing toolbar visibility/order and width cap below. Post-details scope remains deferred.
+
+### Large card toolbar controls (revision 90 proposal)
+
+The shared editor now has eleven presentation fields, including a toolbar-priority string.
+Study 17's seven action choices are carried into the sheet: Upvote, Downvote, Comments, Save,
+Share, Open externally and Copy link. Checkboxes choose direct actions; Up/Down moves checked
+actions in priority order, with disabled boundaries and focus-preserving moves. Unchecked
+actions remain available in More. Default desired actions retain study 17's Large card set:
+Upvote, Downvote, Comments, Save and Share. More is always available and fixed last.
+
+The sample uses study 17's actual-width measurement rule: reserve More, account for padding,
+gaps, icon/count widths and text size, then keep the longest fitting prefix of the selected
+order on one row. Lower-priority actions go into More; growing the window restores them
+without rewriting saved priorities. If resizing removes the focused action, focus moves to
+More. Four synthetic scores/comment counts exercise differing capacities. This is illustrative
+browser fitting, not an approved Android pixel breakpoint or measured native performance.
+
+Visibility/order participates in Use layout, saved new copies, reopening and Discard, separately
+from the accepted per-account full More-menu section/action order. The reachable More preview
+uses grouped Post, Navigate and Share and copy sections for these seven fixture actions only;
+it does not replace the complete study 24 menu, redefine native eligibility, persist its order
+or make that order layout-specific. Its bottom-sheet geometry is provisional. Action buttons
+announce fixture routes only; no votes, save/read state, clipboard, system browser, share or
+network work occurs. Guest vote/save attempts announce sign-in instead. Native action routing,
+account/context lookup, all native menu actions and accessibility still require mapping.
+
+**Next:** text-post excerpt controls and media-height limits, then adaptive columns using the
+accepted minimum-width/large-text constraints. Other families, remaining Settings/accounts/API
+access/onboarding and the deferred post-details scope remain later.
+
+### User, Subreddit and options toolbar entries (revision 91)
+
+**User and Subreddit must be available as configurable toolbar actions**, requested by the
+user. Revision 91 expands the catalog to nine choices. They are opt-in, reorderable and use
+the same width cap, Use layout, new-copy and Discard behavior; the existing desired default
+set is retained. The existing stable author concept is used for the User action. Its icon
+reuses the study 24 author shape; Subreddit reuses the existing native subreddit vector path.
+Neither introduces a native asset or application-identity change.
+
+The controls now explicitly show **More options — Always available · fixed last**. “Options”
+is interpreted as the existing More menu; no second options menu or optional removal of More
+is introduced. If the user intended a different options action, clarify before changing that
+accepted availability rule. All nine fixture actions remain reachable in grouped More.
+
+User/Subreddit route previews identify the current post's author/subreddit, independently of
+metadata visibility and the signed-in account. Saved copies contain only toolbar IDs/order,
+not post identities. These are announcements only: no profile/subreddit navigation, user or
+subreddit menu operations, authentication, API calls or side effects occur.
+
+**Selected routing (revision 92): User opens the current post author's profile; Subreddit opens
+the corresponding subreddit page.** Use the existing navigation/account/access mechanisms.
+Do not substitute user/subreddit action menus for those taps. The HTML now announces the
+selected destination explicitly, including per-post identity, but does not perform navigation
+or prove native restoration. The user also deferred icon work to Android implementation;
+existing glyphs remain placeholders.
+
+### Text excerpts and media height (selected defaults, revision 95)
+
+The shared Large card editor adds two study 17 parameters, bringing its presentation snapshots
+to thirteen fields. **Text post excerpt** offers Hidden, 2 lines, 4 lines and Full text, affecting
+the body only; title, post info and toolbar remain. The longer synthetic text fixture makes the
+choices visible. **Selected: Large card text-post bodies default to 2 lines.** Keep 4 lines,
+Full text and Hidden configurable. Revision 93 applies this default in the HTML editor; native
+preference integration and migration remain unimplemented. CSS line clamping is illustrative and does not establish native Markdown,
+link, code-block, nonlinear scaling or TalkBack behavior.
+
+**Selected: Large card media previews default to No limit.** Keep a Settings option to
+switch to Limit height and back. The current single selector offers No limit (default) plus
+Limit height · Short / Standard / Tall; it uses the existing `mediaheight` snapshot field,
+without changing account scope or introducing a second setting store. With a cap enabled,
+Fit whole media scales down the complete frame instead of cropping it. Exact Android caps
+remain undecided; the prototype's 200/320/440px presets are illustrative. The proposal keeps
+Square crop square and disables this selector in that mode, retaining the selected value
+for a return to Fit; that applicability is still provisional, not a media-policy decision.
+These fixtures are images only; native video/GIF/provider/playback behavior remains unverified. The
+[revision 94 comparison](prototypes/relaxe-exploration/media-height.html?rev=94) uses the same
+1:2 SVG illustration in two independently scrollable feed excerpts: a provisional 320px cap
+versus width-led natural height. A wide-photo toggle shows cases where the cap makes no
+difference. The cap contains the complete frame with side space; No limit requires more
+scrolling for tall media. The comparison now identifies No limit as the selected default; it does not set editor state
+or define Android dimensions, a new shell or action behavior.
+
+Both fields participate in explicit Use layout, immutable new-copy saving/reopen and Discard.
+They do not capture post content/identity, themes or account credentials. The review-only
+`sample=text` flag positions the text sample and its control for comparison; it is not a native
+entry/restoration rule and does not choose a setting.
+
+**Next review:** adaptive columns, then remaining families and detailed
+Settings/accounts/API access/onboarding. Native cap dimensions and Square applicability
+remain provisional. Post-details scope stays deferred; icon refinement belongs to Android
+implementation. Do not ask the media-default question again.
+
+### Large card adaptive columns (selected default, revision 97; geometry provisional)
+
+Study 32 now brings the existing study 17 column constraint into the same Settings/contextual
+editor. **Wide-window columns** offers 1 or 2. It measures the actual preview grid width and
+text size; narrow windows show one column and disable the picker without overwriting the
+preferred wide-window count. Resizing/text changes restore that preference when it fits.
+The existing 320px minimum-card/text heuristic is reused with this editor's current gap;
+all CSS dimensions, the two-column ceiling and exact section placement remain proposals,
+not Android breakpoints or a complete tablet design. Grid items retain source/keyboard order;
+no dense packing or new feed/paging behavior is introduced.
+
+The preferred `columns` value extends the flat HTML layout snapshot to fourteen fields and
+participates in Use layout, immutable saved copies, reopening and Discard. The effective count
+is computed, not saved. If a focused picker becomes unavailable on resize, focus moves to its
+explanation. Existing Guest/account buffers stay separate. Native portrait/landscape/unfolded
+preferences still require explicit mapping; do not reset those values or replace their stores.
+Gallery's accepted two-column minimum and Vertical swipe behavior are unchanged.
+
+The `window` URL flag selects a fixture width only; CSS still constrains it to the real window.
+Available workbench widths now include 840 and 1280. Standalone samples and contextual feed
+reuse the same grid adaptation; the latter remains independently scrollable above the editor.
+
+**Selected (revision 97): a fresh Large card layout defaults to two columns when readable
+space permits.** One column remains selectable. Narrow windows and large-text layouts still
+fall back to one without overwriting the preferred count. This design default does not
+reset existing native user preferences; preservation/migration still requires explicit mapping.
+Exact native breakpoints and a tablet shell remain unapproved. Do not ask this default again.
+
+### Compact thumbnail placement (Right selected, revision 99)
+
+The [focused comparison](prototypes/relaxe-exploration/compact-thumbnails.html?rev=98) reuses
+two study 17 Compact feeds with the existing same-origin bridge. Identical posts, selected
+Filled surface, compact density, title-first information hierarchy and hidden customizable
+toolbar stay fixed. Only Left versus Right thumbnail placement differs. Both use the accepted
+64px browser starting point; native dimensions still need refinement. Left / Right / Hidden
+remain configurable in the existing workbench. The comparison stacks on mobile and exposes
+existing theme/text fixtures without adding account/persistence or native preference state.
+
+**Selected: Compact card thumbnails default to Right.** Left and Hidden remain configurable.
+Revision 99 updates fresh study 17/workbench defaults and labels the comparison accordingly.
+Keep the accepted Filled surface, density, hierarchy and hidden toolbar. Existing named copies
+retain their own placement; the native preference/migration mapping remains unimplemented.
+Do not ask the side-default question again. Continue remaining Compact controls/shared Settings editor integration,
+then Vertical swipe/Gallery controls and detailed Settings/accounts/API access/theme/onboarding.
+Revision 100 integrates Compact into the shared editor as described below. Tablet adaptation
+and cross-surface consistency remain.
+
+### Compact in the shared layout editor (revision 100 HTML proposal)
+
+Study 32's Compact card row now opens the shared Settings editor. The contextual feed path
+uses the same controls: [Compact live editor](prototypes/relaxe-exploration/settings.html?rev=100&page=feed&family=compact&focus=1&editor=1).
+The accepted defaults remain Right thumbnails, Filled surface, compact title-first hierarchy,
+64px browser example and hidden customizable toolbar. Left/Right/Hidden, thumbnail size,
+surface, title/info order, author/flair/age visibility, padding/gap, toolbar position/visibility
+and action visibility/priority are exposed under visible section headings. Exact native units,
+remaining preset values and this editor's grouping are proposals.
+
+The actual study 17 Compact feed is embedded; the inner shell/filter are hidden because the
+outer Settings shell owns navigation. Its height follows the exposed viewport, so the feed
+scrolls independently of sheet controls. Standalone Settings has the same scrolling sample
+above its controls. Collapse/Expand changes space only; explicit Use layout remains separate
+from Save as layout. New named copies are immutable; Back/Close/Escape/app-shell exits retain
+the existing Keep editing / Discard guard. The prototype now partitions draft/applied buffers
+by synthetic account **and family** and records the family on named copies; Large's fourteen
+fields remain independent of Compact's twelve. This is page-memory demonstration, not a new
+native store or native account/context migration. Duplicate names are checked within a family.
+
+Compact reuses its existing long-press/right-click/Shift+F10 toolbar reveal and measured fitting.
+User/Subreddit are now recognized in that fixture's action catalog as optional direct profile/
+subreddit destinations; glyphs remain placeholders. The settings-only embed announces post,
+media and action routes without even changing synthetic read/vote/save state; Guest vote/save
+asks for sign-in. The retained workbench outside this embed keeps its prior local fixture
+behavior. More/customize uses the existing study 17 sample; this is not proof of study 24's
+full native grouped-menu/account-order integration. Toolbar edits made in the inner sample
+are reflected in the shared controls and participate in the same draft/copy semantics.
+
+**Selected (revision 101): Compact controls start with Thumbnails**, followed by Appearance,
+Post information, Spacing and Actions. Keep every control group visible. This settles the
+control-group order, not final native dimensions or the unresolved startup diagnostic in ROADMAP.
+
+### Gallery in the shared editor (revision 102; selected entry behavior)
+
+Gallery now opens in the shared Settings and contextual editor, using the existing study 17
+grid/viewer. Its seven-field presentation snapshot holds surface, framing, content, viewer
+swipe axis, columns, gap and media-tile titles; draft/applied values and copies remain separate
+from Large/Compact and Guest. Explicit Use, new named copies and Discard use the existing flow.
+
+The selected defaults remain visual-media grid, Fit whole media, at least two columns and
+Horizontal viewer paging with Vertical selectable. This slice uses two columns; wider counts
+and the tablet shell still require adaptive review and explicit native preference mapping.
+All posts remains selectable; text/link tiles retain readable titles and open post details.
+The title control affects visual-media tiles only. Both their image and optional caption enter
+the same media-first viewer. Album images still page before the next post for the selected
+swipe/key direction; exit brings the current tile into view. Native gesture, playback policy,
+read-history and restoration correctness are not established by these fixtures.
+
+**Selected:** Media only is the default, with no visible More button in the Gallery grid.
+A short tap opens the media-first viewer, Horizontal by default. A long press opens the
+corresponding post details. The previously selected optional Vertical viewer direction remains
+available in Settings; horizontal browsing remains limited to Gallery entry. Optional short
+titles remain configurable and included in saved copies. Full titles remain in accessible tile
+names, and native content/title gates must be preserved. Text/link tiles in All posts keep
+readable titles and details entry, without a More button.
+
+The [Gallery interaction preview](prototypes/relaxe-exploration/gallery-titles.html?rev=102)
+replaces the title comparison. Right click, Shift+F10 and a focus-visible Post details action
+provide alternatives to holding. Existing hold cancellation and release-click suppression are
+reused; Gallery movement also suppresses the release tap so dragging does not open media.
+The prototype's 550ms/8px thresholds are browser fixtures, not selected native gesture values.
+The details entry uses the existing exact-target route dialog, not the complete study 04
+screen. Viewer controls retain their existing More action; only the grid loses More.
+Surface/gap presets and Grid / Appearance / Viewer grouping remain proposals. No native
+key/store, media eligibility, read/history policy or API mechanism is added.
+
+The existing embed now suppresses the inner navigation in media mode as well as in the grid,
+so the outer shell owns navigation. A duplicate inner bar was found during viewer checking;
+with it suppressed, viewer entry, album paging and return-to-tile checks passed. The unrelated
+intermittent observer exception remains recorded as unresolved in ROADMAP; do not claim a
+clean startup/console run or a known application/tooling cause.
+
+### Vertical swipe shared editor (separate framing selected)
+
+Vertical swipe now opens from Feed layouts in the shared standalone/contextual editor and
+reuses study 17's accepted viewer. The user selected two separate Fit/Fill controls:
+**Photos and albums** and **Videos and GIFs**, both starting at the selected Fit direction.
+Fill crops edges; it is an optional presentation choice. This does not add Horizontal as a
+feed direction. Vertical post paging, horizontal album paging, tap-revealed overlays and the
+selected roughly four-second playing timeout/exceptions remain unchanged.
+
+These two fields use independent family/account draft/applied snapshots and immutable named
+copies. The player's Fit/Fill action is temporary; changing a layout framing field resets that
+override, and a new Vertical post starts with its media-type layout choice. Playback and data
+are outside the saved layout. Video settings now opens the revision 104 HTML category; Data
+Saving Mode opens its revision 105 HTML category. Neither adds a duplicate autoplay/mute/quality policy.
+The embedded preview suppresses duplicate inner navigation and uses the outer shared shell.
+Native storage, policy integration, accessibility, gesture arbitration and process restoration
+remain unimplemented. Separate framing controls are selected; exact wording and native
+geometry remain to refine.
+
+### Video settings (single-page organization selected)
+
+The selected Video organization is one scrollable page with **Playback** and **Autoplay**
+section headings. It retains all 18 keys from `video_preferences.xml` in source order, with
+the same initial values, list options and 0–100/step-1 sliders. Labels/summary presentation
+are refined without renaming native keys. Source defaults are examples for an unused fixture;
+existing users' native values must be retained, not overwritten by these defaults. Feed
+Video Autoplay starts at Never in source XML; explicitly opened full-screen playback and the
+accepted eligible Vertical autoplay contract are distinct and still need native integration.
+
+The 12 switches, four lists and two percentage sliders update page-memory account/Guest
+fixtures only. All 18 source keys are account-scoped in `AccountScopedKeys`. Native preference
+wrappers, EventBus updates, media eligibility, provider access, network and lifecycle handling
+are unchanged. Back retains local values and restores the prior Settings row/scroll. Entry
+from the Vertical editor uses its unapplied-change guard and returns to the same editor
+controls/draft and triggering row; the media iframe is reconstructed, not native post/playback
+restoration. No Video values are included in a saved custom layout. Data Saving Mode has its own revision 105 slice below; native Settings search/deep links
+remain required later.
+
+Single-page organization is selected; exact labels and native controls remain refinement work.
+This is not approval of changed media defaults or a finished native form.
+
+### Data Saving Mode (disabled options while Off selected)
+
+The six fields reuse the Video control renderer: mode (Off / Only on Cellular Data / Always
+On), two preview switches, Reddit and Redgifs resolution, and MLB bitrate. Keys, choices and
+initial values come from `data_saving_mode_preferences.xml`; no stored native values change.
+These keys are absent from `AccountScopedKeys` and remain global, including Guest. The page
+therefore shows global scope and no account switcher. Its page-memory values are shared across
+account fixtures, independently of Video's account-scoped values and saved layout snapshots.
+
+The two preview switches retain `DataSavingModePreferenceFragment`'s mutual exclusion: enabling
+one clears the other. Turning the mode Off retains child values. No network type is detected
+and no media/network/autoplay policy is executed. Native EventBus and provider-quality behavior
+must be retained later. The mode's source default stays Off; this is not a new data-use default.
+
+**Selected:** keep the five child controls visible but disabled while Off, with an explanation,
+so the options remain discoverable. The hidden comparison is retired; old `inactive` overrides
+are ignored. Either non-Off mode enables the same retained fields. Group labels, helper wording and exact native rendering remain proposals.
+Root and Vertical editor links open the same category. Editor entry retains its exit guard and
+returns to its controls/draft; native media post/playback restoration remains unverified.
+
+### Gestures & Buttons: media exit (selected; revision 107)
+
+The first detailed gesture slice is Media, reached from a source-group navigation excerpt
+(General, Gesture sensitivity, Media, Comments, Posts and Swipe actions). The other groups
+remain route previews; this is not a complete gesture settings form or approved final menu.
+
+**Selected mode distinction:** normal media previews opened from a thumbnail and Horizontal
+swipe mode can close with a downward swipe, subject to the user's close setting. Vertical swipe
+mode uses up/down for paging and must use the viewer Back button or Android Back to exit,
+including at the very beginning. Gallery's Vertical viewer follows that rule and browses album
+images before changing posts. There is no first-item downward-dismiss exception. This supersedes
+the previous open question and deferred Horizontal dismissal mapping. Zoom/pan owns touches while
+zoomed; existing open-sheet/zoom Back handling and restoration contracts remain required.
+
+The HTML viewer now distinguishes normal preview / Horizontal / Vertical entry. Pointer swipes
+exercise downward dismissal in normal and Horizontal mode, first-item clamping and subsequent
+paging in Vertical mode, with dismissal blocked when zoomed or the close preference is Off.
+The shared Settings preview forwards the account's close preference separately from layout
+values; it is not part of Use/Save-as-layout snapshots. Other embedded header studies default
+to normal preview; the standalone original media-direction study retains its Vertical meaning.
+
+The Media preference keeps its existing opaque account-scoped key and source On default in
+page memory, with Guest separate. Its new wording describes the selected direction. Native
+readers currently cover image/GIF and Imgur media activities; applying this design consistently
+to native video and post-paging viewers is future integration, not existing parity. No native
+preference, player, API/access, eligibility, lifecycle or read/history policy was changed.
+
+Browser pointer tests do not establish Android touch slop, gesture arbitration, Android Back/
+predictive Back, restoration or accessibility correctness. **Next:** review General gesture
+controls, then sensitivity, comment/post interactions and swipe actions. Preserve upstream
+swipe-action/post-paging mutual exclusion and current preference ownership throughout.
+
+### General gesture controls (volume placement selected)
+
+General now presents seven source preferences in **Navigation**, **Bars** and **Volume keys**
+groups. Their stored keys, defaults and account ownership remain those in the opening section
+of `gestures_and_buttons_preferences.xml`; the labels are refined for readability. Bar locks
+start Off, retaining the accepted hide-on-scroll default. Pull to refresh and supported swipe-
+right Back start On. The post-details swipe preference starts Off and is explicitly labelled
+as post-details navigation, not an additional Horizontal feed layout.
+
+Enabling Swipe between posts retains the native requirement to turn off post/comment swipe
+actions. The shared gesture fixture contains that coupling; detailed action forms remain for
+later review. It does not operate a real pager, app bar, refresh, device volume button or native
+preference. General and Media use one lazily initialized per-account gesture buffer, adding
+missing source defaults without overwriting another gesture page's existing values. Guest is
+separate. Other Settings categories and saved layout snapshots keep their existing ownership.
+
+**Selected:** keep the two independent volume-key controls together once in General.
+The source XML repeats these same keys under Comments and Posts; the redesign should not show
+duplicate controls or invent new stored keys. Grouping and exact labels remain proposals;
+source defaults are fixture initial values, not approval to overwrite existing users' settings.
+
+### Gesture sensitivity (three-step sliders selected)
+
+Four source preferences now share the per-account gesture fixture: tab switching, swipe-right
+Back, comment swipe actions and drawer swipe area. General's selected volume controls are not
+duplicated on later Posts/Comments forms. Sensitivity retains the native keys, three choices
+per field and starting values (tab Low, Back Very Low, comment actions Low, drawer Default).
+This distinction matters: source arrays label their first sensitivity preset Default even
+though it is not the fresh default of those three fields. The proposal calls that preset
+**Standard**, preserving its exact value; the drawer still offers Default / Large / Very Large.
+Exact native labels remain to refine, and existing users' preferences must not be reset.
+
+**Selected:** use three-step sliders for all four fields. The menu comparison is retired;
+old review overrides are ignored. Sliders preserve the same discrete native values, using
+Very Low → Low → Standard for sensitivity and Default → Large → Very Large for drawer area.
+The position is an index, not a replacement native value; accessible value text names the
+current choice. No continuous/common numerical sensitivity scale or changed default is added.
+
+The controls do not tune browser recognition, native touch slop, Slidr, comment gestures or
+drawer width. Browser access was disabled for revisions 109/110; source/mapping/syntax/reference
+and HTTP checks are current, while visual/responsive/theme/interaction checks were not run.
+Prior browser checks remain historical. Native controls and device feel still need Android review.
+
+### Comment gesture controls (named touch selector selected)
+
+Comments presents three existing account-scoped preferences: lock the jump-to-next-top-level-
+comment button, its scroll-hide direction, and tap/long-press swapping. Volume-key navigation
+stays only in General, as selected. Values join the same per-account gesture buffer; Guest
+remains separate. Source defaults stay false / false / true. Locking the jump button disables
+the scroll-hide control in this proposal, retains its value, and re-enables it when unlocked;
+native Settings currently hides it. This follows the selected discoverability direction but
+is a presentation proposal for this control, not a native change or global gate override.
+
+Direction wording is grounded in `ViewPostDetailFragmentNew.onScrolled`: with the button
+unlocked, true hides it toward earlier comments and false hides it toward later comments;
+the end-of-list path and other native FAB visibility rules remain distinct. The HTML form
+changes no real scrolling or button behavior.
+
+**Selected:** replace the relative “Swap tap and long press” wording with a
+named selector: **Tap to collapse/expand** / **Long press to collapse/expand**. It maps to the
+existing boolean (`swap_tap_and_long_in_comments`: true / false), not a new list/string preference.
+The Swap comparison is retired; old `tap-control` overrides are ignored. The explicit top-right −/+ branch
+control remains available in either mode. Toolbar behavior retains its independent setting;
+link/spoiler handling and text-selection priority remain native contracts. Inline Reply/Edit
+and draft decisions are unaffected. No comment/post action is executed by these settings fixtures.
+
+### Post gesture settings (layout selector selected, revision 112)
+
+The two existing shared post long-press preferences remain together and visible: text/non-media
+area and media preview, each retaining None / Show Post Options / Preview in Fullscreen and
+source default Show Post Options. They retain their original account-scoped keys and shared
+ownership. No new per-layout preference namespace or saved-layout property is introduced.
+Volume-key navigation stays only in General.
+
+Layout-specific guidance follows these shared fields. The selected **layout selector** shows
+Large card, Compact card, Gallery or Vertical swipe one at a time. The all-sections comparison
+is retired and old `post-controls` overrides are ignored. Shared fields remain visible once.
+The selector is per-account fixture view state only. Editor links
+use the existing Settings navigation stack and active account; this new path has not yet had
+browser interaction/restoration verification.
+
+The guidance preserves selected intent: Compact long press reveals its customizable in-card
+toolbar; Gallery media tap opens its viewer and long press opens details; Vertical taps reveal
+controls and swipes page posts. Native Compact toolbar overrides and Gallery's existing
+`click_to_show_media_in_gallery_layout` must be mapped explicitly, preserving existing users'
+choices. These shared controls must not silently undo accepted layout gestures, nor may the
+layout labels imply new native ownership or removal of existing overrides. Full precedence/
+legacy migration and media-versus-body behavior remain native integration work.
+
+This page changes fixture values only; it executes no More action, fullscreen preview or read
+marking. Existing account, read/history, API/access and media-policy side effects remain required.
+The selected presentation has source/syntax/reference/HTTP checks only while browser access
+is disabled; visual/responsive/theme and editor Back/guard paths remain unverified.
+
+### Swipe-action settings (both side sections selected, revision 113)
+
+Swipe actions now opens separate Post swipe actions and Comment swipe actions, followed by
+shared Threshold (30% default; 35%/40% available), Haptic feedback (On) and Disable swiping
+between tabs (Off). All 19 existing source keys stay account scoped, including Guest.
+Posts and comments have independent enable switches, both Off by default. Enabling either
+clears post-details Swipe between posts; enabling that setting clears both action switches.
+
+Each post side retains four action levels; each comment side retains three. Left side means
+the row edge revealed by dragging right, and Right side means the edge revealed by dragging
+left. First defaults are Downvote on the left and Upvote on the right; deeper levels are None.
+Preserve exact action IDs, per-surface action lists and the existing side migration. Post swipe
+actions remain limited by native feed applicability, including the single-column restriction;
+these forms add no new applicability to Gallery, Vertical swipe or post details.
+
+Both side sections on one scrollable page are selected. The compact-side-selector comparison
+is retired and old `swipe-sides` overrides are ignored. No side-selection preference or
+saved-layout field is introduced.
+Mappings remain visible but disabled when their surface's enable switch is Off; values are
+retained. Controls reuse shared theme roles, labels and target sizes. The forms execute no
+vote/save/read/reply/share action and do not simulate swipe thresholds, haptics or tab gestures.
+Browser rendering, large text, themes, keyboard, account retention and Back paths are unverified
+while browser access is disabled. Native gesture/accessibility verification remains later work.
+
+### Fonts (sample above controls selected, revision 114)
+
+Interface → Fonts now opens three groups: General, Titles and Content. The six existing
+font-family/size lists retain their source values/defaults and account-scoped preference keys.
+Each family list retains all 17 source choices, including Custom. General/Title sizes retain
+five presets; Content retains its sixth, Enormously large. A separate Choose font file route
+appears only for Custom in each group, retaining the three existing custom-font identifiers.
+These routes announce a fixture destination; they do not open a picker or import files.
+
+A compact sample above the controls is selected. The separate-screen comparison is retired;
+old `font-preview` overrides are ignored. Existing direct Preview study links remain readable.
+Samples adjust approximate role-specific sizes in page memory. They
+do not load or imitate Android's bundled/custom typefaces or apply typography throughout the
+app. General, title and content values remain separate and outside saved layouts; workbench
+large text remains an independent review setting. Native resource geometry, inheritance,
+recreation, file validation/copy failures and font application must use existing mechanisms.
+The page is a navigation/preview proposal, not approval of a new font engine or shipping sizes.
+
+New rendering, themes, large text, keyboard, account retention and Back paths are unverified
+while browser access is disabled.
+
+### Navigation drawer settings (section selectors selected, revision 115)
+
+Interface → Navigation drawer now opens Account header, Sections and Quick toggles groups.
+The fourteen source Boolean keys/defaults stay in the existing whole-file account-scoped
+drawer namespace, with Guest isolated. Avatar side and karma visibility remain unchanged.
+Theme and NSFW quick-toggle visibility default On; thumbnail-side and Resume toggle visibility
+default Off. These switches control visibility, not the underlying theme/content/media policy.
+
+The selected section selectors use Expanded / Collapsed for Account, Reddit, Posts and
+Preferences. Favorite subreddits and Subscribed subreddits additionally offer Hidden, mapping
+to their existing separate hide keys. All six start Expanded from the source defaults.
+Choosing Hidden retains the underlying collapse value; choosing Expanded or Collapsed makes
+the section visible and explicitly sets its collapse flag. No new storage enum or new hide
+capability is introduced. The separate-switch comparison is retired; old `drawer-controls`
+overrides are ignored. The fourteen original Boolean preferences remain the storage contract.
+
+The source fragment dispatches existing avatar/karma events and deferred section-change events
+after preference persistence. Retain those owners and active-account behavior in native work.
+This HTML form only changes page-memory values, without changing the shared drawer fixture,
+account header/switcher, actual quick toggles or subscriptions. It does not execute an event,
+account switch, network call or native preference write. The selected Continuum-like grouped
+drawer design remains; this comparison is about its Settings controls.
+
+Source/syntax/reference/HTTP checks are separate from browser verification; rendering,
+themes, large text, keyboard, account retention and Back remain unverified while browser
+access is disabled.
+
+### Home feed tab settings (inline list selected, revision 116)
+
+Interface → Home feed tabs represents the row above the feed (Home / Popular / All initially),
+separate from the accepted shared Home / Saved / Search / Inbox / Profile bottom navigation.
+The ordered tab list on the same settings page is selected, between Show feed tabs and the
+six existing list-source visibility switches. The separate-editor comparison is retired;
+old `tab-editor` overrides are ignored. Earlier direct editor links remain readable. Up/Down
+moves provide accessible ordering controls; source drag refinement remains native work.
+Per-row Options opens its proposal below; the Add chooser is described below. No
+restricted tab-type inventory or new add/rename/delete behavior has been approved by this slice.
+
+Preserve the existing seven account-keyed Booleans in the tabs preference file: Show tab names
+controls bar visibility and defaults On; six list-source switches default Off. Preserve the
+variable-length ordered list, per-item type/name/source/displayName/customTitle, all current
+add sources (including random/picker variants), rename/delete guards, legacy migration and
+native live-source merging. Toggle-sourced individual tabs retain provenance and ordering;
+disabling a group removes its items, and unloaded live data must not erase valid saved tabs.
+The HTML fixture loads no live list data; source switches update only form values and add no
+synthetic list items. Guest buffers stay isolated and no real account or subscription is read.
+
+Native changes currently persist through existing owners and restart once when leaving the
+changed tab-settings screen. A conditional restart notice illustrates that requirement; HTML
+Back navigates locally and never restarts an app. This placement review does not approve
+changing persistence, restart, account copy/reset or restoration semantics. Tabs remain outside
+saved feed layouts, and their account settings copy/reset rules stay intact.
+
+### Add Home feed tab (grouped chooser selected, revision 117)
+
+Add tab opens the selected grouped chooser with brief route descriptions: Feeds, Subreddits,
+Multireddits, Users and Account feeds. The plain-list comparison is retired; old `add-tabs`
+overrides are ignored. Exact wording/geometry remain refinements; existing native
+`showAddTabDialog` still uses a list dialog until later Android work.
+
+Preserve all sixteen signed-in choices: Home, Popular, All, Subreddit, Subscribed subreddits,
+Random subreddit, Random subscribed subreddit, Random NSFW subreddit, Multireddit, User
+multireddit, User, Upvoted, Downvoted, Hidden, Saved posts and Saved comments. Guest omits the
+same five account-only choices (Upvoted through Saved comments), retaining the other eleven.
+Do not turn the three random variants into new native post types; retain existing pseudo-
+subreddit names and refresh behavior. Subscribed subreddits/own multireddits use native pickers,
+while Subreddit/User/User multireddit retain their source name/path entry routes.
+
+Subreddit, User and User multireddit now open the name-entry proposal below. Other choices
+still announce their next route and add no tab; no real picker or live lookup runs. Modal
+labels, a scrollable choice region, fixed Cancel, native dialog Escape behavior, focus return
+and protection against underlying Settings Escape navigation are included in the HTML. None
+has fresh browser verification while access is disabled. A direct `open=add-tab` review link
+opens the chooser; no native authentication, account lookup, API call or persistence occurs.
+Native duplicate checks, empty-name/duplicate submit guards, source picker loading/empty states,
+rename/reset-name, move-to-top/bottom, user-only delete and at-least-one-tab guard remain required.
+
+### Add tab name entry (same sheet selected, revision 118)
+
+Subreddit, User and User multireddit use their existing source type IDs (3, 5 and 4) and source
+name/path conventions. Continuing inside the same bottom sheet is selected. The centered-
+dialog comparison is retired; old `tab-name` overrides are ignored. Keep the labeled field,
+permanent hint, inline duplicate message and Back / Cancel / Add tab actions. Android
+IME-on-open policy and keyboard/insets correctness remain for native review.
+
+Blank trimmed input and case-insensitive duplicates of the same type disable Add. The fixture
+retains the entered name/path without prefix stripping, path rewriting, server validation or
+new syntax rejection; source only trims and checks identity at this step. A successful Add
+appends a user-source record to the current account's page-memory ordered list, retains other
+accounts' fixture values, shows the source restart notice and closes the chooser. There is no
+native preference write, app restart, Reddit lookup or subscription/follow operation. Multireddit
+display-name derivation follows the inspected helper for these user-entered fixture paths;
+native rendering/restoration must still reuse `MainPageTabsUtils`.
+
+Back (or Escape at the name step) returns to the chooser and restores its scroll/choice focus,
+clearing the unsent name. Cancel closes without adding. These are proposed staged navigation
+behaviors, not evidence of Android Back or saved drafts. No draft store is added. DOM row focus
+keys now include type/name identity so several subreddit or user tabs can be distinguished;
+these are not native stable tab IDs. Options opens its proposal below. Other Add
+choices and native live-source merging remain separate review/integration work. The two
+picker proposals are described below.
+
+### Add tab list pickers (visible filter selected, revision 119)
+
+Subscribed subreddits and Multireddit now continue in the same Add tab sheet with synthetic
+candidate lists. A visible labeled filter field is selected; the plain-list comparison is
+retired and old `picker-filter` overrides are ignored. Filtering is local to available candidates,
+matching subreddit names or multireddit display names/paths without changing their order.
+It performs no Reddit search, API call, lookup, subscription or follow operation.
+
+Tap a candidate to append a user-source record to the current account's page-memory tab list,
+then close. Subreddits retain type 3/name/source 0; owned multireddits retain type 4/raw path/
+displayName/source 0. These are individually added tabs, not toggle-sourced entries. The same
+case-insensitive/type-aware duplicate guard applies; the proposal shows Already added and
+disables duplicate rows, whereas native currently checks on selection and gives a toast.
+That feedback detail is provisional. Native candidates must still come from the existing
+account ViewModels; the HTML's twelve subreddit and six multireddit examples are not user data.
+
+Guest starts with empty fixture lists, and `picker-state=empty` demonstrates the same state
+for either picker. This is fixture data only, not a new Guest eligibility rule. Preserve native
+Guest/local-data mechanisms and the current missing/unloaded/empty list guard. No loading,
+retry, sign-in or backend mechanism is invented. A nonempty list filtered to zero matches
+shows a separate no-match message. Back/Escape returns to chooser scroll/choice focus; Cancel
+closes without adding. Filtering starts unfocused; Android IME behavior remains unverified.
+Native lifecycle, account updates and source merging are not established by these fixtures.
+
+### Home feed tab Options (visible Remove selected, revision 120)
+
+Each Home feed tab row's Options button now opens a sheet with Rename, conditional Reset
+name, Move to top and Move to bottom. Existing Up/Down controls remain accessible on the
+row; native drag and long-press entry remain required for Android refinement. Boundary moves
+are disabled in the HTML; native popup commands currently no-op at those boundaries.
+
+A visible Remove action on each user-added row is selected, matching the source arrangement.
+Remove is omitted from Options; the inside-Options comparison is retired and old `tab-remove`
+overrides are ignored. Reject removing the final tab and omit removal for toggle-sourced rows. These
+rows must instead be managed through their existing list-source switch; no new removal
+capability or preference key is introduced. Remove affects only the page-memory tab list.
+
+Rename continues within the Options sheet. Saving trimmed empty text or the exact computed
+default clears customTitle; another name sets that override without changing feed type/name/
+source or identity. Reset name is shown only when an override exists. Display-name duplicates
+are allowed, as in source; no feed change, server rename or lookup occurs. Rename/Reset/moves/
+Remove update the existing account fixture order and source-style restart notice, never native
+preferences. No new saved-layout field, native stable-ID scheme or restart mechanism is added.
+
+`tab-scenario=last`, `renamed` and `group` are explicit review fixtures for the last-tab guard,
+conditional Reset and source-provided rows. They initialize only an empty page-memory account
+buffer and do not replace native accounts or user tabs. Options resolves the current item
+before mutating; stale items and invalid removals are rejected. Cancel closes without saving
+an open rename; Back/Escape from Rename returns to Options. Close returns focus to the row's
+current Options button, or another surviving row after removal. These focus/navigation paths
+remain unverified in a browser. Exact sheet geometry and disabled-action feedback are proposals.
+
+### Bottom navigation settings (shared default with overrides selected, revision 121)
+
+Interface → Bottom navigation starts with the accepted Home / Saved / center Search / Inbox /
+Profile default. Its hide-on-reading/return-on-upscroll behavior remains selected. Assignment
+changes in the editor below update only its page-memory previews, not the shared shell.
+
+One Default bar with optional Other pages customization is selected. Use the same bar on
+other pages starts On in fixtures; Off reveals an Other pages bar editor. The always-separate
+comparison is retired and old `bottom-scope` overrides are ignored. Other pages includes the
+source subreddit, multireddit and user detail readers. Both buffers start with the accepted
+default; they do not load real inherited action assignments. Customize now opens the editor
+below. Separate override values survive switching shared mode On and Off.
+
+Native `CustomizeBottomAppBarFragment` currently has separate Home/Other-page integer slots:
+2 or 4 outer actions, four retained assignments and a center/FAB choice in each context.
+Keep all existing action choices, Guest restrictions, account-scoped ownership, retained hidden
+slot values and existing enable/visibility/event/restoration mechanisms. Do not silently merge,
+reset or overwrite existing separate configurations when introducing the new shared default.
+Any later shared mode must retain a separate override so existing choices can be recovered;
+preference/migration design and the five-destination structural mapping are not implemented.
+The HTML scope switch is not a native preference and never updates the actual shared shell
+or saved feed layouts. Native defaults are not inferred from the specimen values. Existing
+customization remains required.
+
+### Bottom-navigation button editor (preview targets selected, revision 122)
+
+Default and Other pages use the selected preview-button edit targets, opening a destination/
+action chooser. The permanently visible selector comparison is retired and old `bottom-controls`
+overrides are ignored. Account/context buffers, symbolic choices and immediate page-memory
+updates are retained. Back uses the
+existing Settings stack and restores the Customize row. No native action executes and no
+Android preference, feed layout or live shared shell is changed.
+
+Outer choices retain the twenty semantic entries in the source Other-pages action list,
+including the accepted five navigation/Search defaults. The new shell also needs Home on the
+main page; source main/other integer indices are not interchangeable. Center choices retain
+the source ten actions (eight for Guest), with Search the selected default. Duplicate
+assignments remain allowed, as source does not enforce uniqueness. The five-button default
+remains selected. The count/retained-assignment presentation is described below; native
+integer mapping and migration remain pending.
+
+Guest keeps the source outer-command allowlist and omits private account commands. The three
+additional accepted shell destinations remain represented: Saved uses the device-local route;
+Inbox/Profile are sign-in entry routes, labeled accordingly in choice controls. They add no
+Guest API permission. The actual Guest action dispatch/auth/access/local-data contracts still
+require existing native owners. These semantic fixture choices are not a numeric migration
+or a fix for the recorded Guest FAB index inconsistency. Icon artwork remains deferred.
+
+Default and Other-page arrays are independent, remain separate across scope switches and are
+isolated from Guest/other accounts. Invalid positions, scopes and unavailable choices are
+rejected before a fixture assignment. Center choices use their own capability mask. The
+chooser has selected-state labels, Cancel, modal Escape protection and focus return to the
+updated preview button; browser verification of those paths is unavailable.
+
+### Bottom-navigation counts and retained assignments (expandable group selected, revision 123)
+
+Buttons in bar offers 5 buttons (four sides plus center) and 3 buttons (two sides plus center),
+using the source integer outer-action values 4 and 2. Five remains the accepted default. This
+is clearer counting in the UI, not a new native count value or a three-button default decision.
+MainActivity and the subreddit reader bind source options 1/2 in two-side mode; options 3/4
+are only read in four-side mode. The fixture therefore shows side 1 / center / side 2 with
+three buttons, retaining side 3/4 in their original independent assignments. It does not pick
+arbitrary physical edge slots, swap the center or truncate the stored five-value fixture array.
+
+In three-button mode, the selected presentation keeps the other two assignments inside an
+initially closed Buttons not shown (2) group. The always-visible comparison is retired and old
+`hidden-buttons` overrides are ignored. Assignments remain editable using the selected
+tap-to-choose interaction, and all values restore when returning to five buttons. Expanding is an accessible native HTML details/summary control;
+its open state is retained during an assignment update so focus can return to an exposed button.
+No extra configuration preference or native disclosure behavior is established by that fixture.
+
+Counts are per account/default-or-other context, independent from the assignment arrays and
+shared/override view state. Invalid scope/count requests are rejected. A `button-count=3` link
+initializes only the current review buffer once; manual count changes are not reset by later
+rendering. Native count and hidden integer slot ownership, persistence, restoration, migration
+and Guest numeric mapping still require existing Android mechanisms. The shared shell is not
+updated and no assignment action is executed by this slice.
+
+### Time format (Show elapsed time switch selected, revision 124)
+
+Interface → Time format preserves the source `show_elapsed_time` Boolean (false) and
+`time_format` pattern ("MMM d, yyyy, HH:mm"), with all 23 source patterns in order. Values remain
+account scoped, including a separate Guest fixture. The selected presentation uses Continuum's
+Show elapsed time switch. The named-selector comparison is retired and old `time-control`
+overrides are ignored. This changes no Boolean meaning or default. The date-format picker remains editable in either mode, as in source.
+
+An inline preview shows the selected style for a fixed English timestamp, using source patterns
+and illustrative elapsed text. It is not a locale-aware Android formatter, live clock or a
+new timestamp policy. The two controls update only page-memory values; no feed is reformatted,
+preference persisted or native change event dispatched. Back uses the existing Settings stack.
+
+### Post-details settings (four media switches selected, revision 125)
+
+Interface → Post details now presents all twelve source preferences in Post information,
+Embedded media, Landscape and Continuity groups. Their keys/defaults and source scope remain;
+post-details values belong to the separate account-scoped file, even where feed preference
+names match. These are form fixtures, not a live post-details editor. Exact grouping, labels,
+native geometry and tablet adaptation remain proposals.
+
+For embedded media, four switches are selected: Images, GIFs, Emotes and Comment faces
+(subreddit stylesheet images). The combination-menu comparison is retired and old
+`embedded-control` overrides are ignored. These represent the existing encoded
+`embedded_media_type` value, default All (15).
+Legacy values are named combinations rather than raw flags; preserve their meanings. No new
+media preference keys, autoplay, data saving, NSFW or content policy is introduced.
+
+Landscape splitting retains its source On default and autoplay warning. Side swapping stays
+visible but disabled while splitting is Off, retaining its value. This preserves the setting;
+it does not approve a tablet shell or supersede the full-post-then-comments phone direction.
+Cached comment threads retains string default 10 and native nonnegative signed-Int validation,
+including zero; invalid input announces feedback and keeps the last valid fixture value. The
+HTML never creates, evicts or clears a native cache. Native memory/performance and restoration
+remain implementation work.
+
+### Comments settings (single divider selector selected, revision 126)
+
+Interface → Comments now presents the twelve source preferences in Appearance, Thread display,
+Toolbar and Embedded media groups. Keep their existing account/default-file scope and source
+values; Post details' similarly named media key belongs to a different file. Both pages reuse
+one four-switch renderer and legacy-code mapping, with separate buffers. No source preference
+is deleted or remapped. Comment gestures remain in Gestures & Buttons, and the study 04 explicit
+−/+ collapse control, selectable text and hidden-action direction remain. This form does not
+approve replacement native defaults or modify a comment tree/toolbar/media renderer.
+
+For dividers, the selected presentation combines Show comment divider and Divider type into one selector:
+Off / All comments / Top-level only. These map to the existing Boolean and 0/1 string; Off
+preserves the stored type. The switch-plus-type-menu comparison is retired and old
+`divider-control` overrides are ignored. This introduces no additional preference or changed
+separator policy. Labels,
+section grouping and final native layout remain proposals.
+
+### Sort Type settings (visible-disabled ranges selected, revision 127)
+
+Settings → Sort Type presents all eight source preferences in Post feeds, Subreddits, Users
+and Comments groups. Preserve the existing account/default-file keys and values: remembered
+post/comment sorts On; subreddit Hot, user New, both ranges All Time; comment Best
+(CONFIDENCE); subreddit recommendation Off. Source choices remain five subreddit sorts, four
+user sorts, six ranges and six comment sorts. No comment time-range setting is added.
+
+The selected presentation keeps subreddit/user time ranges visible but disabled unless the
+corresponding sort is Top or Controversial. The hidden-range comparison is retired and old
+`sort-range` overrides are ignored. The chosen range is retained when inactive, including
+across local Back/account changes. The
+native Settings XML currently leaves those lists editable regardless of sort; these alternatives
+are presentation proposals, not source behavior or new preference values. Remember switches
+remain independent; turning them Off does not reset defaults or ranges in the fixture.
+
+This form does not load, erase or write existing per-feed sorting records, change a feed,
+perform a request or implement recommendation precedence. Preserve PostFragment's saved/default
+and changed-default ownership, and the comment view model's saved/recommended/default tiers.
+Exact wording, grouping, migration and native rendering remain later review work. Interface's
+remaining controls/platform-gated subpages are still pending; this slice does not complete it.
+
+### Remaining Interface screen (five inline groups selected, revision 128)
+
+The [full Interface proposal](prototypes/relaxe-exploration/settings.html?rev=128&page=interface&focus=1)
+uses five groups: Appearance (Fonts, Time format); Navigation (drawer, Home feed tabs,
+bottom-navigation editor, Hide floating action button, Enable bottom navigation, default
+search result tab); Posts and comments (the three existing child pages, hide subreddit
+description, vote-button side, exact vote counts, available-space toolbar behavior); Viewing
+(Lazy Mode interval and Shadowbox filtering); Display (Immersive interface and refresh rate).
+It reuses the selected switch/list patterns without reopening the accepted child screens.
+The user selected keeping all five groups inline. Do not reopen the inline-versus-child-page
+comparison. This accepts the screen organization; browser checks and native compatibility
+mapping remain open, so it does not establish complete Interface implementation or verification.
+
+Audit: `interface_preferences.xml` has ten value controls beyond the previously represented
+routes. All ten keys/defaults are retained in the fixture: hide FAB false, bottom bar false,
+hide subreddit description false, search Posts (0), Lazy Mode 2.5 seconds (all seven source
+choices), Shadowbox filter false, votes-right false, full vote counts true, space-based
+items false and maximum refresh false. `Utils.getNVotes` confirms that “absolute” means
+full integer counts rather than abbreviated counts. Search retains Posts/Subreddits/Users
+and native explicit-tab precedence (`SearchResultActivity`). Lazy Mode interval does not
+enable auto-scrolling; Shadowbox filtering remains distinct from Gallery's Media only and
+Vertical swipe. This study does not change any feed, action, media policy or search result.
+
+`InterfacePreferenceFragment` exposes Immersive interface at API 26+, with the source two
+switches: `immersive_interface` true and `disable_immersive_interface_in_landscape_mode`
+false. Both remain independently editable, including while immersive mode is Off, matching
+source. `BaseActivity` applies the landscape exclusion only when immersive is active;
+this is existing system-bar behavior, not a new fullscreen/media mode. Its page-eligibility
+contract remains. The refresh-rate gate is API 23, below the app's min SDK 24, so every
+supported version retains that control; it requests a best-effort maximum, not a guarantee.
+A workbench Android 7/8/16 fixture demonstrates the entry gate; an API-24 immersive deep
+link returns to Interface. Account/Guest buffers are separate and page-memory only.
+Native events, recreation, persistence, insets and platform behavior remain unimplemented.
+
+**Compatibility conflicts remain explicit:** the accepted five-button shell specimen does
+not establish a new value for the source bottom-bar switch (false). Preserve existing
+Off/On values, independent Home/Other assignments and hidden slots. The source hide-FAB
+switch (false) controls a floating action button; it must not silently hide the accepted
+center Search destination. The source available-space switch (false) can hide existing
+post/detail toolbar items at width thresholds, while the accepted feed study already fits
+its selected actions to width. Retain that preference and resolve its exact native mapping
+before implementation; do not turn it On or erase it to match the HTML. Vote-side and
+subreddit-description preferences also remain contracts for later renderer integration.
+The Guest FAB index discrepancy and integer assignment migration remain open. No default,
+preference or live shared shell changes when these form controls are edited.
+
+Revision 128 syntax, source key/default parity, lightweight DOM-model switch/select changes,
+rerender retention, Guest isolation and served-asset checks passed. These are not browser
+interaction or layout checks. Browser opening was rejected because local browser use is
+disabled in Work settings. Light/dark/AMOLED/custom palettes, 360px/landscape/wide layouts,
+100/130/200% text, focus, keyboard and contrast need browser review when available; Android
+accessibility, restoration and performance require later native verification. No Gradle run.
+
+### History and Recently Visited settings (Off-and-clear confirmation selected, revision 129)
+
+The user selected revision 128's five inline Interface groups. Revision 129 advances to the
+[Post History form](prototypes/relaxe-exploration/settings.html?rev=129&page=history-settings&focus=1)
+and [Recently Visited form](prototypes/relaxe-exploration/settings.html?rev=129&page=recently-settings&focus=1).
+Both remain separate account-scoped root categories, consistent with the existing History
+and Recently visited design contracts above. They use a small page-memory fixture module,
+`settings-history.js`; no native preferences, read records, stored visits, events or APIs change.
+
+Post History presents all nine `PostHistoryFragment` values: Save read posts Off; after-vote
+and on-scroll marking Off; automatic hiding and its additional subreddit/user/search scopes
+Off; history limiting On, target 500. Recording, Automatic hiding and Storage are the proposed
+screen groups. Reuse the selected visible-disabled pattern: marking/hiding dependencies stay
+visible while recording is Off; extra hiding scopes require both recording and automatic
+hiding. Values survive toggling parents, local navigation and account changes. Native source
+hides these dependencies; the proposal changes discoverability without changing values or
+read/hide eligibility. The independent limit switch remains usable with recording Off. The
+proposal consistently shows its number field, disabled only when limiting is Off; source's
+number-field visibility depends on `updateOptions` and recording state. This is presentation,
+not a new dependency or retention policy. Storage is not a new clear-history action.
+
+The limit saves already-valid numeric input in the fixture as it is typed, then settles on
+blur/Enter like source: blank/unparseable becomes 500, below 100 becomes 100, above signed-Int
+maximum is capped. Preserve the native numeric keyboard, ten-character input, focus/IME Done
+handling and actual persistence in later implementation. Batch trimming means this target
+is not a strict maximum after each insertion. Existing Guest saved/voted/hidden record-type
+limit handling remains authoritative. Turning recording Off does not purge existing history.
+Clear remains in existing Account Settings Management; the fixture adds explanatory text,
+not a new operation or merged history store. Media-open recording coverage stays as approved;
+no passive-autoplay or repeat-visit timestamp policy is added.
+
+Recently Visited keeps the single `_recently_visited_enabled` Boolean, Off by default, and
+source explanation that Off clears the current account's visited subreddit/user rows. The
+existing recorder keeps 50 per type, applies its subscription/follow/save/own-profile/pseudo-
+subreddit exclusions and records only after data loading. Keep these existing mechanisms;
+there is no new pause-without-clearing mode, separate Clear action or per-row deletion.
+
+**Selected:** confirmation before Recently Visited Off-and-clear. The source immediate-Off
+alternative is retired. On is immediate; attempting Off leaves On until “Turn off and clear”
+is confirmed. The prompt identifies the account (including Guest) and explains that turning
+On again will not restore cleared visits. Cancel/Escape keep On and return focus to the switch.
+Confirmation changes only the fixture flag and announces that no actual stored visits were
+deleted. The dialog protects the underlying Settings Escape/Back handler. Preserve the source
+account-scoped purge on eventual native confirmation; no pause-without-clearing mode is added.
+The user’s choice selects this interaction, not native persistence or deletion correctness.
+
+Current checks: JavaScript syntax; all ten field keys/defaults against source fragments and
+constants; lightweight DOM-model dependency/retention and account isolation; numeric boundaries
+250, 2, empty, signed-Int overflow, ten-digit overflow and invalid text; Recently Visited
+On/Cancel/Escape/confirm and focus callbacks. Five served revision-129 assets match workspace
+bytes through the existing tailnet route. These are model/source/serving checks, not browser
+layout or native coverage. Browser access is disabled; responsive light/dark/AMOLED/custom,
+100/130/200% text, keyboard/focus, modal scrolling and contrast checks remain pending. No Gradle.
+
+### NSFW/spoiler and filter workflows (source organization selected; revision 131 branding correction)
+
+Recently Visited confirmation before Off-and-clear is selected; no decision there remains.
+The [NSFW/spoiler form](prototypes/relaxe-exploration/settings.html?rev=130&page=content-settings&focus=1)
+reuses existing switches and visible-disabled dependencies without asking another routine
+control-pattern question. Four source values remain independently account scoped: NSFW Off,
+blur NSFW On, do-not-blur-in-NSFW-subreddits Off, spoiler blur Off. NSFW's two blur choices
+stay disabled while NSFW is Off and retain their values; native hides them. The subreddit
+exception remains editable whenever NSFW is On, including when general NSFW blur is Off,
+as source does. Spoiler blur stays independent. These controls never fetch/reveal media,
+change a feed or override global/API/content eligibility.
+
+`NsfwAndSpoilerFragment` shows a noncancelable entry warning on page creation, before changing
+these settings. Revision 131 retains the entry interaction and four preferences, but corrects the product
+wording to Relaxe for Reddit and uses a separate Relaxe privacy-policy draft, as requested
+by the user. Copy must not carry the upstream brand or substitute its policy/repository for
+Relaxe’s own policy. The unsupported inherited prediction that NSFW content is “unlikely”
+is replaced by a neutral access-rules statement. The Reddit User Agreement remains a separate
+external link. Agree acknowledges only the synthetic warning and returns focus to the NSFW
+switch; Do not agree goes Back.
+Escape does not accept or close it. There is no stored legal acceptance, real account write,
+new access approval or Reddit request. The Relaxe policy is explicitly a non-effective draft; no agreement is submitted or persisted.
+Final policy content, release URL and native resolution remain later work.
+
+Historical revision-130 filter navigation studies used synthetic rows and route announcements,
+not operational editors (superseded by the revision-132 editable forms below):
+[Post Filter](prototypes/relaxe-exploration/settings.html?rev=130&page=post-filters&focus=1),
+[Comment Filter](prototypes/relaxe-exploration/settings.html?rev=130&page=comment-filters&focus=1),
+[post editor structure](prototypes/relaxe-exploration/settings.html?rev=130&page=post-filter-editor&focus=1)
+and [comment editor structure](prototypes/relaxe-exploration/settings.html?rev=130&page=comment-filter-editor&focus=1).
+The list → options → editor paths follow source. Post options has Edit/Delete; Comments also
+has Apply to, continuing to its separate subreddit-assignment page. Empty-list fixtures use
+`filters=empty`. Create announces the existing empty-name editor route; it does not prefill
+a new named filter from the synthetic example. Delete/Save/Add/Edit rows announce route
+previews and mutate no filter, rule or assignment. Do not call these complete filter forms.
+
+Source-backed workflow boundaries:
+- Named filters and usage rows are owned by account, including Guest, with account/name keys;
+  do not turn them into one global filter or use a saved layout to own their state.
+- Post editor order is Name, Rules, Applies to, Post types, Show only and Limits. Source rule
+  terms cover subreddit/user/flair/domain/title keyword/title regex, each include/exclude;
+  rule-list filtering is display only. Preserve source regex replacement/validation,
+  duplicate-term handling, removal/Undo, wildcard/plain-rule restrictions, ContinuumAll pinning,
+  blocked-subreddit counts/exceptions and legacy stored-column mapping. No browser evaluator
+  establishes matching correctness. The stored model includes legacy NSFW/award fields, but
+  the current source editor exposes six post types, Only NSFW/Only spoilers, and vote/comment
+  range fields. It does not expose Allow NSFW or award controls. `constructPostFilter` clears
+  the legacy award bounds on Save; the redesign must follow the current source behavior
+  rather than turn every model column into a new UI control.
+- Post assignments are in the editor for saved Settings filters; the transient one-feed filter
+  path omits stored targets. Preserve that distinction. “All feeds” is a display grouping for
+  Home plus all subreddits, users and multireddits (four stored usage rows), not every usage
+  type. Search, History, Upvoted, Downvoted, Hidden and Saved retain separate types. Empty names
+  and `NO_USAGE` scope, Guest restrictions, pickers and the read-history discriminator remain
+  authoritative native contracts.
+- Comment editor retains Name, excluded comma-separated text/users, Remove (0)/Collapse (10)
+  and two vote bounds. Comment text uses case-insensitive substring matching, users exact
+  case-insensitive matches, and only positive vote bounds apply. Do not copy post regex,
+  include/exclude rule capabilities or post feed-type assignments into comment filters.
+  The native comment Apply to screen manages subreddit usage separately from rule saving.
+- Save requires a nonempty name and retains duplicate-name override, rename/usage ownership,
+  result/failure and account boundaries. Contextual “add this post/author/subreddit to filter”
+  routes retain existing seed/merge and return-to-reader behavior; Settings studies do not
+  replace them. Source native save/delete/usage operations remain the future implementation
+  owners. No new auto-save, merged transaction or destructive guard is approved here.
+
+**Selected by the user:** retain the source organization with shared styling: post assignments
+inside its editor, comment subreddit assignments on their separate Apply to screen. The
+unified-comment-editor alternative is retired. Do not silently bundle comment usage writes
+into rule Save/cancel. Full editor controls, rule and target sheets, failure/duplicate/dirty-
+exit details remain subsequent review work; navigation studies do not establish their parity.
+
+Revision 130 checks passed: four NSFW/spoiler keys/defaults against source; syntax of both
+changed navigation/content scripts; lightweight DOM-model warning cancel/Agree/decline/focus,
+four switch states, dependent retention and account isolation; filter list/options/editor/
+target navigation callbacks; six served assets matched workspace bytes through the unchanged
+tailnet preview. These are source/model/serving checks. Browser remains unavailable per the
+last access result; no current responsive/theme/large-text/keyboard/contrast or real browser
+modal checks are claimed. No Gradle or native verification. Whole-app styling stays in progress.
+
+Next: refine the complete filter-editor workflows using the selected source organization,
+then remaining miscellaneous/link and management/device Settings. Accounts/API access/onboarding,
+themes, tablet/landscape and consistency/accessibility remain.
+
+### Editable filter workflows (unsaved-exit guard selected, revision 132)
+
+The [post editor](prototypes/relaxe-exploration/settings.html?rev=132&page=post-filter-editor&focus=1)
+and [comment editor](prototypes/relaxe-exploration/settings.html?rev=132&page=comment-filter-editor&focus=1)
+now use editable HTML forms and synthetic account-separated named-filter libraries, replacing
+the old route-only editor outlines. The source organization remains selected. Root filter
+lists support Create, Options, Edit and synthetic Delete; Comments keeps its separate Apply to
+route. Create starts unnamed, without copying the existing example. Nothing writes native
+preferences/Room, evaluates Reddit content, changes a feed or sends requests. Browser state
+is page memory, not an approved persistence schema or new draft-recovery store.
+
+Post form: Name; rule list with local Find rules; Applies to; six post-type switches; Only
+NSFW/Only spoilers; Votes and Comment count range fields; Save. Rule search changes only
+list visibility. Field/match/value sheets cover subreddit, user, flair, domain, title keyword
+and title regex, with Exclude/Only include. Add/Edit trim rule values, reject blank/duplicate
+terms, reject comma-separated storage terms and typed wildcard markers where source does,
+and offer Exact/Starts with/Ends with/Contains for subreddit terms. Wildcard matches need at
+least three characters. The model preserves plain/wildcard admission restrictions, including
+same-kind edits to legacy mixed filters, one regex per polarity with explicit replacement,
+and rule Remove/Undo. Wildcard additions pin targets; other target changes stay disabled until
+wildcard rules are removed. `filter-rules=wildcard` and `mixed` are explicit synthetic fixtures.
+No browser regex evaluator substitutes for Java `Pattern`: `filter-regex=invalid` demonstrates
+source-style validation feedback, but arbitrary Java-pattern syntax still needs native checks.
+
+The source scope `Constants.CONTINUUM_ALL_SUBREDDIT` identifies a registered placeholder whose
+**post listing fetches r/all**, distinct from the ordinary All scope; About/Subscribe resolve
+the placeholder name. It is not simply an ordinary subreddit post listing. The HTML shows
+“All · wildcard filtering” as a neutral proposed display label while retaining the opaque
+`ContinuumAll` scope value. No native target, Reddit name, API path, sorting key or stored usage
+is renamed. Source/native display and navigation mapping must preserve that distinction;
+the user's ban on upstream product branding does not authorize merging these scopes.
+
+Post assignments have all eleven chooser entries (All feeds group plus ten source types),
+with Home/Subreddit/User/Multireddit grouped expansion, blank names broadening only their type,
+comma-split post names, case-insensitive duplicate suppression and read-history type identity.
+Changes are staged with the post filter and committed by its synthetic Save. The native
+pickers remain labelled route previews; no user/subreddit lists or live blocked-subreddit
+records are loaded. Wildcard Blocked subreddits preserves its route for later scope/count/
+exception verification, rather than inventing a second browser recorder.
+
+Post numeric fields mirror `PostFilterRange` presentation: `100-5000`, `100-`, `0-5000`, bare
+positive lower bound and empty/no-limit. Nonpositive or unparseable endpoints are inactive;
+leading `-5000` gives the source missing-lower-bound hint and no limits. There is no new
+minimum-less-than-maximum rejection. Current source shows no award limits and no Allow NSFW
+switch; revision 132 corrects the revision-130 outline, which inferred extra controls from
+legacy model columns. Native Save's legacy award reset remains authoritative.
+
+Comment form: Name, comma-separated excluded text/users, existing user-picker route, Remove
+(0)/Collapse (10), and minimum/maximum vote fields. It adds no post regex, wildcard or include
+features. Positive bounds apply; empty maps to the native unset value. The HTML proposes
+inline rejection of non-integer/out-of-Int input rather than reproducing a native parsing
+exception. Text/name buffers remain separate from post filters and Guest. Post names trim on
+Save; comment names retain source raw nonempty behavior. Duplicate-name replacement is exact
+within the current account, with Cancel retaining input. `filter-save=fail` fails the first
+synthetic Save without clearing input and lets retry succeed. No actual database failure or
+transaction behavior is established.
+
+Comment assignments change independently on their separate page, immediately in the synthetic
+saved record. Source inspection found a native quirk: editing a usage inserts the newly named
+row without deleting the previous key (`CommentFilterUsageListingActivity` +
+`SaveCommentFilterUsage`). The fixture retains that behavior and explains it in the Edit
+assignment dialog; Remove remains separate. Do not silently replace/delete the previous row
+or treat this as an approved native bug fix. This source behavior needs a later explicit fix
+review if changing it is desired. Empty comment target entry is refused; it is not broadened
+to all subreddits like a blank post usage. Synthetic Delete removes that filter and its usages
+immediately, following the existing native operation; no new filter-delete guard is selected.
+
+**Selected:** Keep editing / Discard changes before leaving unsaved filter edits. The source
+immediate-discard comparison is retired. Revision 132's Settings Back/Escape guard reuses
+the other editor pattern. Keep editing retains input; Discard changes leaves without changing
+saved criteria or staged post assignments. This selects the interaction, not native system
+Back, process-death or arbitrary-navigation correctness. Cancel/Escape in a rule/target/replace
+sheet closes only that modal and restores focus. Workbench account/auth/platform fixture
+changes discard the unsaved editor buffer and return to root; they are not native account-
+switch semantics. No new persisted filter-draft store is approved.
+
+Revision 132 checks: syntax of Settings/content/new filters scripts; lightweight DOM-model
+create/edit/save, duplicate replacement/cancel, failure/retry, duplicate rules, plain/wildcard
+scope admission, regex replacement, list search, pin/remove/Undo, separate comment usage
+append behavior, numeric errors/display mode, discard/cancel and Guest isolation. Ten range
+examples/boundaries and legacy mixed-rule admission checked against source contracts. Source
+inventory confirms six post types, two Show only fields and no current award UI. Eight served
+assets matched workspace bytes; local references, modal-Escape integration and Settings Back
+wiring checked. Browser opening was attempted again and returned “Local browser use is disabled
+in Work settings”. No current rendered responsive/theme/large-text/contrast/keyboard/modal
+proof, Android tests or Gradle run is claimed. CSS provides wrapping, explicit labels/focus
+styles and minimum 48px controls, but actual accessibility remains to be verified.
+
+Next: miscellaneous/link and management/device Settings are covered by revision 133 below. Keep full Java validation, live pickers/blocked lists, contextual seed/return
+flows, storage/failure/restoration/account checks and actual Android behavior on the native
+verification list; do not declare whole Settings complete. Policy draft remains pending its
+operator/contact and release data-flow review.
+
+### Miscellaneous, Device and management screens (revision 133 proposal)
+
+Filter unsaved-exit confirmation is selected. The next grouped proposal covers
+[Miscellaneous](prototypes/relaxe-exploration/settings.html?rev=133&page=misc-settings&focus=1),
+[Device](prototypes/relaxe-exploration/settings.html?rev=133&page=device-settings&focus=1),
+[Account Settings Management](prototypes/relaxe-exploration/settings.html?rev=133&page=account-management&focus=1),
+[Global Settings Management](prototypes/relaxe-exploration/settings.html?rev=133&page=global-management&focus=1)
+and [Backup and Restore route](prototypes/relaxe-exploration/settings.html?rev=133&page=backup-settings&focus=1).
+Control definitions are extracted from source XML. Miscellaneous has eleven source values,
+Device two; the account/global management screens retain ten/three actions, Backup/Restore
+two routes. No native value, data, backup, credential or file changes. These are distinct
+screens with their existing root categories, not a new merged settings or data store.
+
+Miscellaneous groups: Navigation and restoration, Opening links, Sharing links, History and
+appearance, Language. All values remain account scoped, Guest separate, including Language;
+link-handler/package choices use their existing explicit account keys. Defaults stay Home-
+position saving Off, session resume Off, External App (0), empty browser packages, shared
+www.reddit.com (fragment-derived default), custom www.reddit.com, Back Default (0), search
+history On, disable-avatar-animation Off and language auto. All 25 language choices remain;
+changing the fixture language does not translate/restart the HTML. Native recreation/events,
+search-history collection and restoration are preserved future integration contracts.
+
+Session resume takes precedence over Home/Best-only position saving. Both remain independent
+switches. Turning resume Off clears this account's recorded screen/cache through
+`ResumeState.clear` → `clearAccount`. **Source scope conflict:** Home-position Off calls
+`cache.edit().clear()` on the raw shared position file (`AppModule`), clearing positions
+across accounts, although the setting itself is per-account. The proposal makes this consequence
+explicit and clears nothing. Account Management's separate deletion already removes only
+the named account key (`AccountStoredData.deleteFrontPageScrolledPosition`). Do not silently
+claim the toggle is account-only, or silently introduce a fix in HTML/native implementation;
+resolve the scoped native correction explicitly before implementing that control. Account
+scope preservation remains required; this is a current-source defect to carry forward.
+
+Opening links retains External App, Custom Tab, Ephemeral Custom Tab, Internal Browser and
+Specific Browser values in source order. A workbench browser-capability fixture (private,
+standard, none) supplies synthetic candidates; it does not enumerate installed apps. Native
+installed-browser sorting/detection and resolver fallback remain authoritative. Private-tab
+choice is offered only with support; package rows follow handler/capability gates. If a stored
+private-tab choice becomes unavailable, the study shows a disabled “Saved choice unavailable”
+option without overwriting the buffer. Native currently omits that option and may show no
+matching entry; this is an explanatory presentation refinement, not a new fallback. Handler
+and package values survive mode/capability changes. No link is launched by changing a setting.
+
+Sharing retains all six source domain choices and independent custom-host value. Custom stays
+visible-disabled outside Custom; Apply domain normalizes lowercase bare hosts, strips pasted
+scheme/path/query/fragment and refuses invalid hosts/ports using the inspected source rule.
+A synthetic post-link example demonstrates the saved domain without a fetch, clipboard or
+share. Preserve `RedditLinkUtils`: non-Reddit embed-fixer hosts affect outbound post/comment
+share/copy links only; browser links use only Reddit-owned domains; media/shorteners and API
+paths stay separate. The study is not a replacement URL resolver or proof of Android URI parity.
+
+Device is global across accounts/Guest: fold support Off and max decoded preview area
+5000000. It retains the source warning that higher resolution can cause unexpected crashes;
+Apply resolution accepts positive signed-Int-range values and keeps the saved value on errors.
+It changes no image decoding, device mode, configuration or performance policy.
+
+Account management separates Settings (Copy/Reset) from Stored data (eight existing local
+clear operations). Copy is disabled with `other-account=none`, as source does; otherwise a
+synthetic chooser excludes the current account/Guest as sources. The confirmation identifies
+source → destination, replacement rather than merge, filters included, Home tabs excluded,
+source unchanged and native restart. Reset explicitly includes Home tabs and filters, and
+names the account. Stored-data confirmations stay account scoped; read-history displays
+unmeasured Size/Count placeholders and preserves READ_POSTS-only clearing, including separation
+from Guest saved/voted/hidden types. The study never copies/restarts/deletes or queries counts.
+Exact native filter replacement, stored-data categories and event/recreation handling remain
+`AccountSettings`/`AccountStoredData`/the source fragment's responsibility.
+
+Global management groups Themes, Legacy settings and Reset. It retains three existing
+operations. **Reset scope:** `AccountScopedSharedPreferences.Editor.clear` delegates whole-file
+clear, so the current reset clears the shared default, Home-tab and NSFW files across accounts;
+it is not a complete erasure of every preference file/database/export. The proposal explains
+that breadth instead of suggesting only the selected account is reset. Future native work
+must preserve or explicitly review the operation and its name, not broaden it by assumption.
+Backup/restore preserve the existing password/encrypted-archive, Android file-picker and
+validation paths as route previews. No password entry or real backup content is requested in
+HTML; sensitive accounts/tokens/API settings in backups remain disclosed, without reading them.
+Notifications, Security, Proxy and Download Locations source XML was inventoried but their
+remaining runtime gates/detail review is not complete. Do not mark all detailed Settings done.
+
+**Selected:** Back up first inside management copy/reset/clear confirmations. The reminder-
+only comparison is retired. The extra action sits alongside Cancel and the operation action.
+It closes/cancels the pending operation and opens Backup and Restore; returning requires
+choosing/reviewing that operation again, with no automatic execution/export/retry. It is not
+mandatory backup or approval for a native destructive operation. Account/global scope and
+existing confirmations remain. Native export, file/password handling and operation correctness
+still require later implementation verification.
+
+Verification: all 28 source action/value keys and defaults matched XML (shared-domain default
+cross-checked with its fragment/helper). Syntax passed for Settings, utilities and filters.
+Lightweight DOM-model checks covered eleven Misc controls/25 languages, browser gates/retained
+choices, custom-host normalization/rejection and account isolation, restoration feedback,
+Device validation/global scope, ten/three management actions, copy target, Cancel/Back up first
+without operation execution, read-only-history scope, no-other-account gating and backup route
+announcements. Nine served assets matched workspace bytes; local references resolved. Browser
+access remains disabled per the last attempt; responsive/theme/large-text/contrast/focus/modal
+rendering and Android events/persistence/Back remain unverified. No Gradle/native checks.
+
+Next: the global-settings source boundaries are reviewed in revision 134 below, before
+Accounts/Guest/login/API access/onboarding. Whole-app styling remains active;
+policy operator/contact and release data-flow review, themes, tablet and consistency remain.
+
+### Global Settings and restore boundary (revision 134; restore review proposed)
+
+Back up first is selected. This grouped proposal covers
+[Notification](prototypes/relaxe-exploration/settings.html?rev=134&page=notification-settings&focus=1),
+[Security](prototypes/relaxe-exploration/settings.html?rev=134&page=security-settings&focus=1),
+[Proxy](prototypes/relaxe-exploration/settings.html?rev=134&page=proxy-settings&focus=1),
+[Download Locations](prototypes/relaxe-exploration/settings.html?rev=134&page=download-settings&focus=1)
+and [Backup and Restore](prototypes/relaxe-exploration/settings.html?rev=134&page=backup-settings&focus=1).
+These are global across accounts/Guest. Their 18 source value/action keys/defaults are retained;
+no extra credential, proxy-auth, folder permission, polling or backup format is introduced.
+The separate `settings-global.js` owns these screens; the obsolete utility backup renderer was
+removed. HTML fixtures never schedule work, authenticate a device, protect a real window,
+change network traffic, grant file access, read passwords/archives or restore/restart anything.
+
+Notification retains Enable On and interval 1 hour, with all nine source options. Minutes
+15/30 and hour values keep their source encodings, including the source typo in the interval
+key. The interval stays visible-disabled while Off, retaining its value; source hides it.
+Android 13+ permission is a separate state and does not overwrite the app preference. The
+workbench adds API 33 and granted/denied fixtures; denial shows the existing Android app-
+settings route. Preserve source's permission request on entry, denial feedback and stored
+request flag. The native worker checks signed-in accounts and notification availability;
+it is not a Guest Inbox feature. Existing connected-network constraints, initial delay,
+unique periodic-work replace/cancel and inexact Android scheduling remain authoritative.
+Changing these controls does not create a browser timer or real permission request.
+
+Security entry remains hidden when strong biometric/device-credential authentication is
+unavailable. A direct unavailable route exposes no controls. The synthetic Authenticate step
+models the native `SecurityPreferenceFragment.onResume` boundary: no fields before success,
+Cancel/error returns Back; successful fixture entry focuses the first control. It collects
+no credential/biometric. All four defaults remain account-section auth Off, secure mode Off,
+app lock Off, timeout 600000, with all sixteen timeout options. Timeout stays editable while
+App Lock is Off, matching source. Every new entry requires the route again; no browser
+“unlocked forever” flag is stored. Keep the native strong-biometric-or-device-credential
+prompt, events, secure-window application (including this screen), lock timing and return
+handling. Browser switch values do not establish actual capture protection or authentication.
+`auth-result=cancel|error` demonstrates exit callbacks only.
+
+Proxy retains Off, HTTP, 127.0.0.1 and port 1080; choices are HTTP/SOCKS/Direct. Host/port remain
+editable while Off or Direct, as source does. Apply fields refuse invalid values while
+retaining saved ones; port **0–65535** is source-valid, not a new 1-based rule. HTML host checks
+mirror source hostname intent and common IPv4/IPv6 cases without DNS requests, but native
+Java regex and Guava address parsing remain authoritative. `PreferenceProxySelector` reads
+settings for new OkHttp connections and evicts tracked pools on change. Off/Direct delegate
+to the system proxy selector rather than guarantee bypassing a system proxy. The study adds
+no restart requirement, connection test, encryption/anonymity promise or credential fields.
+Native connection/pool behavior remains unverified by these forms.
+
+Download Locations retains four independent folder values and the two source Off switches
+(subreddit subfolders and separate NSFW destination). The source NSFW folder stays editable
+while separate NSFW storage is Off, enabling preconfiguration. Choose folder announces the
+existing Android document-tree picker/persistable read-write-URI permission route; no web
+folder picker or typed filesystem path replaces it. `folder-state=chosen` supplies synthetic
+paths, not real device data. Visible Forget folder buttons provide an accessible alternative
+to the source long-press handler for all four locations (despite an older source comment saying
+NSFW lacks it). Forget clears only that location value, retains other locations/switches and
+moves focus to Choose folder; it does not delete downloaded media or revoke URI grants. Source
+path formatting, picker cancellation, revoked/invalid access, storage/provider behavior and
+native download services remain later checks. No new automatic download retry is introduced.
+
+Backup retains password → Android destination picker → encrypted archive/result, with native
+6–32 trimmed-character validation and Show password behavior. Restore retains Android file
+selection, supported legacy compatibility-password attempt, password prompt when needed,
+archive parsing/validation, supported data replacement, outcomes and success-triggered restart.
+The browser exposes route/outcome studies, not a password field or archive processor. Real
+password memory clearing, retry lifecycle, partial/invalid archive handling, Room/preferences
+write scope and rollback limitations must be verified natively; the study promises neither
+whole-app atomic rollback nor a complete device wipe. The policy draft gains source-backed
+notification-content and folder-grant disclosures; it remains unfinalized and unpublished.
+
+**Selected:** replacement review after choosing a backup and before the first native restore
+attempt. Immediate continuation is retired. Native `onActivityResult` currently starts restore
+after selection, including an automatic supported compatibility attempt that may succeed
+without a prompt; the new review must precede that first call. It names the selected file,
+explains that accounts/settings/themes/supported data across accounts may be replaced and
+that successful restore restarts the app. Cancel/Escape clears the pending fixture and returns
+focus to Choose backup. Confirm continues only into native-route/outcome feedback, not an
+actual operation. Wrong-password/invalid/failure/success fixtures retain their documented
+boundaries. No decrypted archive inventory is invented and no native change is implemented.
+
+Verification: all 18 source keys/defaults matched XML; syntax of global/Settings/utility/privacy
+scripts passed. Lightweight DOM-model checks covered Notification defaults/nine choices/Off
+retention/API gate; Security pre-auth hiding/success/cancel/focus/global retention/sixteen
+choices; Proxy seven host and five port cases/Off-Direct editing; four folder routes/isolated
+Forget/retention; Backup boundary and Restore Cancel/Escape/confirmation/four outcome models.
+Ten served assets matched workspace bytes, local references and global route/modal integration
+checked. No actual permission/authentication/URI/network/archive behavior was exercised. Browser
+access remains disabled per the last attempt: rendered responsive/theme/large-text/keyboard/
+contrast checks are pending; no Gradle or native tests were run. Existing source scope defects
+from revision 133 remain open and are not silently fixed by this group.
+
+Next: the requested per-account basics onboarding is proposed in revision 135 below;
+Accounts/Guest/login/API access remains a related unfinished workflow group. Themes/custom editor, tablet/landscape and cross-screen consistency/accessibility remain.
+Detailed Settings directions are covered to this point, but source conflicts, native mechanisms,
+prototype route-only boundaries and browser checks prevent declaring Settings/whole-app styling
+fully complete. Policy operator/contact, release data-flow audit and production URL remain.
+
+### Per-account onboarding and download default (live layout samples, revision 136)
+
+**Approved requirement:** prompt for a default download location during onboarding; basic
+settings such as layout and theme are set up per account. Add an onboarding flow if there
+is no existing one. The source inspection found first-launch theme seeding and separate
+login/account entry, but no general basics-setup wizard in the inspected launcher/login/
+settings paths. ARCHITECTURE.md records the confirmed storage boundaries and planned integration.
+This is design/HTML authorization, not native implementation, application-ID change or a new
+login/API-access mechanism. Restore replacement review is also selected; no restore choice
+remains open.
+
+The [revision-136 onboarding study](prototypes/relaxe-exploration/settings.html?rev=136&page=onboarding&focus=1)
+starts after an account/Guest context is available and proposes Layout → Theme → Downloads →
+Review. The API-key/access checks and successful native account acquisition must happen through
+existing owners before first account setup; the study does not fake a Reddit sign-in or collect
+keys/passwords. Fresh Guest entry has its own setup context. Revision 137 connects these entries to the account/access workflow proposal below.
+
+**User-requested correction:** the layout selector must show a rendered feed sample (or an
+appropriate animation) for the selected family. “Keep current layout” is not useful for login/
+first-use setup. Revision 136 therefore shows four actual choices: Compact, Large, Gallery and
+Vertical. First-use Theme also shows actual modes (Follow system, Light, Dark, AMOLED), rather
+than the same inheritance placeholder. Compact/Follow system are starting candidates in the
+synthetic study, not approval of new shipping defaults or replacement of source first-launch
+theme seeding. Existing-account re-entry must load its actual saved family/mode/custom choices
+from their owners, not reset them to these fixture candidates or offer a generic Keep current
+item. Custom palettes, saved/context-specific layouts and the shared theme library stay intact.
+
+The Layout step embeds the existing Settings **feed** renderer in a same-origin frame, rather
+than drawing a second approximate post card. Large reuses the shared editor's post samples and
+accepted controls; Compact/Gallery/Vertical reuse its established nested feed/media fixture.
+The sample changes with selection and forwards theme/palette/text/window controls. Embedded
+status/header/bottom-navigation duplicates are suppressed locally. Each frame is isolated
+from the parent onboarding buffers and performs no native action. Only the current selected
+sample is mounted, using that family's accepted starting configuration. First-use setup now
+keeps detailed customization in Settings, rather than opening a parent editor whose separate
+fixture buffer is not synchronized with this account's sample. Family choice survives moving
+between setup steps. Final basic/advanced persistence still needs one native owner and explicit
+mapping; the sample is not a mirror of arbitrary saved/context-specific layout overrides.
+
+Vertical has an interactive viewer with its existing touch/keyboard behavior plus visible
+Previous sample / Next sample controls outside the frame. These commands use existing viewer
+buttons and respect an open modal, disabled endpoint and zoom-owned paging. This is rendered
+browser interaction, not a timed demonstration or native animation benchmark. No automatic
+page-advance loop is added. The existing album/post distinction, gating and media-policy
+fixtures remain; appearance does not establish Android correctness. Parent/child messages are
+limited to the expected same-origin frame/source with validated family/theme/text/width and
+±1 commands; stale frames cannot update the current sample. Ready feedback waits for the
+existing nested fixture signal for media families; Large uses its rendered page readiness.
+Actual readiness/gesture playback still requires browser verification when available.
+
+Theme uses the existing foundation tokens for its local sample. Follow system is illustrated
+by the workbench appearance; it is not a new browser/system-theme implementation. It forwards
+appearance controls without replacing native theme persistence or a custom-theme library.
+No second native theme engine or competing onboarding preference copies are approved.
+
+Downloads explicitly prompts for **this account's default folder**, including a separate Guest
+choice. Choose folder previews the existing Android document-tree route and uses a clearly
+synthetic example folder; Cancel/Escape or `setup-folder=denied|invalid` keeps the previous
+choice. There is no real path browsing or URI permission grant. The review shows the target
+account, chosen layout/theme and folder or deferred status. Finish stores only a page-memory
+setup snapshot/completion marker for that identity. Re-entering the same identity retains its
+local choices/progress; another signed-in identity or Guest starts independently. For direct
+review links, `setup-account=secondreader` and `guest` select synthetic identities; these are
+not new account namespaces or actual account switches. No localStorage/native persistence is
+introduced, and process-death restoration remains future work.
+
+**Source/target scope conflict:** current four media/NSFW locations and two folder-organization
+switches are global, as revision 134's source-backed Download Locations study shows. Layout and
+theme selection already have account-scoped mechanisms. The user's new requirement approves a
+per-account default download setting; the existing global source is not proof it exists. Plan
+its scope/migration and Settings ownership before native implementation. Keep existing explicit
+image/GIF/video/NSFW locations and NSFW separation values intact; do not silently collapse them
+into one folder, clear them on setup or change another account when one chooses a default.
+The relationship of a new base folder, per-media overrides and legacy shared values must have
+an explicit mapping. The onboarding study intentionally collects only the new account default; it does
+not relabel the existing global source form or pretend the mapping is implemented. Optional
+advanced overrides remain existing mechanisms, not four compulsory onboarding picker prompts.
+
+Native integration requirements: use `AccountScope`/existing scoped preference owners for
+completion and default selection; trigger for genuinely new account/Guest setup, not every
+account switch/token refresh. Existing users/restored accounts must retain their choices and
+not be forcibly reset because a new completion key is absent. Offer a future re-entry path for
+account setup; eligibility/versioning, copy/reset/remove-account and backup/restore treatment
+need explicit mapping. An Android URI grant is app/device owned even when a folder preference
+is per account; two accounts may deliberately choose the same folder. Do not claim file-level
+account sandboxing or revoke a shared grant when one account forgets its default. Restoring a
+saved URI does not restore its device permission; retain validation/reselection and existing
+missing-location download feedback, without automatic download retries. Device security,
+proxy, Android permissions and the theme library retain global/OS scope and are not silently
+made per-account by the setup request. Other “etc.” basics can follow the account/access review;
+no additional data/content/notification policy defaults are chosen here.
+
+**Selected:** Choose folder / Set up later during each new account's onboarding. Folder
+selection is optional: browsing and finishing setup remain available without storage access.
+When no usable download location exists, retain the existing download-setup prompt; do not
+silently choose a folder, reuse another account's selection or automatically retry a download.
+Cancelling/denying folder access keeps the previous choice and allows deferral. Completing
+onboarding is separate from holding a valid folder permission. The mandatory-folder-before-
+Finish alternative is retired. This selects product behavior; per-account native preferences,
+URI validity/grants and legacy media/NSFW mapping remain planned implementation work.
+
+Revision 135 checks remain historical for its initial setup flow. Revision 136 checks passed:
+JavaScript syntax; lightweight DOM models for four actual family/mode choices, per-family feed
+URLs/titles, preview origin/source/stale-frame handling, Vertical sample commands, theme/text
+forwarding, step-to-step choice retention and per-account selection retention. A separate model of the
+actual child bridge checked readiness/configuration validation and existing-button paging
+with modal/zoom/disabled-boundary rejection. Eleven served assets matched workspace bytes;
+four embedded feed URLs returned 200 and local references resolved. An initial test-harness
+syntax error was corrected and that bridge model passed on rerun; it was not an application
+syntax failure. Browser opening was retried and returned “Local browser use is disabled in
+Work settings”. Therefore no actual nested-frame rendering/ready timing, animation, gesture,
+responsive/theme/large-text/keyboard/contrast or Android proof is claimed. No native change,
+installation or Gradle check occurred. Whole-app styling/onboarding remain in progress.
+
+Folder deferral is now explicitly selected by the user; no choice remains open there.
+The current HTML already offers Set up later and permits finishing with no selected folder;
+this decision updates its status, not a new runtime branch. Earlier revision verification
+remains historical; no new browser/native verification is implied by accepting the behavior.
+
+Next: review Themes/custom editor and retain native setup eligibility/default-folder
+migration work. Theme/custom-editor, tablet/landscape and cross-screen
+consistency/accessibility remain. Privacy-policy draft operator/contact and actual release
+data-flow verification remain pending.
+
+### Accounts, Guest and API access (revision 137; workflow proposal)
+
+The [Accounts study](prototypes/relaxe-exploration/settings.html?rev=137&page=accounts&focus=1),
+[sign-in](prototypes/relaxe-exploration/settings.html?rev=137&page=account-login&focus=1) and
+[API configuration](prototypes/relaxe-exploration/settings.html?rev=137&page=api-access&focus=1)
+cover this group together. Settings Switch account/API Keys open these studies without moving
+account management exclusively into Settings or replacing the accepted drawer/shell. Synthetic
+identities/configuration stay in page memory. No Reddit page, OAuth request, token exchange,
+native switch or restart is performed. Use example keys only.
+
+Preserve source distinctions: switching retains saved sign-ins; Use Guest retains sign-ins and
+resume records; Log out removes the current local account/resume and enters Guest; removing
+another saved sign-in leaves the current account active. This is not Reddit account deletion or
+itself remote authorization revocation. Related database rows may be removed; scoped preferences
+may remain. The policy draft now describes these source-backed limits. Visible Options provides
+an alternative to long press. Existing optional device authentication gates names; cancellation
+or error returns without exposing them.
+
+**Selected:** confirm current-account Log out, naming its local removal, with Cancel and
+the Use Guest alternative. The user selected option 1. Source immediate logout is retired as
+the target presentation; other-account removal already confirms in source. Revision 137 already
+demonstrates this guard. Native implementation remains unchanged; no logout question is pending.
+
+Proposed eligibility connects successful new sign-in/first Guest use to approved Layout → Theme
+→ Downloads → Review. Existing/returning accounts bypass automatic setup; optional Review account
+setup loads their own choices. Failed/cancelled/denied/unverified sign-in or profile loading
+creates no account/setup. Leaving setup does not roll back a successful sign-in. Completion is
+separate from folder access. Existing/restored users must never reset just because a new marker
+is absent. Native eligibility/versioning, account lifecycle and download migration remain planned.
+
+Keep default in-app Reddit WebView and existing Chrome Custom Tab/Auth Tab routes. Auth Tab retains
+its explicit agreement/decline and unsupported-Auth-Tab WebView fallback; app policy uses Relaxe's
+draft. Browser capability is separate from the ephemeral-browser fixture. Preserve native OAuth
+scopes, redirect scheme, state checks and token/profile owners. Error previews offer explicit retry
+without changing accounts; distinct native login implementations do not share every error classifier.
+
+API settings stay global: overrides Off by default, Client ID/User agent/Redirect dependent on it,
+Giphy independent. Example edits mirror source normalization: Client ID 22 characters after whitespace
+removal; User agent trims ends; Redirect removes whitespace; Giphy 32 characters or empty. Built-in
+client rejection remains native; no built-in key is copied. Client/agent/redirect edits show the
+existing deferred-restart consequence. QR/camera is a route preview. No entitlement or access change.
+
+Revision 137 syntax/model checks passed for Guest/switch retention, existing setup, new login through
+Finish, logout Cancel/confirm, returning bypass, ten failed/unknown results, new Guest, API gate and
+validation/restart markers, Auth Tab agreement/fallback and protected-name/focus behavior. Additional
+checks covered normalization and unavailable-browser guards. Twelve served assets matched workspace
+bytes; local HTML references resolved. These are source/model/HTTP checks only. Browser access remains
+disabled; rendered responsive/theme/large-text/keyboard/contrast and native correctness are pending.
+No native changes, installation or Gradle run. Next: Themes/custom editor.
+Native account conflicts are recorded in ARCHITECTURE.md. Whole-app styling remains in progress.
+
+### Themes and custom-theme editor (unified Material You direction; revision 138 study)
+
+**Approved direction:** the user selected separate Save new copy / Update shared theme, with an
+impact confirmation for shared updates. The user also requires a more elegant, easier theming
+system than Continuum, with equivalent depth and all themes using Material You. This supersedes
+the earlier source-shaped proposal to expose Material You as an optional second theme system.
+Research/design planning is authorized now; native implementation belongs to the later Android
+phase. Revision 138 now demonstrates the core workflow in HTML. Android behavior and persistence are
+unchanged; this study does not implement native Material palette generation or migration.
+
+**Selected color sources:** wallpaper or chosen base color, both using the same Material system.
+The user selected option 1; Wallpaper-only is retired. There is no Material You On/Off or separate
+legacy theme category in the target. Material You personalization/M3 roles do not require wallpaper
+as the sole source. System wallpaper palettes are API31+; supported older devices still need a
+Material fallback. Exact native source/fallback and migration behavior remain planned.
+
+**Revision 138 accepted:** the user reviewed the study and said “Looks good.” Appearance →
+Choose theme → Customize/Preview → Save new copy or confirmed shared update, with explicit Use
+theme, is the accepted HTML direction. Retain its basic/Advanced hierarchy, draft protection and
+per-account appearance intent. This accepts the demonstrated workflow, not unbuilt import/Online/
+conversion behavior, exact native geometry, palette algorithms or accessibility/performance proof.
+Palette-style/contrast presets below remain planning candidates where absent from the study.
+
+**Screen/workflow direction and planned extensions:**
+
+- Appearance opens with an active-theme card and a realistic Posts/Comments sample. Keep
+  Follow system / Light / Dark distinct from Black backgrounds in dark mode. These control how
+  the current theme renders, rather than requiring users to assign three separate theme files.
+  Exact defaults remain unselected; existing-account values must migrate without reset.
+- Choose theme shows visual choices, active/preview labels and a clear Use theme button for the
+  current account. Wallpaper follows system colors; saved recipes are reusable choices in the
+  same system. Wallpaper and chosen base color are selected sources. No application
+  occurs on merely opening a tile, and no editable global slot flags appear in the basic chooser.
+- Customize opens a draft with Basics first: source (if offered), coordinated palette style and
+  readable contrast controls, with Light/Dark/Black preview modes and Posts/Comments examples.
+  Exact style/contrast presets and ranges require native capability/accessibility review; do not
+  add arbitrary sliders just to appear powerful. Advanced reveals searchable grouped role controls,
+  current value/source, inherited/generated versus explicit override, and Reset this override.
+  Main app colors stay unchanged while previewing. Dirty exits use Keep editing / Discard.
+- Save new copy requests a unique name and stores a reusable recipe; Use theme separately assigns
+  it to this account. Updating a shared theme explicitly confirms affected users/assignments
+  where known; built-in themes are copied for editing. Failed saves retain the draft. No Save
+  action implicitly publishes, imports, changes account assignment or switches appearance.
+- Saved themes offers explicit Customize, Rename, Copy/export and confirmed Delete. Local and
+  existing Online capabilities remain discoverable under library/browsing, not a second theme
+  engine. Online-owner updates stay separate from local saving, with existing access mechanisms.
+  Import reviews compatibility, source/override conversion and name conflict before applying;
+  deletion explains active-account fallback and never silently changes unrelated accounts.
+
+**Depth without the flat source list:** retain an inventory/migration map for all source fields:
+up to 86 color roles, three slot-assignment flags and three system-bar switches, plus name.
+Color roles map into M3 foundation roles or Relaxe extension roles (read posts, vote states,
+NSFW/spoilers/flair, comment depth, messages, etc.). The three source assignment flags become
+explicit account selection/adaptation, not three compulsory tasks inside color editing. System
+bar controls retain supported intent/platform gates. Keep existing fonts/layout settings in
+their owners; a theme is not a hidden bundle that resets those choices. Advanced must retain
+equivalent useful role control, alpha precision and clear override reset; do not claim all
+legacy literal values can remain visually identical after conversion. Incompatible raw imported
+palettes need review/backup and explicit conversion, not silent deletion or a hidden legacy engine.
+
+**Dynamic behavior proposal:** save recipes/overrides, not generated wallpaper snapshots under
+reserved names. A wallpaper update re-resolves generated roles without replacing library rows,
+changing recipe identity or erasing overrides. Track which values inherit and which are explicit;
+offer review/reset if a locked override loses contrast after wallpaper changes. Preserve semantic
+meaning of votes, errors, read state and moderation with labels/states as well as color; don't
+blindly harmonize them into indistinguishable accents. Generated pairs, alpha, scrims, black
+surfaces and custom extensions all need measured contrast, not a generic Material accessibility
+claim. Refresh is a recovery action if needed, not a second way users must apply a theme.
+
+**Account model target versus current source:** selection and appearance should satisfy accepted
+per-account setup, with reusable library recipes shared. Current source actually shares the three
+active palettes, so this requires planned explicit account-reference/assignment migration. Editing
+a shared recipe may affect its users only through an explicit shared-update operation; a copy
+leaves original users unchanged. Exact reference/versioning/removal and backup contracts remain
+native design work. Stable identity separate from display name is a candidate technical boundary,
+not an implemented schema. No source defaults, existing account choices or stored theme data are
+changed by this plan.
+
+Research checked 2026-10-31 against primary sources:
+[Android color design](https://developer.android.com/design/ui/mobile/guides/styles/color)
+supports source-generated tonal roles, custom schemes, semantic extensions and harmonization;
+[Material 3 theming](https://developer.android.com/develop/ui/compose/designsystems/material3)
+distinguishes system dynamic color on API31+ from custom light/dark schemes;
+[Views dynamic colors](https://developer.android.com/develop/ui/views/theming/dynamic-colors)
+provides a Views path, so this does not require a Compose rewrite;
+[Material Color Utilities](https://github.com/material-foundation/material-color-utilities)
+provides scheme, HCT, contrast and harmonization building blocks. The screen/recipe model above
+is our design inference, not a Google-prescribed theme manager. Exact library APIs/version and
+Views/Compose mapping must be verified at native implementation time.
+
+**Implemented HTML study:** [Appearance](prototypes/relaxe-exploration/settings.html?rev=138&page=themes&focus=1)
+→ [Choose theme](prototypes/relaxe-exploration/settings.html?rev=138&page=theme-chooser&focus=1)
+→ [Customize](prototypes/relaxe-exploration/settings.html?rev=138&page=theme-editor&focus=1).
+The existing Theme root entry now opens Appearance. Preview tile selection does not apply; Use theme
+changes only the selected account's synthetic reference. Display mode and the black-background
+switch are per account, retained independently; system mode uses workbench appearance (battery-saver
+label on older fixtures). Starting selections are fixture candidates, not approved shipping defaults.
+Shared reusable examples include Wallpaper, Fern, Clay and editable Evening. Built-ins save as copies.
+
+The editor supports Wallpaper/chosen base color (picker plus six-digit value), Light/Dark/Black and Posts/Comments
+samples, and all 86 source color fields plus three system-bar switches under searchable groups.
+The three source slot booleans map to explicit selection rather than editor controls. Override values
+accept #RRGGBB/#AARRGGBB, are separated by preview mode, retain invalid input across preview changes,
+and can reset to inherited values. Navigation-bar dark-icon control keeps its API26 gate. Other
+source roles remain retained controls, not proof every role is rendered in the sample. Defaults are
+illustrative derived fixture values, not a loaded native palette or final role map. Typography/layout
+owners and media/read/save/vote actions are not changed by this editor.
+
+Save new copy checks a unique trimmed name and leaves the active assignment alone; its result opens
+Choose theme with the copy previewed and explicit Use theme. Shared update names affected synthetic
+accounts and confirms; Cancel preserves the library. `theme-save=fail` retains the draft. Dirty Back/
+Escape and account/platform fixture changes use Keep editing/Discard; opening a modal does not exit
+editing. Preview tabs/modes alone do not make the draft dirty. Resetting the last override restores
+clean state. Shared Rename preserves fixture identity; confirmed Delete names affected accounts and
+uses Wallpaper fallback only for references to that deleted example. Built-ins have no Delete action.
+At revision 138, Copy/export, import and Online explained existing native routes only. Revision
+139 below extends their HTML workflows; real clipboard/file/network and native conversion remain
+unimplemented.
+
+**Important prototype boundary:** color mixing and default role values are illustrative browser
+fixtures, not Material Color Utilities/HCT or a faithful Continuum renderer. The sample reuses a
+local post image/content and shows selected role mappings with inert action text. It does not claim
+Material palette validity, complete role parity or native system-bar rendering. Wallpaper workbench
+changes re-render samples without replacing saved recipe rows or clearing overrides. The future
+native resolver/migration must deliver the accepted all-Material behavior. No preferences, database,
+account data, native identity, Android permission, online service or real theme file is changed.
+
+**Revision 138 verification:** JS syntax passed for main/theme/inventory modules. Lightweight DOM
+models passed preview/apply separation, copy naming/no implicit apply, draft Keep/Discard, account
+mode/black isolation, per-mode alpha overrides/reset, invalid-input retention/guard, search, shared
+update Cancel/confirm, failed save, wallpaper/library retention, deletion Cancel/confirm/fallback and
+89-control/platform coverage. Thirty-six default sample text-color pair ratios were >=4.5:1; this
+covers those computed sample pairs only, not arbitrary overrides or overall accessibility. Source
+inventory equality passed: 86 colors plus three switches, with three slot flags explicitly mapped.
+Fifteen served assets matched workspace bytes, three theme routes returned HTTP200, local refs and
+script order resolved. Browser opening again reported “Local browser use is disabled in Work
+settings”; no rendered responsive/themes/large-text/keyboard/focus/contrast proof. No Gradle, native
+or device checks.
+
+**Next:** retain accepted revision 138 as the baseline; review the revision-139 library extension
+below and retain native per-account assignment/recipe migration planning. Visually refine when
+browser access returns. Tablet/landscape and cross-screen consistency/accessibility remain.
+Whole-app styling remains in progress.
+
+### Theme library, import and Online (revision 139 proposal)
+
+[Theme library](prototypes/relaxe-exploration/settings.html?rev=139&page=theme-library&focus=1)
+adds Local/Online tabs behind the accepted chooser's Import / browse online entry. Local retains
+Preview → Use theme and Options for Customize/Rename/Copy/Delete. This extends the accepted core
+workflow rather than adding a second theme engine or changing approved appearance choices.
+
+Import accepts pasted theme text, with example buttons; it reads no clipboard or file. Review
+happens before creating any library item, replacing anything or applying account assignments.
+Supported study-recipe input retains its source/per-mode overrides. Legacy review shows recognized
+controls, unmapped field names and ignored Light/Dark/AMOLED assignment flags; the exact original
+text is retained with the copy in page memory. A unique trimmed name is required. Save Material
+copy does not apply it; it returns to the accepted chooser with explicit Use theme. Existing
+same-named themes are kept. Updating a shared theme remains the separate accepted editor operation.
+
+**Selected default:** keep compatible legacy customizations in Advanced while generating the
+Material foundation, retaining the original and requiring review. The user selected option 1.
+Fresh Material colors remains an explicit alternative in the study, not the default. This decides
+conversion intent, not the final native mapper or blanket approval of every library/Online detail.
+The study stages recognized legacy overrides for all
+three preview modes; that is an illustration, not an accepted native light/dark conversion rule
+or a promise of exact old appearance. Unmapped data is retained, not silently applied or dropped.
+No legacy-conversion default question remains. [Direct legacy review example](prototypes/relaxe-exploration/settings.html?rev=139&page=theme-import-review&theme-import-example=legacy&focus=1).
+
+The parser accepts the provisional `relaxe-theme-study` version-1 fixture recipe or recognized
+legacy field names; supported study colors are six/eight-digit hex or legacy signed/unsigned
+32-bit integers. Native Android also accepts color-name/other Color.parseColor forms; unsupported
+study inputs stop with compatibility feedback and keep the original. This is deliberately not a
+production-format/schema commitment or a complete native validator. Invalid JSON, unsupported
+future versions/maps and unrecognized objects do not mutate the library. Input is capped at 64 KiB
+for this fixture only; no shipping size limit is chosen. `theme-import=fail` retains review/text.
+Import text/review is partitioned by account fixture; no native persistence is introduced.
+
+Copy/export now opens labelled read-only theme text with manual Select text, separate from public
+sharing. Exported fixture recipes contain theme values, not account references, tokens or API
+settings. Retained originals are separately viewable. No clipboard write, file export, upload or
+real backup is performed. Original legacy text must be preserved through actual native conversion;
+future format compatibility/backup/storage ownership remain explicit Android work.
+
+Online uses synthetic author/name listings, retained Local access, explicit more/retry and detail
+download/error handling. No new search/filter capabilities are invented from the empty source
+filter class. `theme-online=offline|error|empty|append-error` and `theme-download=fail|malformed`
+exercise examples; retry advances fixture state only. Other authors/Guest can review a local Material
+copy, not edit the online listing. An owned listing offers Edit my online theme; the editor keeps
+Save new copy separate from Review online save. This retains source owner-only update intent,
+not proof of server authorization. Existing native service/access mechanisms must stay unchanged.
+
+Owned online-save review distinguishes local-only, online-only and local-then-online, with an
+explicit confirmation for online updating and an editable online name. A local-save failure stops
+the proposed subsequent update. If online update fails after local success, the copy is kept and
+explicit retry must not duplicate it. `theme-upload=fail` demonstrates partial success. No automatic
+retry, publishing of a new listing, endpoint replacement, live download or public update occurs.
+The current native service uses older color JSON; compatibility conversion/serialization is still
+required and no recipe-upload support is claimed. Online Delete/Rename are not shown as remote
+operations: source actually invokes local helpers by name, as ARCHITECTURE.md records. Local
+Options remain the explicit place for local Rename/Delete.
+
+This extension also captures in-progress text edits before blur, so Escape/fixture-change guards
+can protect unfinished color input. Theme dialogs now use the existing canvas/foreground tokens,
+including dark appearance. These are HTML corrections, not native behavior changes.
+
+**Revision 139 verification:** main/theme/library JS syntax and lightweight DOM models passed for
+legacy/recipe review, duplicate naming/no apply, ignored slot flags, retained originals/unknown
+fields, fresh-palette path, malformed/future formats and signed colors, failure retention, export
+separation, offline/download retry, Guest/owner gates, online-only/local+online, partial-save retry
+without duplicate copies, and local failure stopping update. In-progress text/invalid-map guards
+passed. The accepted revision-138 core models were rerun after integration and passed, including
+its 36 computed default text-pair contrast checks. Six library URLs returned HTTP200; 16 served
+assets matched workspace bytes and references/script order resolved. Browser opening again returned
+“Local browser use is disabled in Work settings”; rendered responsive/theme/large-text/keyboard/
+focus/contrast and native performance/accessibility remain unverified. No app edits or Gradle run.
+
+**Next:** retain the selected conversion default and continue tablet/landscape adaptation, carrying
+the library proposal and native role/account/recipe migration and real service
+compatibility as later Android work. Whole-app styling remains in progress.
+
+### Tablet and landscape direction (selected composition; revision 140 study)
+
+The accepted wide card-feed default and Gallery minimum-two-column rule remain in force. They
+do not decide the shell or whether an opened post shares a window with its feed. The current
+[wide-feed study](prototypes/relaxe-exploration/settings.html?rev=139&page=feed&window=1280&focus=1)
+is the prior baseline. Revision 140 adds the dedicated compositor below without changing native
+preferences or the accepted standalone feed.
+
+**Source distinctions:** `layout-land` and `layout-sw600dp/app_bar_main.xml` already use an 80dp
+navigation rail. `MainActivity` maps its slots to configured bottom-bar actions; retain those
+assignments, visibility and accepted per-context overrides rather than install a fixed new list
+of destinations. The native rail is unlabeled; accessible labels/selected states and readable
+presentation need native refinement. Existing portrait hidden-bar state is retained across rail
+configurations. Exact rail width, expansion or an always-open drawer is not approved by this audit.
+
+Post-details land/sw600 resources contain separate post/comments recyclers. The fragment gates
+their use by orientation preferences; landscape separation defaults On, portrait separation Off,
+and side swap Off. This is **post/comments**, not **feed/post reader**. Keep preferences/values
+and explicitly map effective layouts; don't silently equate these two splits or force three panes.
+Portrait/landscape/unfolded feed-layout/column preferences also remain stored choices. Adaptive
+available width affects the effective layout, not those saved values. Gallery's two-column minimum
+must not be weakened just to fit an extra reader pane.
+
+**Proposed screen-level direction:** preserve the selected drawer/account/search and configured
+navigation actions; put those same actions in a rail when usable space supports it. Reserve the
+remaining window for content. No automatic permanently expanded drawer consumes a third region.
+Use the current window, height, text size, insets, IME and folds to choose composition, not a
+physical tablet flag or orientation alone. Bound reading line lengths; don't stretch a phone
+article edge to edge. Exact thresholds and dimensions remain native/prototype review work.
+
+**Selected composition:** feed + post reader beside each other when both are readable, with a
+single-screen fallback. The user selected option 1. Separate post screens at every width is
+retired as the target. Exact thresholds/geometry and remaining adaptive surfaces are not approved
+by this choice. No feed/reader composition question remains.
+
+Open a reader only after an explicit post/comment action; don't auto-select the first
+post and trigger read/history/media effects on resize. Preserve the feed's account, identity,
+sort/filter, scroll anchor and the reader's selected post/comment position independently. Back
+closes the relevant modal/zoom first, then returns focus to the selected feed item through the
+existing contract. Narrowing shows the active reader alone; widening restores the feed beside it
+without reopening, reordering or replaying actions. Reader post/comments stays the accepted full
+post followed by comments within a narrow pane; any preferred internal split is effective only
+when it fits, without overwriting the saved split/swap values. A full reader can use the source
+split preference when appropriate. Native nested-split policy needs an explicit mapping.
+
+Apply the same relationship consistently to Inbox list/thread and Settings categories/controls
+when wide; narrow views retain the existing navigation stack. User/subreddit/Saved/History feeds
+reuse their accepted layout and data boundaries. Media gets a focused viewer and existing Back,
+zoom/paging, autoplay and sound ownership; it doesn't silently become a decorative side pane.
+Compose/Reply, sheets and dialogs stay bounded and reflow for short height/IME, preserving drafts,
+focus and reachable actions. Separate scroll regions need labelled keyboard/accessibility access.
+At large text, collapse panes before clipping text/actions or shrinking targets. Folds/hinges must
+not cross readable content; native posture detection and actual input/service behavior remain later.
+
+This recommendation is an inference from source and official
+[list-detail guidance](https://developer.android.com/develop/ui/compose/layouts/adaptive/list-detail)
+and [window-size guidance](https://developer.android.com/develop/ui/compose/layouts/adaptive/use-window-size-classes),
+checked 2026-10-31. The guidance supports side-by-side content when space permits and one-pane
+navigation when it does not; it doesn't authorize a Compose rewrite or fix Relaxe's breakpoints.
+The source audit established no rendered/native verification. Revision 140's actual scope/checks
+are recorded below. Whole-app styling and the broader adaptive/accessibility review remain active.
+
+#### Adaptive feed/reader study 40 (revision 140; first slice)
+
+[Open adaptive reading](prototypes/relaxe-exploration/adaptive.html?rev=140&focus=1).
+The compositor reuses study 17's feed and study 04's full-post/comments renderer through scoped
+same-origin adapters. Compact, Large card and Gallery are available. Vertical keeps its focused
+viewer and is not a split-feed fixture here. Five compatible existing post fixtures cover photo,
+gallery, video, GIF and text so feed/reader identities match. Other posts, loading/content gates
+and cross-screen data reconciliation are outside this slice, not native correctness claims.
+
+No reader is mounted or post selected until explicit entry. Feed/reader frames stay mounted across
+window/text/appearance changes. Resize does not change selected identity, preferred columns or
+fixture open count. Parent readability heuristics choose composition; the reused renderer computes
+its own actual columns, reported separately. Gallery retains at least two. Reader content remains
+full post then comments within a narrow pane; native post/comments split/swap values are not changed
+or mapped to a third pane. Exact cutoffs and pane/rail sizes are browser proposals, not Android dp.
+
+Presets cover 360/390/720/840/1024/1280 widths, short landscape, 100/130/200% text, Light/Dark/Black
+and palette fixtures. Simulated keyboard reduces available height; unavailable-width/hinge reserves
+conservative space without modelling actual fold position/posture. The shell's same navigation
+sample moves between rail/bottom row. It does not load/change real configured native assignments,
+visibility, hidden state or per-context overrides. Those require explicit later native mapping.
+
+Media uses the reused viewer in focused space; its Comments can show the reader over that context.
+Feed dialogs take Back before closing the reader. Reader Back handles dialog, composer, revealed
+toolbar, then return to feed; explicit return focuses the selected item with nearest scrolling.
+Media Back delegates to existing Escape/zoom/control handling. Hidden reader, host dialog and host
+visibility loss pause fixture video; resize does not automatically resume sound. The short-height
+reader moves Reply controls into its existing scroll region instead of crowding reading space.
+Existing discussion/scroll/draft owners remain, with validated post/account/text/appearance/palette
+configuration. Signed-in/Guest are fixed entry fixtures (`account=guest`), not real switching.
+Foundation colors are forwarded locally, not a native Material resolver. Messages require expected
+same-origin source windows; namespaced feed IDs map explicitly to matching reader fixture IDs.
+Adapters return immediately outside their adaptive query flags.
+
+**Verification:** syntax passed for controller/state and both adapters. Models passed 162 window/
+height/text/family combinations for no auto-selection, fallback, selected-post/preferred-column/
+open-count retention and Gallery minimum; additional models covered media, IME and reserved width.
+Controller smoke passed lazy mount, Guest, source rejection, stable frame across resize, palette
+forwarding, overlay Back/focus and hidden pause. Real adapter code passed models for namespaced IDs
+across refresh, routing/focus, modal/media delegation, reader config guards, Guest, short-height
+footer, Back order and pause. A return-focus scope error found by the adapter model was fixed and
+the rerun passed. Nine changed/new assets matched served bytes; local refs and three host/child
+routes returned HTTP200. Browser opening again reported “Local browser use is disabled in Work
+settings”. No actual frame readiness/rendering, scroll/draft/focus retention, responsive bounds,
+themes/large-text/contrast/keyboard/IME/gestures or native performance/accessibility proof. No app
+edits or Gradle/device checks. Earlier theme/account checks remain historical, not rerun evidence.
+
+**Revision 140 accepted:** the user said “Looks good, continue.” The demonstrated feed/reader
+composition is the HTML baseline; exact native geometry, lifecycle and rendered verification are
+still separate. Revision 141 below extends the adaptive group. Whole-app styling remains active.
+
+#### Adaptive Inbox, Settings and writing (revision 141 accepted)
+
+[Inbox](prototypes/relaxe-exploration/adaptive-workflows.html?rev=141&workspace=inbox&focus=1),
+[Settings](prototypes/relaxe-exploration/adaptive-workflows.html?rev=141&workspace=settings&focus=1)
+and [Create post](prototypes/relaxe-exploration/adaptive-workflows.html?rev=141&workspace=compose&focus=1)
+share the selected readable-width pane policy. No Inbox item or Settings category is preselected.
+Inbox/Settings use a list and selected item when both fit, and a single-screen stack when narrow;
+Create post stays a bounded focused form. Same shell navigation sample, window/text/appearance/
+palette controls and simulated keyboard are reused. Exact rail/pane thresholds remain provisional.
+
+Inbox reuses the existing study-13 listing and read/failure logic. Its scoped selection hook requests
+the transition first; only after an existing thread/editor exit is allowed does it commit selection
+through the source fixture. Canceling or resizing starts no read job. Success/failure feedback,
+views, paging, Mark all semantics and Guest gate stay with that module. Notifications retain their
+comment-context route preview; received messages seed the existing PM thread with the exact row's
+subject, other party and body; Sent is a distinct read-only preview in this study. It is not a new
+native Sent restriction. Subreddit parties keep r/ labels. No notification is substituted with an
+unrelated PM/post. Real context navigation and new-PM composition remain existing routes/previews.
+
+The PM frame keeps typed text on resize and uses the existing sending/exit guard, formatting,
+preview and success/failure behavior. Switching threads/workflows first resolves that guard. Local
+message/scroll snapshots are retained by thread fixture; discarded unsent text is not silently
+restored. Accepted reply/update behavior remains synthetic, not a real send or native draft store.
+Read-status attempts, account badge/descendant rules and reconciliation still require native owners.
+
+Settings reuses the existing root categories and forms. Its scoped API preserves nested category
+view/stack/scroll snapshots in page memory, with existing scoped preference buffers unchanged.
+Choosing another category/workflow uses its actual theme/filter/layout dirty-exit guard first;
+choosing the same category retains the editor. Back unwinds nested controls before closing the
+category to its list. UI-only/route-only categories remain so; no missing source mechanism is faked.
+Shared/global/account scope captions remain owned by their original forms. Current category/row
+markers and focus return use the list, with a selector/first-category fallback if the row is gone.
+
+Create post reuses the six-type composer, including its pending submission, media/formatting,
+validation and discard guards. Resizing keeps the frame/form; leaving uses the existing guard
+once. The adapter forwards exit acknowledgement instead of asking the same question twice.
+Guest uses existing sign-in gating. New PM creation is not replaced by the public-post composer.
+
+At short height or large text, PM header/reply form, Settings header and composer header can move
+inside their existing scroll region, keeping controls reachable without a second draft/scroll store.
+Navigation/pane headings give way during simulated IME/very short space; fields are not reset or
+shrunk to force a fit. Dialogs remain bounded to the frame and scroll; cancellation respects existing
+cancel handlers (including non-dismissible warnings). Current video is paused on hidden-workflow/
+host visibility changes, including accessible nested study frames. Native IME extraction, focus,
+TalkBack, actual folds, predictive Back and player/resource lifecycle remain unverified.
+
+The compositor uses a single pending-transition token, expected child source/origin and commit
+acknowledgement. A canceled/stale/unrelated guard reply cannot select/read a different row. It
+keeps frames mounted across workspace/size changes; configuration acknowledges readiness but does
+not prove all nested previews have rendered. Fixed account entry (`account=guest`) is a fixture,
+not real switching or native account isolation. Source adapters are gated by `adaptive-screen` and
+intended to be inert in standalone studies. Native identity, APIs/access, preferences and data are
+unchanged. The user accepted this screen group with “Looks good, continue”. This establishes HTML direction; native implementation and rendered verification remain separate.
+
+**Verification:** JS syntax and parent/state models passed no-auto-selection, guard owner/token
+checks, cancel-without-read, exactly-one allowed commit, correct row/party routing, stable frames
+on resize, Settings guard, composer text/IME and single close guard. Actual Inbox source models
+passed deferred read jobs, source read/failure handling, Guest and intended standalone detail-first
+behavior. Scoped PM API models passed exact row content, same-thread text and per-thread message/
+scroll retention. Embed/Settings API models passed cancel/allow acknowledgement, freeze/resume,
+short-height header/reply placement, owner guard, nested view/scroll retention, Back and reentry.
+Revision-140 state/controller/adapter models were rerun after optional navigation-layout integration
+and passed, including 162 size/text/family cases. Nineteen changed/new served assets matched workspace
+bytes, references resolved and nine workspace/child routes returned HTTP200. Browser opening again
+reported “Local browser use is disabled in Work settings”. No actual rendered frames, overflow,
+focus/scroll/draft retention, large-text/themes/contrast, keyboard/IME or native accessibility/
+performance verification is claimed. No app edits, installation or Gradle/device run.
+
+**Next:** revision 141 is accepted; the revision-142 audit below owns the current consistency work.
+Native preference/role/route/migration mapping remains later Android work. Whole-app styling remains
+in progress; rendered verification is an outstanding requirement.
+
+#### Cross-screen consistency and accessibility audit (revision 142)
+
+The current [adaptive workflows](prototypes/relaxe-exploration/adaptive-workflows.html?rev=142&focus=1)
+and [theme editor](prototypes/relaxe-exploration/settings.html?rev=142&page=themes&focus=1)
+retain accepted hierarchy and behavior. Explicit list/workspace selections focus a named content
+region after the current child configuration acknowledges readiness, without focusing a text input.
+Ordinary resizing preserves visible focus; if reflow hides the focused pane, focus moves to the
+remaining content. Returning to a list scrolls its selected row into view before focus. Busy state,
+navigation current state, menu relationships and region focus indicators are explicit.
+
+Theme save validation reveals an invalid Advanced field even when hidden by search or another
+preview mode, then focuses it with associated help. A failed shared update reports inside its
+dialog. An unfinished base-color entry is retained while wallpaper colors are active and does not
+block saving those colors; switching back reveals that unfinished entry for correction. Changing
+the wallpaper fixture palette refreshes inherited displayed values while retaining overrides.
+These refinements add no account, preference, read, save, vote or network side effects.
+
+Audit references: [WCAG focus visibility](https://www.w3.org/WAI/WCAG22/Understanding/focus-not-obscured-minimum.html)
+and [status messages](https://www.w3.org/WAI/WCAG22/Understanding/status-messages.html).
+Model checks cover acknowledgement/focus intent, hidden-pane repair without read commits,
+cross-mode validation, inactive-color retention, inherited values and dialog-local failure.
+Static checks of 17 active HTML pages found no duplicate IDs, unnamed static form controls,
+missing iframe titles/image alternatives or broken static ARIA references. This is limited source
+coverage, not a rendered accessibility pass. Bounds, focus traversal/visibility, contrast, themes,
+large text, keyboard and service accessibility still require rendered/native verification.
+
+#### Reader Appearance (revision 143; screen accepted)
+
+The user selected option 1, the separate reader Appearance shortcut, then accepted the screen with “Looks good, continue”. The earlier context question
+is resolved: Post More → Appearance previews that post and its comments, while feed-family controls
+stay in the feed editor. [Open the reader Appearance study](prototypes/relaxe-exploration/details.html?rev=143&post=p5&appearance=1).
+No per-post preference namespace is introduced; the caption identifies the current account.
+
+The screen groups Post information, Comments and separate media controls for post text/comments.
+Six post visibility controls map to existing hide-type/flair/ratio/prefix/vote-count/comment-count
+keys. Comments reuse spacing, single level indicator, avatar, prefix, vote count and the accepted
+Off / All comments / Top-level only divider selector. Off retains the divider type. Both media
+groups use the accepted four switches and encoded combination table, with separate existing values.
+Cache capacity, landscape split/swap, gallery grid, FAB, thread ordering/collapse and toolbar/gesture
+behavior remain available through their existing Settings pages. Fonts links to its existing page;
+font settings have wider scope and are not duplicated as reader-only controls.
+
+The preview is a read-only text snapshot from the current renderer, with its post/comment structure
+and synthetic metadata. Media is represented by labelled placeholders and illustrative visibility
+samples; opening it does not create another player or fetch gated/remote media. It is not a full
+media-rendering or native palette proof. Wide windows place preview beside controls; phones place
+it above independently scrolling controls. Short-height geometry remains a browser proposal.
+
+Changes update the preview draft only. Apply writes the exposed keys to the same `settings-video.js`
+page-memory buffers and decorates the existing reader without rebuilding it. Cancel/Back/Escape
+close a clean editor, or offer Keep editing / Discard changes. Account ownership is captured on
+entry; post/comment media stay separate. Existing sort, collapse, reply draft, vote/save and scroll
+owners are retained. Playback pauses on entry and does not automatically resume sound on exit.
+An open adaptive editor makes the sibling feed/navigation inert until it closes, preventing a
+different post selection behind the draft; existing host Back delegates to the editor’s guard.
+Window/text/theme changes retain the editor draft. These are browser interactions, not a native
+router, draft store or preference migration. Settings opened in another tab has its own fixture
+memory; no cross-tab preference synchronization is claimed.
+
+**Current verification:** actual Settings-buffer and editor control-flow models passed draft/apply
+separation, account isolation, separate media values, all 16 media encodings, retained divider type,
+unchanged unrelated fields, invalid-commit atomicity, 19 switches plus divider, Apply disabled while
+clean, Keep editing/Apply/Discard/clean close, unchanged model scroll and focus return. Snapshot
+cloning/rendering is excluded from that control-flow model. Source renderer checks preserve sort,
+vote/save, collapsed state and reply drafts. Adaptive host/source guard and 162 layout/state cases
+pass. Static references/syntax/HTTP checks are recorded in ROADMAP.md. Browser use is disabled in
+Work settings; actual layout, themes/large text, focus/traversal, contrast and keyboard behavior
+remain unverified. No native/app changes or Gradle/device run.
+
+**Next:** the reader screen is accepted. The grouped create/act proposal below owns the remaining
+parent context, Poll fields, attachment editing/guards and result feedback review.
+
+#### Create/act consistency packet (revision 144 audit; option 1 selected at revision 145)
+
+The user selected option 1: compact disclosure plus the common attachment/feedback direction below. This is explicit approval of this screen/workflow packet, not a native implementation claim.
+Review [separate-screen Reply](prototypes/relaxe-exploration/reply.html?rev=144&style=screen&target=long),
+[Poll](prototypes/relaxe-exploration/compose.html?rev=144&type=poll), and
+[Gallery](prototypes/relaxe-exploration/compose.html?rev=144&type=gallery).
+The accepted inline Reply default and original-above-inline Edit comment remain unchanged.
+
+**Selected screen direction:** keep writing foremost with progressive disclosure. A separate-
+screen Reply starts with a compact two-line parent and Expand / Collapse, preserving full context
+on request. Inline Reply already sits under its full parent and needs no duplicate parent card.
+Poll starts with two options plus Add option up to six; remove is available above two, preserving
+order and labels. Its body/options/duration preview and 1–7 day selector retain the three-day
+default. Gallery keeps caption and optional outbound URL behind each image’s Edit action, with
+caption/link summaries on the grid, explicit Save details / Cancel and the 180-character source cap.
+The full-parent/six-field alternative is retired. Expand / Collapse remains a user action; compact
+entry is the selected separate-screen starting state. The following common directions are selected.
+
+| Workflow | Selected consistent treatment | Source boundary retained |
+| --- | --- | --- |
+| Single Image/Video replacement | Choose/Record replacement provisionally; cancel/failure retains the existing selection; explicit Remove clears it | Native Image Select again currently clears immediately. Staged replacement is an intentional future UX change requiring native implementation, not source behavior already present |
+| Gallery | Whole-image thumbnails, selection order, Edit details, accessible Remove and count; no new reorder workflow | Existing 20-image cap, pending Add/edit/remove restrictions including thumbnail-failure exception, stable IDs and upload-failure removal |
+| Inline image/GIF insertion | Accepted thumbnail/filename reuse; deleting a body block removes it from the writing while keeping it reusable within that composition | No remote delete or cross-post library; original account/type/body/selection must own a delayed result; mismatched results wait for explicit insertion |
+| Closing writing | Reuse each owner’s exit contract with clear scope | Reply/comment Edit retain Save draft / Leave without saving / Cancel and complete account/parent/type attachment recovery requirement; post composer retains its own discard contract. No new saved post draft store is proposed |
+| Pending work and failure | Disable duplicate submission; keep writing and eligible selections; identify upload versus submission errors and offer the existing retry route | Leaving may not cancel a native submission; do not promise cancellation, automatic retries, or retained Gallery entries after source upload failure |
+| Validation and result | Field-local error plus focus on the first invalid field; persistent readable result/status; retain source success return/update behavior | No invented server validation, success Undo or extra posting action. Browser “nothing sent” feedback remains explicitly synthetic; it does not establish native success navigation |
+
+Current source reinspection confirms `CommentActivity` carries parent identity/title/body extras;
+`PostPollActivity` collects nonempty options in order, requires two, and its layout uses 1–7 days
+with default 3. No new trimming, duplicate rejection or option-length cap is proposed.
+`PostImageActivity` Select again clears its URI/preview immediately, so replacement retention must
+be explicitly implemented later rather than described as existing Android behavior. Gallery detail
+edits are staged in the HTML dialog until Save details. Type changes are not discard operations;
+the existing separate browser body/attachment buffers are retained, with native ownership and
+restoration still requiring implementation review. Native account draft and attachment gaps remain
+recorded in ARCHITECTURE.md.
+
+Revision 144 corrects the app-facing embedded-image limitation notice to Relaxe for Reddit;
+upstream attribution in research notes remains. It implements no unresolved disclosure/guard choice.
+Syntax/static/reference/served-byte checks are current in ROADMAP.md; no fresh interaction or
+rendered verification is claimed for this copy/docs slice. Browser opening remains disabled in
+Work settings. Earlier fixture checks remain historical. No app/native/identity or Gradle change.
+
+Revision 145 records selection and retires the Reply workbench’s full-on-entry comparison.
+Target entry starts compact; Expand / Collapse still works. Existing Poll Add/Remove and Gallery
+Edit already match the selected direction. Earlier sections describing these choices as provisional
+are historical; this selected packet supersedes them. It does not select a native schema, migration,
+pixel dimension or motion implementation.
+
+#### Rendered follow-up (revision 149; 2026-11-01)
+
+The finishing directions through revision 148 remain selected. Browser access worked in the
+current chat after the stopped docs-only preview helper was restarted. Earlier statements that
+browser use was disabled describe their historical checks; current rendered evidence and its
+limits are authoritative in ROADMAP.md's revision-149 handoff.
+
+The rendered pass found and corrected saved-row wrapping; cramped short/narrow reader Appearance
+columns and inadequate preview space; partly obscured reader guard focus; theme/filter cancellation
+leaving adaptive transitions pending; and stale theme feedback/preview selection after an account
+fixture change. In short/narrow frames the reader dialog now scrolls as a whole, keeping a bounded,
+independently scrollable preview and reachable controls/actions. Larger frames retain the existing
+pane arrangement. Dirty-guard entry/return lets the focused control scroll fully into view.
+These are HTML repairs to accepted behavior, not new product choices or native geometry decisions.
+
+The recorded 48-case matrices per surface use 360/390/720-landscape/1280-wide, 100/130/200% text
+and representative light/dark/AMOLED/custom fixtures. Actual frames, screenshots and focused
+cancel/failure/retry/keyboard/account checks supplement parent bounds measurements. Gallery's
+keyboard-only details shortcut intentionally stays visually clipped until focus, when it expands
+to a visible target; it is not a failed idle touch target. Sampled text contrast is not exhaustive
+theme-role/alpha/icon contrast or native Material parity. The 2026-11-05 follow-up reproduced the
+observer TypeError independently of Relaxe scripts and completed the bounded HTML closeout; see
+ROADMAP.md for the controlled comparison and real-route regression. No clean-console or Android
+correctness/performance claim is made. Prototype revision 149 and accepted directions remain.
+
+#### Remaining consistency inventory (revision 149 update)
+
+| Area | Current status | Remaining work |
+| --- | --- | --- |
+| Settings, accounts/access, onboarding, themes, adaptive screens and reader Appearance | Screen directions and recorded rendered fixture review complete | Native owner/migration/service conflicts and device verification remain; no automatic re-review of accepted controls |
+| Create/act | Compact parent, two initial Poll fields, Gallery Edit, staged replacement and owner-specific feedback/guards selected | Native attachment/draft lifecycle and exact action eligibility; retain each original action/service owner |
+| Named saved layouts | Shared device library, independent account/context snapshots and rename/delete preservation selected; rendered fixture review recorded at revision 149 | Native identity/persistence/migration/backup/reset/removal design; do not reset existing choices |
+| Browse finishing details | Find in Saved under More, leading favorites once, Recently visited inline filter/Visited time labels selected at revision 148 | Preserve native formatting, density, query/paging, action and recording contracts during implementation and device verification |
+| Shipping defaults | New setup starts with Large/Card 1/Filled and Follow system; existing/restored choices retained | Unselected geometry/gap/cap fixtures are not shipping defaults; map all actual native values and context overrides before implementation |
+| Accessibility and rendering | Revision-149 rendered fixture coverage complete; observer follow-up isolated outside Relaxe scripts and affected flows rerun | Exhaustive custom-role/alpha/icon contrast and native TalkBack/Switch Access, RTL, IME/Back, restoration and performance remain separate |
+| Native refinement | Icons and cohesive motion explicitly deferred | Native geometry, semantic role parity/real Material palette generation, preference/layout migrations, service compatibility and release data-flow audit require a separately authorized task |
+| Privacy policy | Relaxe draft and warning branding established | Operator/contact, release-specific data-flow/retention/deletion audit and production URL before distribution; draft is not effective policy |
+
+**Precise next task:** plan the Android architecture proof of concept in a new chat using ROADMAP.md's
+closeout handoff. Whole-app styling is complete at the recorded HTML exploration scope; accepted
+choices stay recorded. Define one bounded presentation slice and its owner/verification contracts.
+Planning does not authorize native implementation, identity changes, installation or publication.
+
+### Native motion pass (required during Android implementation)
+
+**User requirement:** make the Android app feel modern and slick through coherent animations
+across the app. This belongs to the later native phase; current authorization remains HTML/
+documentation only. Treat motion as a shared design concern, not only Vertical swipe or a
+literal reproduction of browser rendering. Exact timing, easing/spring behavior, geometry
+and implementation APIs remain to be designed and verified on Android.
+
+Plan the motion pass with progressive screen implementation: navigation/Back and account-
+context transitions; sheets/dialogs and disclosure; toolbar/action reveal and row expansion;
+layout changes and previews; theme changes; refresh/loading/error/optimistic action feedback;
+media paging/zoom/control reveal; and keyboard/inset/adaptive-pane changes. Use motion to
+explain hierarchy, gesture ownership and state change. Keep shared patterns consistent without
+forcing every element to animate. Reuse existing native/state owners and suitable platform/
+Material mechanisms before adding a parallel animation framework or a wholesale UI rewrite.
+
+Animation must not alter account scope, sorting/filtering, vote/save/read side effects, API/
+access, media fetching, restoration or action eligibility. Interruptions/cancellation, reverse
+navigation, sheet dismissal, rapid taps and optimistic rollback must finish in the correct
+state without duplicate actions or lost anchors. Do not introduce timed paging or extra media
+preparation merely for a visual demonstration. Preserve zoom/gesture locks and existing
+playback/resource ownership.
+
+Respect system animation/accessibility and reduced-motion preferences, providing clear
+immediate state changes where motion is reduced/disabled. Preserve focus order/return and
+readable labels without depending on movement or color alone. Verify with real device frame/
+input measurements, accessibility services, large text, themes, tablet/landscape, interruptions
+and constrained devices; refine density and responsiveness natively. Do not claim browser
+smoothness or a passing build proves native animation quality/performance. Record the eventual
+motion patterns and actual verification alongside their native slices, without changing
+accepted behavior just to achieve an effect.
+
+### Relaxe for Reddit privacy-policy draft (revision 131; not effective)
+
+The user requires Relaxe branding and an independent app privacy policy. The
+[privacy-policy draft](prototypes/relaxe-exploration/settings.html?rev=131&page=privacy&focus=1)
+is reachable from Settings → Privacy Policy and the NSFW entry warning. It is written for
+Relaxe for Reddit, not copied from upstream policy text. The warning’s policy link opens the
+same-origin draft in a separate tab without accepting the warning; its existing gating remains.
+The root policy route uses the existing Settings stack and hides the account-specific caption,
+because this is an app-wide policy. No native policy link, legal acceptance or app ID changed.
+
+The draft covers account authorization/tokens and actions, Guest requests, local records,
+media/third-party/browser/proxy traffic, permissions, backups, diagnostics and retention/deletion.
+Do not claim that Guest is network-anonymous, that no information leaves the device, that every
+connection/local store is encrypted, or that no telemetry exists without a release-build audit.
+Source evidence inspected: `account/Account.java`, `account/AccountStoredData.kt`,
+`utils/APIUtils.java`, `settings/CrashReportsFragment.java`, `asynctasks/BackupSettings.java`,
+`settings/BackupAndRestorePreferenceFragment.kt`, the manifest and dependency declarations.
+In particular, existing crash export includes logs and device/app/Android details in an
+external issue-form URL, transmitting when the form opens, before issue submission. The
+current target belongs to upstream; a Relaxe support target and data disclosure need later
+native/release decisions. Backups include account records and use password-encrypted archives;
+exported files must not be equated with local app storage deletion. Provider constants and
+a dependency declaration are inventory evidence, not proof of all runtime traffic or absence
+of automatic collection. No credentials or real logs were read into shared documentation.
+
+**Draft limitations:** operator identity, public privacy contact, effective date, production
+policy URL, enabled services/dependencies, exact diagnostic behavior, category-specific retention,
+account-removal/token deletion instructions and applicable privacy-request process still need
+confirmation against the intended release. An optional text question requests operator/contact;
+until answered they remain explicitly pending. This is a review artifact, not a published
+policy, legal-compliance claim or release approval. The draft does not invent a service
+operator, address or privacy guarantee. Public sharing/publication is not authorized here.
+
+Official reference checks used the [Reddit User Agreement](https://redditinc.com/policies/user-agreement),
+[Reddit Privacy Policy](https://www.reddit.com/policies/privacy-policy) and
+[Google Play User Data guidance](https://support.google.com/googleplay/android-developer/answer/10144311?hl=en-GB).
+These are reference material, not evidence that a store release is planned or that Relaxe is
+compliant; Google’s guidance calls for an app-specific disclosure reflecting actual data
+handling, with contact and retention/deletion information. The app’s own disclosure remains
+distinct from Reddit’s policy for its services.
+
+Revision 131 verification: syntax checks for Settings, content and privacy scripts; lightweight
+DOM-model warning identity/local-policy link, acknowledgement/focus and preserved four switches;
+policy draft identity/status/content and external references; local asset references and route
+wiring; seven served assets match workspace bytes through the existing tailnet endpoint. No
+upstream branding or repository URL remains in the warning or privacy renderer. Source attribution
+in research/docs remains. Browser rendering, themes/large text/responsiveness/accessibility and
+actual Android behavior remain unverified; no Gradle or native check was run.
 
 ### UI review tracker
 
@@ -1258,19 +4300,19 @@ account scope, accessibility and restoration requirements from ARCHITECTURE.md t
 | Area | Current decision/status | Next review |
 | --- | --- | --- |
 | Compact feed | Refined A accepted at HTML design level; cards, metadata/stat grouping, hidden toolbar and customization required | Native refinement/validation when implementation is separately authorized |
-| Other feed layouts | Four families selected: Large card (Card 1/2 compositions), Compact card, Vertical swipe, Gallery; Compact 2 rejected; Card 3 not separate | Study 17 revision 34 adds named copies, icon/toolbar controls and adaptive columns; review remaining defaults and a dedicated tablet shell, then map legacy preferences before native work |
+| Other feed layouts | Four customizable families selected; Gallery minimum two columns retained; adaptive feed/reader revision 140 accepted | Legacy preference mapping, native geometry and rendered verification; preserve saved wide-column and navigation choices |
 | Post details and comments | Study 04 accepted for now: full post → comments, top-right −/+ branch collapse, explicit main-post Reply for top-level comments | Native preference mappings, composer integration and Android refinement; exact styling separately |
 | Vertical photo/gallery/video/GIF | A selected; autoplay; tap-revealed overlays; confirmed ~4s playing timeout; Comments goes to default details | Native gesture/timeout/accessibility/policy/restoration validation; exact styling separately |
-| Long-press/action options | Customizable actions required | Final placement, order/toggle controls, defaults, scope/persistence and accessible alternatives |
+| Long-press/action options | Grouped More, section reordering and action reordering within each section selected; ordering editor drafted | Shared order per account selected; final Settings mapping/defaults/persistence and native accessible alternatives remain |
 | Shared visual foundations | A typography + B moderate rounding + C solid icons selected; reuse existing wallpaper/custom theme mechanisms through component-role mapping | Native geometry/assets, full role parity and accessibility validation remain later work |
 | Shell/navigation | Study 09b accepted at HTML design level: shell/drawer, balanced → expanded search, compact type/scope selector, history/tools and current results presentation | Keyboard-on-open deferred to native review; layout/preference mappings, insets, Back and restoration remain implementation work |
 | Subreddits/search/list surfaces | Search 09b and subreddit/shared-shell revision 12 accepted at HTML level; study 11 single list selector and visible stars selected, tighter rows requested and demonstrated | Judge final row density on Android; retain list details for consistency review and continue to Profiles |
 | Profiles/inbox/saved/history | Profile study 12 header/actions/comment context selected; Inbox study 13 compact selector and two-line previews selected; Saved tabs/source, History date headings and Recently visited two tabs/visible row actions selected | Recently visited filter/time labels remain proposals; History keeps Continuum basics with explicit media-only viewing; native geometry/actions/accessibility remain implementation work |
-| Creation/editing/moderation | Unified composer with compact six-type selector, visible Spoiler/NSFW/reply-notification controls, Preview beside Post, Title-first Link, Image-before-Body order and always-visible Video editing controls selected; study 18 revision 49 adds the browser-checked Poll proposal | Poll initial option fields, inline attachments, reply/edit and moderation/report flows; Gallery caption placement/attachment details remain provisional; native contracts retained |
-| Settings/accounts/onboarding | Review 07 has preference-row specimens; existing theme mechanism inspected, area design not reviewed | Preference organization, login/API-key/access setup, account options and theme editor in proposed group 5 |
+| Creation/editing/moderation | Selected post-composer details recorded above; Inline Reply default/shared Edit comment style/original visible; GIF beside Images and thumbnail/filename image rows selected; complete scoped Reply/comment EDIT drafts required; PM toolbar/Preview/discard, Continuum alignment and bubbles selected; grouped/reorderable More selected; Chat shortcut deferred | Category-first Report bottom sheet and Delete excerpt selected; compact moderator primary buttons and Remove/Spam confirmation selected; download rows and paired Share/Copy selected; inline missing-folder notice selected; study 31 visible Open in browser selected; Copy customization in Settings required, both defaults enabled; Edit post shared Reply/Edit style selected; Settings direction is recorded above; continue the provisional-state audit. Other action/result details remain for review. Live PM compatibility unverified; Study 21 shared Reply/Edit style is selected. Parent display, Poll fields and attachment/feedback direction selected in revision 145; native mapping and rendered checks remain |
+| Settings/accounts/onboarding | Detailed Settings, account/access and optional per-account onboarding directions recorded through revision 137; unified Material You chooser/editor/library through 139; adaptive workflows through 141 accepted | Reader Appearance shortcut selected in revision 143; native scope/migration/service conflicts and rendered verification remain open. See current audit above |
 | Sheets/dialogs/feedback | Search entry accepted in study 09b; keyboard policy deferred to native review; other shared dialog details open | Action/confirmation menus, destructive feedback and focus in create/act group |
-| Media utilities/downloads | Existing behavior retained | Provider/external-open/share/save/download surfaces and status feedback |
-| Accessibility/responsiveness | Cross-cutting requirement, not a separate cosmetic pass | Large text, TalkBack/Switch Access, RTL, keyboard, landscape/tablet, motion and safe areas in every slice |
+| Media utilities/downloads | Study 28 separate download rows selected; source gallery-index and GIF/video-variant boundaries recorded; study 29 paired Share/Copy selected | Study 30 inline missing-folder notice selected; study 31 visible Open in browser selected; Copy customization in Settings required, both defaults enabled; remaining native utility/result details stay for implementation/consistency review |
+| Accessibility/responsiveness | Adaptive groups 140/141 accepted; revision 142 adds focus/error refinements and limited source/model audit | Rendered themes, large text, bounds, focus/keyboard checks remain unavailable; native TalkBack/Switch Access, RTL, motion, insets and restoration remain required |
 
 Existing reuse evidence for toolbar work: `res/xml/post_preferences.xml` already has
 `long_press_to_hide_toolbar_in_compact_layout` and `post_compact_layout_toolbar_hidden_by_default`;

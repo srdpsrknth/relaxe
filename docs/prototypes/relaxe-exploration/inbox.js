@@ -1,7 +1,7 @@
 /* Synthetic study 13. No Reddit requests, messages, native preferences or account writes. */
 (function(){
 'use strict';
-let getContext,route,states={};
+let getContext,route,states={},adaptiveOpen=null,adaptiveCommit=false;
 const views={all:'All',unread:'Unread',messages:'Messages',sent:'Sent',mentions:'Mentions',comments:'Comment replies',postreplies:'Post replies'};
 const root=()=>document.getElementById('destination');
 const escapeText=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -57,7 +57,7 @@ function redraw(focus,offset){root().innerHTML=render();root().scrollTop=offset?
 function setView(view){const s=state();s.offsets[s.view]=root().scrollTop;s.view=view;s.more=false;s.detail=null;s.notice='';redraw('#inbox-view')}
 function initialize(context,onRoute){getContext=context;route=onRoute;
  document.addEventListener('click',event=>{const button=event.target.closest('[data-inbox],[data-inbox-row]');if(!button||root().dataset.inbox!=='true')return;const s=state();
- if(button.dataset.inboxRow){const row=rows().find(row=>row[0]===button.dataset.inboxRow);s.offsets[s.view]=root().scrollTop;s.detail=row[0];s.lastRow=row[0];s.more=false;s.notice=unread(row)?'Updating read status…':'';redraw('h3',0);if(unread(row)){const account=getContext().account,generation=s.generation;s.busy=true;setTimeout(()=>{if(generation!==s.generation)return;s.busy=false;if(s.fixture==='read-error')s.notice='Couldn’t update read status. This item is still unread.';else{s.read.add(row[0]);s.notice='Marked read in this fixture.'}if(root().dataset.inbox==='true'&&getContext().account===account)redraw(s.detail?'h3':null,s.detail?0:undefined)},350)}return}
+ if(button.dataset.inboxRow){const row=rows().find(row=>row[0]===button.dataset.inboxRow);if(!row)return;if(adaptiveOpen&&!adaptiveCommit){adaptiveOpen([...row]);return}s.offsets[s.view]=root().scrollTop;s.detail=adaptiveOpen?null:row[0];s.lastRow=row[0];s.more=false;s.notice=unread(row)?'Updating read status…':'';redraw(adaptiveOpen?'[data-inbox-row="'+row[0]+'"]':'h3',adaptiveOpen?s.offsets[s.view]:0);if(unread(row)){const account=getContext().account,generation=s.generation;s.busy=true;setTimeout(()=>{if(generation!==s.generation)return;s.busy=false;if(s.fixture==='read-error')s.notice='Couldn’t update read status. This item is still unread.';else{s.read.add(row[0]);s.notice='Marked read in this fixture.'}if(root().dataset.inbox==='true'&&getContext().account===account)redraw(s.detail?'h3':null,s.detail?0:undefined)},350)}return}
  const a=button.dataset.inbox;
  if(a==='more'){s.more=!s.more;redraw('[data-inbox="more"]')}
  else if(a==='top'){s.more=false;redraw('[data-inbox="more"]',0)}
@@ -75,5 +75,5 @@ function initialize(context,onRoute){getContext=context;route=onRoute;
  document.getElementById('inbox-account').addEventListener('change',event=>{route(event.target.value)});
 }
 function enter(){root().dataset.inbox='true';document.getElementById('inbox-fixtures').hidden=false;document.getElementById('inbox-account').value=getContext().account;document.getElementById('inbox-fixture').value=state().fixture;root().innerHTML=render();root().scrollTop=(state().offsets[state().view]||0)}
-window.RelaxeInbox={initialize,enter,leave(){root().dataset.inbox='false';document.getElementById('inbox-fixtures').hidden=true}};
+window.RelaxeInbox={initialize,enter,setAdaptiveOpen(fn){if(new URLSearchParams(location.search).get('adaptive-screen')==='inbox-list')adaptiveOpen=fn},adaptiveSelect(id){if(!adaptiveOpen||!rows().some(r=>r[0]===id))return false;const b=root().querySelector('[data-inbox-row="'+id+'"]');if(!b)return false;adaptiveCommit=true;try{b.click()}finally{adaptiveCommit=false}return true},adaptiveFocus(id){const target=root().querySelector('[data-inbox-row="'+id+'"]')||root().querySelector('#inbox-view');target?.scrollIntoView({block:'nearest',inline:'nearest'});target?.focus({preventScroll:true})},leave(){root().dataset.inbox='false';document.getElementById('inbox-fixtures').hidden=true}};
 })();
